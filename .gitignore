@@ -30,3 +30,9 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Docker datas folder
+docker/grafana/data/*
+docker/postgres/data/*
+docker/loki/data/*
+docker/prometheus/data/*
