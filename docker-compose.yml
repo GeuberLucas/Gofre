@@ -13,6 +13,15 @@ services:
       - ./docker/postgres/data:/var/lib/postgresql
     networks:
       - gofre-network
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: geuberlu@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: 123456
+    ports:
+      - "8080:80"
+    networks:
+      - gofre-network
 
   prometheus:
     image: prom/prometheus:latest
