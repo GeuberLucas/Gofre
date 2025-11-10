@@ -17,3 +17,8 @@ func ConnectToDatabase() (*sql.DB, error) {
 	}
 	return db, nil
 }
+
+
+func CloseDatabaseConnection(db *sql.DB) error {
+	return db.Close()
+}
