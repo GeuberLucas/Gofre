@@ -1,23 +1,27 @@
 package repository
 
 import (
+	"database/sql"
 	"log"
 	"time"
 
-	"github.com/GeuberLucas/Gofre/backend/pkg"
 	"github.com/GeuberLucas/Gofre/backend/services/auth/internal/models"
 )
 
-func NewUserRepository( user models.User)(int64) {
-	var sqlCommand string="insert into auth.users (name,lastName,cell_phone,username, email,password,created_at,updated_at) values (?,?,?,?,?,?,?,?)"
-	dbConn,error := pkg.ConnectToDatabase()
-	if error != nil {
-		log.Fatal(error)
-		return 0
-	}
-	defer pkg.CloseDatabaseConnection(dbConn)
+type UserRepository struct {
+	db *sql.DB
+}
 
-	statement, err := dbConn.Prepare(sqlCommand)
+
+func NewUserRepository(db *sql.DB) *UserRepository {
+	return &UserRepository{db: db}
+}
+
+func (r *UserRepository) CreateUser( user models.User)(int64) {
+	var sqlCommand string="insert into auth.users (name,lastName,cell_phone,username, email,password,created_at,updated_at) values (?,?,?,?,?,?,?,?)"
+	
+
+	statement, err := r.db.Prepare(sqlCommand)
 	if err != nil {
 		log.Fatal(err)
 		return 0
@@ -39,16 +43,11 @@ func NewUserRepository( user models.User)(int64) {
 
 	return idLastInsert
 }
-func GetUsers() ([]models.User, error) {
+func (r *UserRepository) GetUsers() ([]models.User, error) {
 	var sqlCommand string="select id, username, name, lastName, cell_phone, email, password, created_at, updated_at from auth.users"
-	dbConn,error := pkg.ConnectToDatabase()
-	if error != nil {
-		log.Fatal(error)
-		return nil, error
-	}
-	defer pkg.CloseDatabaseConnection(dbConn)
+	
 
-	rows, err := dbConn.Query(sqlCommand)
+	rows, err := r.db.Query(sqlCommand)
 	if err != nil {
 		return nil, err
 	}
@@ -66,16 +65,11 @@ func GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
-func GetUserByUsername(username string) (models.User, error) {
+func (r *UserRepository) GetUserByUsername(username string) (models.User, error) {
 	var user models.User
 	var sqlCommand string="select id, username, name, lastName, cell_phone, email, password, created_at, updated_at from auth.users where username = ?"
-	dbConn,error := pkg.ConnectToDatabase()
-	if error != nil {
-		log.Fatal(error)
-		return user, error
-	}
-	defer pkg.CloseDatabaseConnection(dbConn)
-	row := dbConn.QueryRow(sqlCommand, username)
+	
+	row := r.db.QueryRow(sqlCommand, username)
 	err := row.Scan(&user.ID, &user.Username, &user.Name, &user.LastName, &user.Cellphone, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return user, err
@@ -83,16 +77,11 @@ func GetUserByUsername(username string) (models.User, error) {
 	return user, nil
 }
 
-func GetUserByID(id int64) (models.User, error) {
+func (r *UserRepository) GetUserByID(id int64) (models.User, error) {
 	var user models.User
 	var sqlCommand string="select id, username, name, lastName, cell_phone, email, password, created_at, updated_at from auth.users where id = ?"
-	dbConn,error := pkg.ConnectToDatabase()	
-	if error != nil {
-		log.Fatal(error)
-		return user, error
-	}
-	defer pkg.CloseDatabaseConnection(dbConn)
-	row := dbConn.QueryRow(sqlCommand, id)
+	
+	row := r.db.QueryRow(sqlCommand, id)
 	err := row.Scan(&user.ID, &user.Username, &user.Name, &user.LastName, &user.Cellphone, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return user, err
@@ -100,15 +89,10 @@ func GetUserByID(id int64) (models.User, error) {
 	return user, nil
 }
 
-func UpdateUser(user models.User)  {
+func (r *UserRepository) UpdateUser(user models.User)  {
 	var sqlCommand string="update auth.users set name=?, lastName=?, cell_phone=?, username=?, email=?, password=?, updated_at=? where id=?"
-	dbConn,error := pkg.ConnectToDatabase()
-	if error != nil {
-		log.Fatal(error)
-		return 
-	}
-	defer pkg.CloseDatabaseConnection(dbConn)
-	statement, err := dbConn.Prepare(sqlCommand)
+	
+	statement, err := r.db.Prepare(sqlCommand)
 	if err != nil {
 		log.Fatal(err)
 		return 
@@ -123,15 +107,10 @@ func UpdateUser(user models.User)  {
 	
 }
 
-func DeleteUser(id int64)  {
+func (r *UserRepository) DeleteUser(id int64)  {
 	var sqlCommand string="delete from auth.users where id=?"
-	dbConn,error := pkg.ConnectToDatabase()
-	if error != nil {
-		log.Fatal(error)
-		return
-	}
-	defer pkg.CloseDatabaseConnection(dbConn)
-	statement, err := dbConn.Prepare(sqlCommand)
+	
+	statement, err := r.db.Prepare(sqlCommand)
 	if err != nil {
 		log.Fatal(err)
 		return
