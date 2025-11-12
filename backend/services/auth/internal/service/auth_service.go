@@ -96,11 +96,7 @@ func (s *authService) Profile(userID int64) (*dtos.ProfileDto, error, string) {
 }
 
 func (s *authService) ForgotPassword(email string) error {
-	dbConn,err := pkg.ConnectToDatabase()
-	if err != nil {
-		return  err
-	}
-	defer pkg.CloseDatabaseConnection(dbConn)
+	
 	return nil
 }
 
@@ -120,7 +116,13 @@ func getUserRepository() (*repository.UserRepository,error){
 	if err!= nil {
 		return  nil,err
 	}
-	defer pkg.CloseDatabaseConnection(dbConn)
 	return repository.NewUserRepository(dbConn),nil
+}
+func getResetTokenRepository() (*repository.ResetTokensRepository,error){
+	dbConn,err := pkg.ConnectToDatabase()
+	if err!= nil {
+		return  nil,err
+	}
+	return repository.NewResetTokensRepository(dbConn),nil
 }
 
