@@ -1,3 +1,3 @@
-module github.com/GeuberLucas/Gofre/backend/midlewares
+module github.com/GeuberLucas/Gofre/backend/middlewares
 
 go 1.25.4
