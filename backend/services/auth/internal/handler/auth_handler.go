@@ -34,6 +34,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			pkg.ErrorResponse(w, http.StatusInternalServerError, erro)
 			return
 		}
+		if typeError == "Pass" {
+			pkg.ErrorResponse(w, http.StatusUnauthorized, erro)
+			return
+		}
 	}
 
 	pkg.JSONResponse(w,http.StatusOK,serviceresult)
@@ -61,6 +65,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			pkg.ErrorResponse(w, http.StatusInternalServerError, erro)
 			return
 		}
+		
 	}
 
 	pkg.JSONResponse(w,http.StatusOK,serviceresult)
@@ -68,15 +73,15 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	params:= mux.Vars(r)
-	userId,erro :=strconv.ParseUint(params["userId"],10,64)
+	userId,erro :=strconv.ParseInt(params["userId"],10,64)
 	if erro != nil {
 		pkg.ErrorResponse(w, http.StatusBadRequest, erro)
 		return
 	}
 	service := service.NewAuthService()
-	serviceresult,erro,typeError := service.Profile(strconv.FormatUint(userId,10))
+	serviceresult,erro,typeError := service.Profile(userId)
 	if erro != nil {
-		if typeError == "validation" {
+		if typeError == "Validation" {
 			pkg.ErrorResponse(w, http.StatusBadRequest, erro)
 			return
 		}
@@ -84,6 +89,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 			pkg.ErrorResponse(w, http.StatusInternalServerError, erro)
 			return
 		}
+		
 	}
 
 	pkg.JSONResponse(w,http.StatusOK,serviceresult)

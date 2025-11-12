@@ -7,10 +7,10 @@ import (
 ) 
 
 func ConnectToDatabase() (*sql.DB, error) {
-	stringConnection := "postgres:123456@tcp(localhost:5432)/Gofre"
-	db, error := sql.Open("postgres", stringConnection)
-	if error != nil {
-		return nil, error
+	stringConnection := "user=postgres password=123456 host=localhost port=5432 dbname=Gofre sslmode=disable"
+	db, err:= sql.Open("postgres", stringConnection)
+	if err != nil {
+		return nil, err
 	}
 	if err := db.Ping(); err != nil {
 		return nil, err
