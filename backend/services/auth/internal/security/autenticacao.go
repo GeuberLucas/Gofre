@@ -14,7 +14,7 @@ func GenerateToken(userId int) (string,error){
 	
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,perms)
 
-	return token.SignedString([]byte("teste"))
+	return token.SignedString([]byte("HEJ7hRH9eWkJgkvghExLAAJvcDfZL9VlNYtAXuuCu9qQ3HCF7W1d7HGvrHvrnKbXcaM5+SPohHdHoUToeuAg6Q=="))
 
 
 }

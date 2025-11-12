@@ -2,7 +2,9 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"strings"
+	"time"
 
 	"github.com/GeuberLucas/Gofre/backend/pkg"
 	dtos "github.com/GeuberLucas/Gofre/backend/services/auth/internal/DTOs"
@@ -54,6 +56,8 @@ func (s *authService) Register(obj dtos.RegisterDTO) (*dtos.LoginResultDto, erro
 	}
 	usuario.Email = obj.Email
 	usuario.Password = passwordHash
+	usuario.Username= obj.Username
+	usuario.Cellphone= obj.Cellphone
 	usuario.Name = nameSplit[0]
 	if len(nameSplit) > 1 {
 		usuario.LastName = nameSplit[1]
@@ -96,20 +100,68 @@ func (s *authService) Profile(userID int64) (*dtos.ProfileDto, error, string) {
 }
 
 func (s *authService) ForgotPassword(email string) error {
+	userRepository,err:=getUserRepository()
+	if err != nil {
+		return err
+	}
+	resetTokenRepository,err:= getResetTokenRepository()
+	if err != nil {
+		return err
+	}
+	user,err:= userRepository.GetUserByEmail(email)
+	if err != nil {
+		return err
+	}
 	
+	token, hashToken,err:= security.CreateResetToken(32)
+	if err != nil {
+		return err
+	}
+
+	var resetTokenModel models.ResetToken
+	resetTokenModel.UserID=user.ID
+	resetTokenModel.TokenHash=hashToken.TokenHash
+	resetTokenModel.ExpiresAt=hashToken.ExpiresAt
+
+	err=resetTokenRepository.CreateResetToken(&resetTokenModel)
+	if err != nil {
+		return err
+	}
+
+	sendEmail(token,user.Email)
+
+
 	return nil
 }
 
 func (s *authService) ResetPassword(token string, newPassword string) error {
-	dbConn,err := pkg.ConnectToDatabase()
-	if err!= nil {
-		return  err
+	userRepository,err := getUserRepository()
+	resetTokenRepository,err := getResetTokenRepository()
+	if err !=nil {
+		return err
 	}
-	defer pkg.CloseDatabaseConnection(dbConn)
+	hashRecievedToken:= security.HashToken(token)
+
+	resetTokenModel,err:= resetTokenRepository.GetResetTokenByTokenHash(hashRecievedToken)
+	if err !=nil {
+		return err
+	}
+	if resetTokenModel.ExpiresAt.Unix() < time.Now().Unix(){
+		return errors.New("Expired")
+	}
+	hashNewPassWord,err:= security.HashPassword(newPassword)
+	user,err:=userRepository.GetUserByID(resetTokenModel.UserID)
+	if err !=nil {
+		return err
+	}
+	userRepository.UpdateUserPassword(user.ID,hashNewPassWord)
 	return nil
 }
 
-
+//TODO:Criar service de envio de email com comunicação por fila e pub,sub
+func sendEmail(token string,email string){
+	fmt.Printf(token)
+}
 
 func getUserRepository() (*repository.UserRepository,error){
 	dbConn,err := pkg.ConnectToDatabase()

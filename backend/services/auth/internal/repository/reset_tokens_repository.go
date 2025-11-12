@@ -15,7 +15,7 @@ func NewResetTokensRepository(db *sql.DB) *ResetTokensRepository {
 }
 
 func (r *ResetTokensRepository) CreateResetToken(token *models.ResetToken) error {
-	var sqlCommand string="insert into auth.reset_tokens (user_id, hash_token, expires_at) values (?,?,?,?)"
+	var sqlCommand string="insert into auth.reset_tokens (user_id, hash_token, expires_at) values ($1,$2,$3)"
 	statement, err := r.db.Prepare(sqlCommand)
 	if err != nil {
 		return err
@@ -32,7 +32,7 @@ func (r *ResetTokensRepository) CreateResetToken(token *models.ResetToken) error
 
 func (r *ResetTokensRepository) GetResetTokenByTokenHash(tokenHash string) (models.ResetToken, error) {
 	var resetToken models.ResetToken
-	var sqlCommand string="select id, user_id, hash_token, expires_at from auth.reset_tokens where hash_token = ?"
+	var sqlCommand string="select id, user_id, hash_token, expires_at from auth.reset_tokens where hash_token = $1"
 	row := r.db.QueryRow(sqlCommand, tokenHash)
 	err := row.Scan(&resetToken.ID, &resetToken.UserID, &resetToken.TokenHash, &resetToken.ExpiresAt)
 	if err != nil {
