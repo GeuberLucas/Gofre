@@ -3,6 +3,7 @@ package pkg
 import (
 	"net/http"
 
+	"github.com/GeuberLucas/Gofre/backend/middlewares"
 	"github.com/gorilla/mux"
 )
 
@@ -17,9 +18,10 @@ type Route struct {
 func ConfigureRoutes(r *mux.Router, routes []Route) *mux.Router {
 	for _, route := range routes {
 		if route.NeedsAuth{
-			r.HandleFunc(route.Path,middlewares.Authenticate)
+			r.HandleFunc(route.Path,middlewares.Authenticate(route.HandlerFunc)).Methods((route.Method))
+		}else{
+			r.HandleFunc(route.Path, route.HandlerFunc).Methods(route.Method)
 		}
-		r.HandleFunc(route.Path, route.HandlerFunc).Methods(route.Method)
 	}
 	return r
 }
