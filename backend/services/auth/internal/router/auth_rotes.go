@@ -1,12 +1,12 @@
 package router
 
 import (
-	"github.com/GeuberLucas/Gofre/backend/pkg"
+	routes "github.com/GeuberLucas/Gofre/backend/pkg/routes"
 	"github.com/GeuberLucas/Gofre/backend/services/auth/internal/handler"
 )
 
 
-var routes = []pkg.Route{
+var authRoutes = []routes.Route{
 	{Path: "/login", Method: "POST", HandlerFunc: handler.LoginHandler, NeedsAuth: false},
 	{Path: "/register", Method: "POST", HandlerFunc: handler.RegisterHandler, NeedsAuth: false},
 	{Path: "/profile/{userId}", Method: "GET", HandlerFunc: handler.ProfileHandler, NeedsAuth: true},

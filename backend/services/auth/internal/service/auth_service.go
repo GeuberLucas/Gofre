@@ -6,7 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GeuberLucas/Gofre/backend/pkg"
+	"github.com/GeuberLucas/Gofre/backend/pkg/db"
+	jwtToken "github.com/GeuberLucas/Gofre/backend/pkg/jwt"
 	dtos "github.com/GeuberLucas/Gofre/backend/services/auth/internal/DTOs"
 	"github.com/GeuberLucas/Gofre/backend/services/auth/internal/models"
 	"github.com/GeuberLucas/Gofre/backend/services/auth/internal/repository"
@@ -37,7 +38,7 @@ func (s *authService) Login(obj dtos.LoginDTO) (*dtos.LoginResultDto, error, str
 		return nil,errors.New("Username or Password Invalids"),"Pass"
 	}
 
-	jwtToken,_ := security.GenerateToken(int(userModel.ID))
+	jwtToken,_ := jwtToken.GenerateToken(int(userModel.ID))
 
 	var result dtos.LoginResultDto
 
@@ -71,7 +72,7 @@ func (s *authService) Register(obj dtos.RegisterDTO) (*dtos.LoginResultDto, erro
 	if id <= 0 {
 		return nil, errors.New("User not created"), "Internal"
 	}
-	jwtToken,_ := security.GenerateToken(int(id))
+	jwtToken,_ := jwtToken.GenerateToken(int(id))
 
 	var result dtos.LoginResultDto
 
@@ -164,14 +165,14 @@ func sendEmail(token string,email string){
 }
 
 func getUserRepository() (*repository.UserRepository,error){
-	dbConn,err := pkg.ConnectToDatabase()
+	dbConn,err := db.ConnectToDatabase()
 	if err!= nil {
 		return  nil,err
 	}
 	return repository.NewUserRepository(dbConn),nil
 }
 func getResetTokenRepository() (*repository.ResetTokensRepository,error){
-	dbConn,err := pkg.ConnectToDatabase()
+	dbConn,err := db.ConnectToDatabase()
 	if err!= nil {
 		return  nil,err
 	}

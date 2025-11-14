@@ -1,6 +1,17 @@
 name: gofre-stack
 version: "3.8"
 services:
+  auth:
+    container_name: auth_microservice
+    image: "auth-microservice"
+    build:
+      context: "./backend/services/auth"
+      dockerfile: Dockerfile
+    env_file:
+      - backend.env
+    networks:
+      - gofre-network
+    ports: -"8081:80"
   database:
     image: postgres:18
     environment:

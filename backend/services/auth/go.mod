@@ -10,6 +10,7 @@ require (
 )
 
 require (
-	github.com/GeuberLucas/Gofre/backend/middlewares v0.0.0-20251113003200-13d7c19d4c57 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 )
+
