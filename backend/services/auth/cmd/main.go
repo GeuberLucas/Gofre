@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/GeuberLucas/Gofre/backend/services/auth/internal/router"
 	"github.com/joho/godotenv"
@@ -15,5 +16,10 @@ func main() {
     }
 	router := router.SetupRoutes()
 
-	log.Fatal(http.ListenAndServe(":80", router))
+	var portApi string = ":50728"
+	if os.Getenv("Enviroment") != "Development"{
+		portApi=":80"
+	}
+
+	log.Fatal(http.ListenAndServe(portApi, router))
 }

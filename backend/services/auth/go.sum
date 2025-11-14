@@ -1,3 +1,9 @@
+github.com/GeuberLucas/Gofre/backend/middlewares v0.0.0-20251113003200-13d7c19d4c57 h1:AC9EMZda7AYwfnTRjKXRTVNng0DaElwezIgpO5sRmWM=
+github.com/GeuberLucas/Gofre/backend/middlewares v0.0.0-20251113003200-13d7c19d4c57/go.mod h1:eyNvbTQviLZriyTqRHB+iZq0sVvc1qC3HEDnMNXyOHk=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251114103232-a8437ddd4b44 h1:tmvp3fTm0X2s/vKMxR59SKXVtvj1fZKA5EzlzI3D/IA=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251114103232-a8437ddd4b44/go.mod h1:RSbseu1+4dQgd7l/ccVqcmZhXN2magyMfsiWBfue87o=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251114143613-be540cbad100 h1:LSIIhN5K+KMBEfg66xadWHjcN8Ooee6EpCTdSmmTKwM=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251114143613-be540cbad100/go.mod h1:2a7eEYcyvjTLYYPsJSoj/UmsFPkWB9JqqQxxryVy+Qw=
 github.com/golang-jwt/jwt/v5 v5.3.0 h1:pv4AsKCKKZuqlgs5sUmn4x8UlGa0kEVt/puTpKx9vvo=
 github.com/golang-jwt/jwt/v5 v5.3.0/go.mod h1:fxCRLWMO43lRc8nhHWY6LGqRcf+1gQWArsqaEUEa5bE=
 github.com/gorilla/mux v1.8.1 h1:TuBL49tXwgrFYWhqrNgrUNEY92u81SPhu7sTdzQEiWY=

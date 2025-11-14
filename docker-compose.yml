@@ -11,7 +11,8 @@ services:
       - backend.env
     networks:
       - gofre-network
-    ports: -"8081:80"
+    ports:
+      - "8081:80"
   database:
     image: postgres:18
     environment:
