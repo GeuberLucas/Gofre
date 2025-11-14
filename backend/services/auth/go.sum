@@ -1,5 +1,7 @@
-github.com/LukaGiorgadze/gonull/v2 v2.1.0 h1:Q/VzyEYtRyW3R1GKagfdrBbZuTNDv2uibOCczA/VVS8=
-github.com/LukaGiorgadze/gonull/v2 v2.1.0/go.mod h1:EDdsrB3GGauPQ7EN34y61ZwtDajd+osK92Wn+97JlAk=
+github.com/GeuberLucas/Gofre/backend/middlewares v0.0.0-20251113003200-13d7c19d4c57 h1:AC9EMZda7AYwfnTRjKXRTVNng0DaElwezIgpO5sRmWM=
+github.com/GeuberLucas/Gofre/backend/middlewares v0.0.0-20251113003200-13d7c19d4c57/go.mod h1:eyNvbTQviLZriyTqRHB+iZq0sVvc1qC3HEDnMNXyOHk=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251113003200-13d7c19d4c57 h1:kun8d+2AapZkgmW3z5u6IM+spCnJv6w2DXlhTHyv/1s=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251113003200-13d7c19d4c57/go.mod h1:7SVMPrdV+PTO+fv2E0pBU9feV13bO6bxR8DIs5jYVdk=
 github.com/golang-jwt/jwt/v5 v5.3.0 h1:pv4AsKCKKZuqlgs5sUmn4x8UlGa0kEVt/puTpKx9vvo=
 github.com/golang-jwt/jwt/v5 v5.3.0/go.mod h1:fxCRLWMO43lRc8nhHWY6LGqRcf+1gQWArsqaEUEa5bE=
 github.com/gorilla/mux v1.8.1 h1:TuBL49tXwgrFYWhqrNgrUNEY92u81SPhu7sTdzQEiWY=
