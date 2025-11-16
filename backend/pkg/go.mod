@@ -1,4 +1,4 @@
-module github.com/GeuberLucas/Gofre/pkg
+module github.com/GeuberLucas/Gofre/backend/pkg
 
 go 1.25.4
 

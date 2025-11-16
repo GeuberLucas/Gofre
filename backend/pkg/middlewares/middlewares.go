@@ -3,8 +3,8 @@ package middlewares
 import (
 	"net/http"
 
-	jwtToken "github.com/GeuberLucas/Gofre/pkg/jwt"
-	"github.com/GeuberLucas/Gofre/pkg/response"
+	jwtToken "github.com/GeuberLucas/Gofre/backend/pkg/jwt"
+	"github.com/GeuberLucas/Gofre/backend/pkg/response"
 )
 
 func Authenticate(next http.HandlerFunc) http.HandlerFunc{
