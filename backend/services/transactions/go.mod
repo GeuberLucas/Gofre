@@ -1,4 +1,4 @@
-module transactions
+module github.com/GeuberLucas/Gofre/backend/services/transactions
 
 go 1.25.4
 

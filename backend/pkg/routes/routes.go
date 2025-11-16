@@ -3,7 +3,7 @@ package routes
 import (
 	"net/http"
 
-	"github.com/GeuberLucas/Gofre/backend/pkg/middlewares"
+	"github.com/GeuberLucas/Gofre/pkg/middlewares"
 	"github.com/gorilla/mux"
 )
 
