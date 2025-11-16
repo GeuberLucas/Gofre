@@ -1,6 +1,7 @@
 package service
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"strings"
@@ -23,12 +24,14 @@ func NewAuthService() *authService {
 
 
 func (s *authService) Login(obj dtos.LoginDTO) (*dtos.LoginResultDto, error, string) {
-	userRepository,err:=getUserRepository()
+	dbConn,userRepository,err:=getUserRepository()
+	defer db.CloseDatabaseConnection(dbConn)
 	if err !=nil{
 		return nil,err,"Internal"
 	}
 	
 	userModel,err:= userRepository.GetUserByUsername(obj.Username)
+	
 	if err !=nil{
 		return nil,err,"Internal"
 	}
@@ -64,7 +67,8 @@ func (s *authService) Register(obj dtos.RegisterDTO) (*dtos.LoginResultDto, erro
 		usuario.LastName = nameSplit[1]
 	}
 
-	repositoryUser,err := getUserRepository()
+	dbConn,repositoryUser,err := getUserRepository()
+	defer db.CloseDatabaseConnection(dbConn)
 	if err != nil {
 		return nil, err, "Internal"
 	}
@@ -85,7 +89,8 @@ func (s *authService) Register(obj dtos.RegisterDTO) (*dtos.LoginResultDto, erro
 }
 func (s *authService) Profile(userID int64) (*dtos.ProfileDto, error, string) {
 	
-	repositoryUser,err  := getUserRepository()
+	dbConn,repositoryUser,err  := getUserRepository()
+	defer db.CloseDatabaseConnection(dbConn)
 	userModel,err := repositoryUser.GetUserByID(userID)
 	if err != nil{
 		return nil,err,"Internal"
@@ -101,11 +106,12 @@ func (s *authService) Profile(userID int64) (*dtos.ProfileDto, error, string) {
 }
 
 func (s *authService) ForgotPassword(email string) error {
-	userRepository,err:=getUserRepository()
+	dbConn,userRepository,err:=getUserRepository()
+	defer db.CloseDatabaseConnection(dbConn)
 	if err != nil {
 		return err
 	}
-	resetTokenRepository,err:= getResetTokenRepository()
+	dbConn,resetTokenRepository,err:= getResetTokenRepository()
 	if err != nil {
 		return err
 	}
@@ -136,8 +142,9 @@ func (s *authService) ForgotPassword(email string) error {
 }
 
 func (s *authService) ResetPassword(token string, newPassword string) error {
-	userRepository,err := getUserRepository()
-	resetTokenRepository,err := getResetTokenRepository()
+	dbConn,userRepository,err := getUserRepository()
+	dbConn,resetTokenRepository,err := getResetTokenRepository()
+	defer db.CloseDatabaseConnection(dbConn)
 	if err !=nil {
 		return err
 	}
@@ -164,18 +171,18 @@ func sendEmail(token string,email string){
 	fmt.Printf(token)
 }
 
-func getUserRepository() (*repository.UserRepository,error){
+func getUserRepository() (*sql.DB,*repository.UserRepository,error){
 	dbConn,err := db.ConnectToDatabase()
 	if err!= nil {
-		return  nil,err
+		return  dbConn,nil,err
 	}
-	return repository.NewUserRepository(dbConn),nil
+	return dbConn,repository.NewUserRepository(dbConn),nil
 }
-func getResetTokenRepository() (*repository.ResetTokensRepository,error){
+func getResetTokenRepository() (*sql.DB,*repository.ResetTokensRepository,error){
 	dbConn,err := db.ConnectToDatabase()
 	if err!= nil {
-		return  nil,err
+		return  dbConn,nil,err
 	}
-	return repository.NewResetTokensRepository(dbConn),nil
+	return dbConn,repository.NewResetTokensRepository(dbConn),nil
 }
 

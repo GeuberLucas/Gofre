@@ -31,9 +31,7 @@ Registrar todas as movimentações financeiras do usuário e disponibilizar cál
     
 3. A categoria deve existir na lista fixa (front) ou no service `categories` (caso exista).
     
-4. Não deve permitir transações com **data futura**.
-    
-5. O sistema deve agrupar transações por:
+4. O sistema deve agrupar transações por:
     
     - mês
         
@@ -41,7 +39,7 @@ Registrar todas as movimentações financeiras do usuário e disponibilizar cál
         
     - tipo
         
-6. Resultado mensal das transações:
+5. Resultado mensal das transações:
     
     - **entradas_totais = soma(entradas do mês)**
         
@@ -49,7 +47,7 @@ Registrar todas as movimentações financeiras do usuário e disponibilizar cál
         
     - **saldo = entradas_totais – saidas_totais**
         
-7. Este serviço deve fornecer totais para outros microserviços:
+6. Este serviço deve fornecer totais para outros microserviços:
     
     - goals → comparação planejado × realizado
         

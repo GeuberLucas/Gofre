@@ -39,9 +39,77 @@ CREATE TABLE
             time zone NOT NULL,
             CONSTRAINT users_pkey PRIMARY KEY (id)
     )
--- categories micro service
 
 
+-- transaction micro service
+create schema IF NOT EXISTS transactions
+create type expense_category as ENUM(
+'Mercado geral',
+'Delivery',
+'Restaurante e bares',
+'Vestuário',
+'Moradia',
+'Utilidades',
+'Decoração',
+'Educação',
+'Dependentes',
+'Saúde',
+'Entretenimento',
+'Serviços',
+'Impostos',
+'Transporte',
+'Presentes',
+'Pets',
+'Viagens',
+'Doações',
+'Apostas',
+'Livre',
+'Outros'
+)
+create type expense_type as enum(
+'Mensal',
+'Variável',
+'Fatura'
+)
+create type payment_method as enum(
+    'pix',
+    'debito',
+    'credito',
+    'boleto',
+    'dinheiro',
+    'ted',
+    'cheque',
+)
+create type income_type as enum(
+    'Trabalho',
+    'Extra',
+    'Investimento',
+    'Aposentadoria',
+    'Resgate',
+    'Outros'
+)
+
+create table IF NOT EXISTS transactions.expenses(
+    id serial PRIMARY KEY,
+    user_id integer not null,
+    description varchar(255) not null,
+    target varchar(255),
+    categoriy expense_category not null,
+    type expense_type not null,
+    payment_method payment_method,
+    payment_date timestamp with time zone not null,
+    is_paid boolean not null default False
+
+)
+create table IF NOT EXISTS transactions.revenue(
+     id serial PRIMARY KEY,
+    user_id integer not null,
+    description varchar(255) not null,
+    origin varchar(255),
+    type income_type not null,
+    received_date timestamp with time zone not null,
+    is_recieved boolean not null default False
+)
 
 
 

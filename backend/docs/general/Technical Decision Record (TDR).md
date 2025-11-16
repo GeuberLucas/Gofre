@@ -31,6 +31,35 @@ Liste os impactos positivos e negativos.
 
 ---
 
+### **TDR-002 — Consolidação dos dados de transações em relatórios**  
+**Data:** 2025-11-16  
+
+**Contexto:**  
+O projeto contém uma feature de relatório gerais baseado nas somas das entradas ,saídas e aportes que o usuário cadastrou
+
+**Problema Identificado:**  
+O problema que identifique foi a onde e quando eu iria processar esses dados , no schema de transaction (com a criação de diversas views), no micro serviço de transactions (com end-point para cada relatório)
+
+**Decisão:**  
+Decidi então criar um schema direto para a consolidação desses dados seguindo a seguinte logica da planilha de base do sistema , onde irei registrar as somas de cada tipo de transaction
+![[Pasted image 20251116075218.png]]
+
+**Justificativa:**  
+- Facildade na hora de consultar os relatórios
+- Menos joins em tabelas 
+- Menor processamento na hora de retornar os relatórios 
+
+**Consequências:**  
+ - Positivas: 
+	 - consolidação de dados centralizados
+	 - relatórios centralizados
+ - Negativas: 
+	 - um schema a mais para manter
+	 - envio de eventos obrigatório a cada mudança em qualquer transaction e investment
+
+---
+
+
 ### **TDR-001 — Reorganização dos pacotes `middleware` e `pkg` para evitar dependência circular**  
 **Data:** 2025-11-13  
 

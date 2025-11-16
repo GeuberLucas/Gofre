@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "general/Regras de Domínio do Sistema.md",
+                "file": "general/Technical Decision Record (TDR).md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Regras de Domínio do Sistema"
+              "title": "Technical Decision Record (TDR)"
             }
           }
         ],
@@ -200,7 +200,8 @@
   },
   "active": "a5fecccaecda90ab",
   "lastOpenFiles": [
-    "general/Technical Decision Record (TDR).md",
-    "general/Regras de Domínio do Sistema.md"
+    "Pasted image 20251116075218.png",
+    "general/Regras de Domínio do Sistema.md",
+    "general/Technical Decision Record (TDR).md"
   ]
 }
