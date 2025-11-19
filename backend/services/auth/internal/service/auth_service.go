@@ -25,7 +25,7 @@ func NewAuthService() *authService {
 
 func (s *authService) Login(obj dtos.LoginDTO) (*dtos.LoginResultDto, error, string) {
 	dbConn,userRepository,err:=getUserRepository()
-	defer db.CloseDatabaseConnection(dbConn)
+	defer dbConn.Close()
 	if err !=nil{
 		return nil,err,"Internal"
 	}
@@ -70,7 +70,7 @@ func (s *authService) Register(obj dtos.RegisterDTO) (*dtos.LoginResultDto, erro
 		return nil,errors.New("Required fields are empty"),"validation"
 	}
 	dbConn,repositoryUser,err := getUserRepository()
-	defer db.CloseDatabaseConnection(dbConn)
+	defer dbConn.Close()
 	if err != nil {
 		return nil, err, "Internal"
 	}
@@ -92,7 +92,7 @@ func (s *authService) Register(obj dtos.RegisterDTO) (*dtos.LoginResultDto, erro
 func (s *authService) Profile(userID int64) (*dtos.ProfileDto, error, string) {
 	
 	dbConn,repositoryUser,err  := getUserRepository()
-	defer db.CloseDatabaseConnection(dbConn)
+	defer dbConn.Close()
 	userModel,err := repositoryUser.GetUserByID(userID)
 	if err != nil{
 		return nil,err,"Internal"
@@ -109,7 +109,7 @@ func (s *authService) Profile(userID int64) (*dtos.ProfileDto, error, string) {
 
 func (s *authService) ForgotPassword(email string) error {
 	dbConn,userRepository,err:=getUserRepository()
-	defer db.CloseDatabaseConnection(dbConn)
+	defer dbConn.Close()
 	if err != nil {
 		return err
 	}
@@ -146,7 +146,7 @@ func (s *authService) ForgotPassword(email string) error {
 func (s *authService) ResetPassword(token string, newPassword string) error {
 	dbConn,userRepository,err := getUserRepository()
 	dbConn,resetTokenRepository,err := getResetTokenRepository()
-	defer db.CloseDatabaseConnection(dbConn)
+	defer dbConn.Close()
 	if err !=nil {
 		return err
 	}

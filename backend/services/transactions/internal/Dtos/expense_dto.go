@@ -1,0 +1,33 @@
+package dtos
+
+import (
+	"time"
+
+	"github.com/GeuberLucas/Gofre/backend/services/transaction/internal/models"
+)
+
+type ExpenseDto struct {
+	ID            int64     `json:"id"`
+	UserId        int64     `json:"userId"`
+	Description   string    `json:"description"`
+	Target        string    `json:"target"`
+	Category      string    `json:"category"`
+	Type          string    `json:"type"`
+	PaymentMethod string    `json:"paymentMethod"`
+	PaymentDate   time.Time `json:"paymentDate"`
+	IsPaid        bool      `json:"isPaid"`
+}
+
+func (ex ExpenseDto) ToModel() models.Expense {
+	return models.Expense{
+		ID:            ex.ID,
+		UserId:        ex.UserId,
+		Description:   ex.Description,
+		Target:        ex.Target,
+		Category:      ex.Category,
+		Type:          ex.Type,
+		PaymentMethod: ex.PaymentMethod,
+		PaymentDate:   ex.PaymentDate,
+		IsPaid:        ex.IsPaid,
+	}
+}

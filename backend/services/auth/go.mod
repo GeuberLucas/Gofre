@@ -10,7 +10,7 @@ require (
 require github.com/golang-jwt/jwt/v5 v5.3.0 // indirect
 
 require (
-	github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251114143613-be540cbad100
+	github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251119180622-974b257b9a18
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9 // indirect
 )

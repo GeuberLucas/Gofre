@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"log"
 
 	"github.com/GeuberLucas/Gofre/backend/services/transaction/internal/models"
 )
@@ -33,16 +34,92 @@ func (r ExpenseRepository) Create(model models.Expense) error {
 	if err != nil {
 		return err
 	}
-	
-	_,err = statement.Exec(model.UserId,model.Description,model.Target,model.Category,model.Type,model.PaymentMethod,model.PaymentDate,model.IsPaid)
+
+	_, err = statement.Exec(model.UserId, model.Description, model.Target, model.Category, model.Type, model.PaymentMethod, model.PaymentDate, model.IsPaid)
 	if err != nil {
 		return err
-	}	
-	
+	}
+
 	return nil
 }
 
-func (r ExpenseRepository) GetAll(userId int) ([]models.Expense, error) {}
-func (r ExpenseRepository) GetById(id int) (models.Expense, error)      {}
-func (r ExpenseRepository) Update(model models.Expense) error           {}
-func (r ExpenseRepository) Delete(id int) error                         {}
+func (r ExpenseRepository) GetAll() ([]models.Expense, error) {
+	var sqlCommand string = `SELECT id, user_id, description, target, category, type, payment_method, payment_date, is_paid
+	FROM transactions.expense;`
+
+	rows, err := r.db.Query(sqlCommand)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var expenses []models.Expense
+	for rows.Next() {
+		var expense models.Expense
+		err := rows.Scan(&expense.ID, &expense.UserId, &expense.Description, &expense.Target, &expense.Category, &expense.Type, &expense.PaymentMethod, &expense.PaymentDate, &expense.IsPaid)
+		if err != nil {
+			return nil, err
+		}
+		expenses = append(expenses, expense)
+	}
+	return expenses, nil
+}
+func (r ExpenseRepository) GetById(id int) (models.Expense, error) {
+	var expense models.Expense
+	var sqlCommand string = `SELECT id, user_id, description, target, category, type, payment_method, payment_date, is_paid
+	FROM transactions.expense
+	WHERE id=$1;`
+
+	row := r.db.QueryRow(sqlCommand, id)
+	err := row.Scan(&expense.ID, &expense.UserId, &expense.Description, &expense.Target, &expense.Category, &expense.Type, &expense.PaymentMethod, &expense.PaymentDate, &expense.IsPaid)
+	if err != nil {
+		return expense, err
+	}
+	return expense, nil
+}
+func (r ExpenseRepository) GetByUserId(userId int) (models.Expense, error) {
+	var expense models.Expense
+	var sqlCommand string = `SELECT id, user_id, description, target, category, type, payment_method, payment_date, is_paid
+	FROM transactions.expense
+	WHERE user_id=$1;`
+
+	row := r.db.QueryRow(sqlCommand, userId)
+	err := row.Scan(&expense.ID, &expense.UserId, &expense.Description, &expense.Target, &expense.Category, &expense.Type, &expense.PaymentMethod, &expense.PaymentDate, &expense.IsPaid)
+	if err != nil {
+		return expense, err
+	}
+	return expense, nil
+}
+func (r ExpenseRepository) Update(model models.Expense) error {
+	var sqlCommand string = `UPDATE transactions.expense
+	SET description=?, target=?, category=?, type=?, payment_method=?, payment_date=?, is_paid=?
+	WHERE id=$7;`
+
+	statement, err := r.db.Prepare(sqlCommand)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+	_, err = statement.Exec(model.UserId, model.Description, model.Target, model.Category, model.Type, model.PaymentMethod, model.PaymentDate, model.IsPaid)
+	if err != nil {
+		return err
+	}
+	log.Println("User updated successfully")
+	return nil
+
+}
+func (r ExpenseRepository) Delete(id int) error {
+	var sqlCommand string = "DELETE FROM transactions.expense where id=$1;"
+
+	statement, err := r.db.Prepare(sqlCommand)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+	_, err = statement.Exec(id)
+	if err != nil {
+		return err
+	}
+	log.Println("User deleted successfully")
+	return nil
+}
