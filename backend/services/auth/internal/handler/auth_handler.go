@@ -12,7 +12,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
+func LoginHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
 	bodyRequest,erro := ioutil.ReadAll(r.Body)
 	if erro != nil {
 		response.ErrorResponse(w, http.StatusUnprocessableEntity, erro)
@@ -41,9 +43,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.JSONResponse(w,http.StatusOK,serviceresult)
-}
+}}
 
-func RegisterHandler(w http.ResponseWriter, r *http.Request) {
+func RegisterHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 	bodyRequest,erro := ioutil.ReadAll(r.Body)
 	if erro != nil {
 		response.ErrorResponse(w, http.StatusUnprocessableEntity, erro)
@@ -69,9 +72,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.JSONResponse(w,http.StatusOK,serviceresult)
-}
+}}
 
-func ProfileHandler(w http.ResponseWriter, r *http.Request) {
+func ProfileHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 	params:= mux.Vars(r)
 	userId,erro :=strconv.ParseInt(params["userId"],10,64)
 	if erro != nil {
@@ -93,9 +97,10 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.JSONResponse(w,http.StatusOK,serviceresult)
-}
+}}
 
-func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
+func ForgotPasswordHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 	bodyRequest,erro := ioutil.ReadAll(r.Body)
 	if erro != nil {
 		response.ErrorResponse(w, http.StatusUnprocessableEntity, erro)
@@ -113,9 +118,10 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response.JSONResponse(w,http.StatusOK,map[string]string{"message":"If the email exists, a reset link has been sent."})
-}
+}}
 
-func ResetPasswordHandler(w http.ResponseWriter, r *http.Request) {
+func ResetPasswordHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 	params:= mux.Vars(r)
 	HashEncoded :=params["HashEncoded"]
 	if HashEncoded == "" {
@@ -140,4 +146,4 @@ func ResetPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	response.JSONResponse(w,http.StatusOK,map[string]string{"message":"Password has been reset successfully."})
 
-}
+}}

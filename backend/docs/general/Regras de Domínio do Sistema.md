@@ -11,53 +11,48 @@
 
 ## 1.1. Objetivo
 
-Registrar todas as movimentações financeiras do usuário e disponibilizar cálculos consolidados por mês.
+Registrar todas as movimentações financeiras do usuário e disponibilizar os eventos para outros micro-serviços 
 
 ## 1.2. Regras de negócio
 
-1. Toda transação deve ter:
-    
-    - data
-        
-    - categoria
-        
-    - descrição
-        
-    - valor
-        
-    - tipo (`entrada` ou `saida`)
-        
-2. O valor deve ser **sempre positivo**.
-    
-3. A categoria deve existir na lista fixa (front) ou no service `categories` (caso exista).
-    
-4. O sistema deve agrupar transações por:
-    
-    - mês
-        
-    - categoria
-        
-    - tipo
-        
-5. Resultado mensal das transações:
-    
-    - **entradas_totais = soma(entradas do mês)**
-        
-    - **saidas_totais = soma(saídas do mês)**
-        
-    - **saldo = entradas_totais – saidas_totais**
-        
-6. Este serviço deve fornecer totais para outros microserviços:
-    
-    - goals → comparação planejado × realizado
-        
-    - forecast → projeções
-        
-    - reports → dashboard
-        
-    - property → impacto no patrimônio (opcional)
-        
+1. As transações devem ter obrigatoriamente:
+	> Entradas (revenues):
+		1. Origem
+		2. Tipo
+		3. Data efetuada ou prevista
+		4. Valor (>=0) 
 
+	> Saidas (expenses) :
+		 1.  Destino
+		 2. Categoria
+		 3. Tipo
+		 4. Forma de pagamento
+		 5. Data pagamento ou previsão
+		 6. Valor (>=0)
+2. Metadata obrigatória
+	> 1. id
+	> 2. user_id
+	> 3. created_at
+	> 4. updated_at
+3.   As transações (Entrada e saida) podem ter o Campo `Descrição`
+	
+4. Este serviço deve publicar eventos eventos para outros microserviços:
+    - goals → comparação planejado × realizado
+    - forecast → projeções
+    - reports → dashboard
+    - property → impacto no patrimônio (opcional)
+5.  Os eventos devem ser enviados após a consolidação dos registros no banco de dados
+6. os eventos que serão enviados são:
+	1.  Inclusão de transação
+	2.  Atualização de transação
+	3.  Deleção de transação
+7. o Evento enviado terá a seguinte estrutura:
+	1. Mes da transação
+	2. Se é entrada ou saida
+	3. tipo da transaction
+	4. categoria (Se for saida)
+	5. Metodo de pagamento
+	6. Valor
 ---
 
 # 2. **INVESTMENTS SERVICE**

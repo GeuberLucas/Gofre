@@ -1,12 +1,15 @@
 package router
 
 import (
-	routes "github.com/GeuberLucas/Gofre/backend/pkg/routes"
+	"github.com/GeuberLucas/Gofre/backend/pkg/routes"
+	"github.com/gorilla/mux"
 )
 
-var transactionRoutes []routes.Route{
-
+var transactionRoutes = []routes.Route{
+	
 }
+
+
 
 func SetupRoutes() *mux.Router {
 	r := mux.NewRouter()

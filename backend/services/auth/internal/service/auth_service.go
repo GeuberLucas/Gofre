@@ -66,15 +66,17 @@ func (s *authService) Register(obj dtos.RegisterDTO) (*dtos.LoginResultDto, erro
 	if len(nameSplit) > 1 {
 		usuario.LastName = nameSplit[1]
 	}
-
+	if(!usuario.Validate()){
+		return nil,errors.New("Required fields are empty"),"validation"
+	}
 	dbConn,repositoryUser,err := getUserRepository()
 	defer db.CloseDatabaseConnection(dbConn)
 	if err != nil {
 		return nil, err, "Internal"
 	}
 	id:= repositoryUser.CreateUser(usuario)
-	if id <= 0 {
-		return nil, errors.New("User not created"), "Internal"
+	if err != nil {
+		return nil, fmt.Errorf("User Not created: %s",err), "Internal"
 	}
 	jwtToken,_ := jwtToken.GenerateToken(int(id))
 
@@ -168,7 +170,7 @@ func (s *authService) ResetPassword(token string, newPassword string) error {
 
 //TODO:Criar service de envio de email com comunicação por fila e pub,sub
 func sendEmail(token string,email string){
-	fmt.Printf(token)
+	fmt.Printf(token,email)
 }
 
 func getUserRepository() (*sql.DB,*repository.UserRepository,error){

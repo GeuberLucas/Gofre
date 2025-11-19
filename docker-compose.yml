@@ -22,6 +22,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
+      - ./docker/postgres/init/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./docker/postgres/data:/var/lib/postgresql
     networks:
       - gofre-network

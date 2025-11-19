@@ -19,7 +19,7 @@ CREATE TABLE
             time zone NOT NULL,
             CONSTRAINT reset_tokens_pkey PRIMARY KEY (id),
             CONSTRAINT reset_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION
-    )
+    );
 CREATE TABLE
     IF NOT EXISTS auth.users (
         id integer NOT NULL GENERATED ALWAYS AS IDENTITY (
@@ -38,11 +38,11 @@ CREATE TABLE
         with
             time zone NOT NULL,
             CONSTRAINT users_pkey PRIMARY KEY (id)
-    )
+    );
 
 
 -- transaction micro service
-create schema IF NOT EXISTS transactions
+create schema IF NOT EXISTS transactions;
 create type expense_category as ENUM(
 'Mercado geral',
 'Delivery',
@@ -65,12 +65,12 @@ create type expense_category as ENUM(
 'Apostas',
 'Livre',
 'Outros'
-)
+);
 create type expense_type as enum(
 'Mensal',
 'Variável',
 'Fatura'
-)
+);
 create type payment_method as enum(
     'pix',
     'debito',
@@ -78,8 +78,8 @@ create type payment_method as enum(
     'boleto',
     'dinheiro',
     'ted',
-    'cheque',
-)
+    'cheque'
+);
 create type income_type as enum(
     'Trabalho',
     'Extra',
@@ -87,20 +87,20 @@ create type income_type as enum(
     'Aposentadoria',
     'Resgate',
     'Outros'
-)
+);
 
 create table IF NOT EXISTS transactions.expenses(
     id serial PRIMARY KEY,
     user_id integer not null,
     description varchar(255) not null,
     target varchar(255),
-    categoriy expense_category not null,
+    category expense_category not null,
     type expense_type not null,
     payment_method payment_method,
     payment_date timestamp with time zone not null,
     is_paid boolean not null default False
 
-)
+);
 create table IF NOT EXISTS transactions.revenue(
      id serial PRIMARY KEY,
     user_id integer not null,
@@ -109,7 +109,7 @@ create table IF NOT EXISTS transactions.revenue(
     type income_type not null,
     received_date timestamp with time zone not null,
     is_recieved boolean not null default False
-)
+);
 
 
 

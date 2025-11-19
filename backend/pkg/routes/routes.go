@@ -10,7 +10,7 @@ import (
 type Route struct {
 	Path        string
 	Method      string
-	HandlerFunc func(w http.ResponseWriter, r *http.Request)
+	HandlerFunc http.HandlerFunc
 	NeedsAuth   bool
 }
 

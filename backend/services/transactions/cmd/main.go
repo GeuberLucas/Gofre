@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/GeuberLucas/Gofre/backend/services/transaction/internal/router"
 	"github.com/joho/godotenv"
 )
 

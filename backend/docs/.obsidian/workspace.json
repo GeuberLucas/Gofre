@@ -48,9 +48,21 @@
               "icon": "lucide-file",
               "title": "Struct folders"
             }
+          },
+          {
+            "id": "ea0db873919d27d7",
+            "type": "leaf",
+            "state": {
+              "type": "image",
+              "state": {
+                "file": "Pasted image 20251116075218.png"
+              },
+              "icon": "lucide-image",
+              "title": "Pasted image 20251116075218"
+            }
           }
         ],
-        "currentTab": 2
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -212,11 +224,12 @@
       "bases:Create new base": false
     }
   },
-  "active": "7f4d14c9a9d0a0d7",
+  "active": "ea0db873919d27d7",
   "lastOpenFiles": [
-    "general/Technical Decision Record (TDR).md",
+    "general/Regras de Domínio do Sistema.md",
+    "Cenários de teste.md",
     "general/Struct folders.md",
-    "Pasted image 20251116075218.png",
-    "general/Regras de Domínio do Sistema.md"
+    "general/Technical Decision Record (TDR).md",
+    "Pasted image 20251116075218.png"
   ]
 }
