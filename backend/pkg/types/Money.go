@@ -4,7 +4,7 @@ import "math"
 
 type Money int64
 
-func (m Money) FloatToMoney(value float64) Money {
+func FloatToMoney(value float64) Money {
 	return Money(math.Round(value * 100))
 }
 

@@ -98,6 +98,7 @@ create table IF NOT EXISTS transactions.expenses(
     type expense_type not null,
     payment_method payment_method,
     payment_date timestamp with time zone not null,
+    amount integer not null,
     is_paid boolean not null default False
 
 );
@@ -107,6 +108,7 @@ create table IF NOT EXISTS transactions.revenue(
     description varchar(255) not null,
     origin varchar(255),
     type income_type not null,
+    amount integer not null,
     received_date timestamp with time zone not null,
     is_recieved boolean not null default False
 );

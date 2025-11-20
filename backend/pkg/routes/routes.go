@@ -14,14 +14,13 @@ type Route struct {
 	NeedsAuth   bool
 }
 
-
 func ConfigureRoutes(r *mux.Router, routes []Route) *mux.Router {
 	for _, route := range routes {
-		
-		if route.NeedsAuth{
-			r.HandleFunc(route.Path,middlewares.Authenticate(route.HandlerFunc)).Methods((route.Method))
-		}else{
-			r.HandleFunc(route.Path, route.HandlerFunc).Methods(route.Method)
+
+		if route.NeedsAuth {
+			r.HandleFunc(route.Path, middlewares.Logger(middlewares.Authenticate(route.HandlerFunc))).Methods((route.Method))
+		} else {
+			r.HandleFunc(route.Path, middlewares.Logger(route.HandlerFunc)).Methods(route.Method)
 		}
 	}
 	return r

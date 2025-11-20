@@ -10,10 +10,10 @@ import (
 type IExpenseRepository interface {
 	Create(model models.Expense) error
 	GetAll() ([]models.Expense, error)
-	GetById(id int) (models.Expense, error)
-	GetByUserId(userId int) (models.Expense, error)
+	GetById(id int64) (models.Expense, error)
+	GetByUserId(userId int64) ([]models.Expense, error)
 	Update(model models.Expense) error
-	Delete(id int) error
+	Delete(id int64, userId int64) error
 }
 
 type ExpenseRepository struct {
@@ -26,8 +26,8 @@ func NewExpenseRepository(db *sql.DB) *ExpenseRepository {
 
 func (r ExpenseRepository) Create(model models.Expense) error {
 	sqlCommand := `INSERT INTO transactions.expenses(
-	user_id, description, target, category, type, payment_method, payment_date, is_paid)
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`
+	user_id, description, target, category,amount, type, payment_method, payment_date, is_paid)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9);`
 
 	statement, err := r.db.Prepare(sqlCommand)
 	defer statement.Close()
@@ -35,7 +35,7 @@ func (r ExpenseRepository) Create(model models.Expense) error {
 		return err
 	}
 
-	_, err = statement.Exec(model.UserId, model.Description, model.Target, model.Category, model.Type, model.PaymentMethod, model.PaymentDate, model.IsPaid)
+	_, err = statement.Exec(model.UserId, model.Description, model.Target, model.Category, model.Amount, model.Type, model.PaymentMethod, model.PaymentDate, model.IsPaid)
 	if err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func (r ExpenseRepository) Create(model models.Expense) error {
 }
 
 func (r ExpenseRepository) GetAll() ([]models.Expense, error) {
-	var sqlCommand string = `SELECT id, user_id, description, target, category, type, payment_method, payment_date, is_paid
+	var sqlCommand string = `SELECT id, user_id, description, target, category,amount, type, payment_method, payment_date, is_paid
 	FROM transactions.expense;`
 
 	rows, err := r.db.Query(sqlCommand)
@@ -56,7 +56,7 @@ func (r ExpenseRepository) GetAll() ([]models.Expense, error) {
 	var expenses []models.Expense
 	for rows.Next() {
 		var expense models.Expense
-		err := rows.Scan(&expense.ID, &expense.UserId, &expense.Description, &expense.Target, &expense.Category, &expense.Type, &expense.PaymentMethod, &expense.PaymentDate, &expense.IsPaid)
+		err := rows.Scan(&expense.ID, &expense.UserId, &expense.Description, &expense.Target, &expense.Category, &expense.Amount, &expense.Type, &expense.PaymentMethod, &expense.PaymentDate, &expense.IsPaid)
 		if err != nil {
 			return nil, err
 		}
@@ -64,43 +64,53 @@ func (r ExpenseRepository) GetAll() ([]models.Expense, error) {
 	}
 	return expenses, nil
 }
-func (r ExpenseRepository) GetById(id int) (models.Expense, error) {
+func (r ExpenseRepository) GetById(id int64) (models.Expense, error) {
 	var expense models.Expense
-	var sqlCommand string = `SELECT id, user_id, description, target, category, type, payment_method, payment_date, is_paid
+	var sqlCommand string = `SELECT id, user_id, description, target, category,amount, type, payment_method, payment_date, is_paid
 	FROM transactions.expense
 	WHERE id=$1;`
 
 	row := r.db.QueryRow(sqlCommand, id)
-	err := row.Scan(&expense.ID, &expense.UserId, &expense.Description, &expense.Target, &expense.Category, &expense.Type, &expense.PaymentMethod, &expense.PaymentDate, &expense.IsPaid)
+	err := row.Scan(&expense.ID, &expense.UserId, &expense.Description, &expense.Target, &expense.Category, &expense.Amount, &expense.Type, &expense.PaymentMethod, &expense.PaymentDate, &expense.IsPaid)
 	if err != nil {
 		return expense, err
 	}
 	return expense, nil
 }
-func (r ExpenseRepository) GetByUserId(userId int) (models.Expense, error) {
-	var expense models.Expense
-	var sqlCommand string = `SELECT id, user_id, description, target, category, type, payment_method, payment_date, is_paid
+func (r ExpenseRepository) GetByUserId(userId int64) ([]models.Expense, error) {
+
+	var sqlCommand string = `SELECT id, user_id, description, target, category,amount, type, payment_method, payment_date, is_paid
 	FROM transactions.expense
 	WHERE user_id=$1;`
 
-	row := r.db.QueryRow(sqlCommand, userId)
-	err := row.Scan(&expense.ID, &expense.UserId, &expense.Description, &expense.Target, &expense.Category, &expense.Type, &expense.PaymentMethod, &expense.PaymentDate, &expense.IsPaid)
+	rows, err := r.db.Query(sqlCommand, userId)
 	if err != nil {
-		return expense, err
+		return nil, err
 	}
-	return expense, nil
+	defer rows.Close()
+
+	var expenses []models.Expense
+	for rows.Next() {
+		var expense models.Expense
+		err := rows.Scan(&expense.ID, &expense.UserId, &expense.Description, &expense.Target, &expense.Category, &expense.Amount, &expense.Type, &expense.PaymentMethod, &expense.PaymentDate, &expense.IsPaid)
+		if err != nil {
+			return nil, err
+		}
+		expenses = append(expenses, expense)
+	}
+	return expenses, nil
 }
 func (r ExpenseRepository) Update(model models.Expense) error {
 	var sqlCommand string = `UPDATE transactions.expense
-	SET description=?, target=?, category=?, type=?, payment_method=?, payment_date=?, is_paid=?
-	WHERE id=$7;`
+	SET description=$1, target=$2, category=$3,amount=$4, type=$5, payment_method=$6, payment_date=$7, is_paid=$8
+	WHERE id=$9;`
 
 	statement, err := r.db.Prepare(sqlCommand)
 	if err != nil {
 		return err
 	}
 	defer statement.Close()
-	_, err = statement.Exec(model.UserId, model.Description, model.Target, model.Category, model.Type, model.PaymentMethod, model.PaymentDate, model.IsPaid)
+	_, err = statement.Exec(model.UserId, model.Description, model.Target, model.Category, model.Amount, model.Type, model.PaymentMethod, model.PaymentDate, model.IsPaid)
 	if err != nil {
 		return err
 	}
@@ -108,15 +118,15 @@ func (r ExpenseRepository) Update(model models.Expense) error {
 	return nil
 
 }
-func (r ExpenseRepository) Delete(id int) error {
-	var sqlCommand string = "DELETE FROM transactions.expense where id=$1;"
+func (r ExpenseRepository) Delete(id int64, userId int64) error {
+	var sqlCommand string = "DELETE FROM transactions.expense where id=$1 and user_id=$2;"
 
 	statement, err := r.db.Prepare(sqlCommand)
 	if err != nil {
 		return err
 	}
 	defer statement.Close()
-	_, err = statement.Exec(id)
+	_, err = statement.Exec(id, userId)
 	if err != nil {
 		return err
 	}

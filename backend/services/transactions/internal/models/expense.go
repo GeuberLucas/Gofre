@@ -1,7 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
 
+	"github.com/GeuberLucas/Gofre/backend/pkg/types"
+)
 
 type Expense struct {
 	ID            int64
@@ -12,33 +15,35 @@ type Expense struct {
 	Type          string
 	PaymentMethod string
 	PaymentDate   time.Time
-	IsPaid		  bool
+	Amount        types.Money
+	IsPaid        bool
 }
 
+func (ex Expense) Isvalid() (bool, string) {
 
-func (ex Expense) Isvalid() (bool,string) {
-
-	if (ex.UserId ==0){
+	if ex.UserId == 0 {
 		return false, "expense:validate:UserId required"
 	}
-	if (ex.Target ==""){
+	if ex.Target == "" {
 		return false, "expense:validate:Target required"
 	}
-	if (ex.Category ==""){
+	if ex.Category == "" {
 		return false, "expense:validate:Category required"
 	}
 
-	if(ex.Type == "" ){
+	if ex.Type == "" {
 		return false, "expense:validate:Category required"
 	}
 
-	if(ex.PaymentMethod==""){
+	if ex.PaymentMethod == "" {
 		return false, "expense:validate:PaymentMethod required"
 	}
 
-	if(ex.PaymentDate.IsZero()){
+	if ex.PaymentDate.IsZero() {
 		return false, "expense:validate:PaymentDate required"
 	}
-
-	return true,""
+	if ex.Amount <= 0 {
+		return false, "repense:validate:Amount not be equal or minor than zero"
+	}
+	return true, ""
 }

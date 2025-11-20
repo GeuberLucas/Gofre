@@ -2,6 +2,8 @@ package models
 
 import (
 	"time"
+
+	"github.com/GeuberLucas/Gofre/backend/pkg/types"
 )
 
 type Revenue struct {
@@ -11,7 +13,7 @@ type Revenue struct {
 	Origin      string
 	Type        string
 	ReceiveDate time.Time
-	Amount      Money
+	Amount      types.Money
 	IsRecieved  bool
 }
 
@@ -32,7 +34,7 @@ func (re Revenue) Isvalid() (bool, string) {
 	}
 
 	if re.Amount <= 0 {
-
+		return false, "repense:validate:Amount not be equal or minor than zero"
 	}
 
 	return true, ""

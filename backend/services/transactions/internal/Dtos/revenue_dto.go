@@ -3,6 +3,7 @@ package dtos
 import (
 	"time"
 
+	"github.com/GeuberLucas/Gofre/backend/pkg/types"
 	"github.com/GeuberLucas/Gofre/backend/services/transaction/internal/models"
 )
 
@@ -14,6 +15,7 @@ type RevenueDto struct {
 	Type        string    `json:"type"`
 	ReceiveDate time.Time `json:"receiveDate"`
 	IsRecieved  bool      `json:"IsRecieved"`
+	Amount      float64   `json:"amount"`
 }
 
 func (re RevenueDto) ToModel() models.Revenue {
@@ -25,5 +27,6 @@ func (re RevenueDto) ToModel() models.Revenue {
 		Type:        re.Type,
 		ReceiveDate: re.ReceiveDate,
 		IsRecieved:  re.IsRecieved,
+		Amount:      types.FloatToMoney(re.Amount),
 	}
 }
