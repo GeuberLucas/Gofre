@@ -1,7 +1,5 @@
-github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251119180622-974b257b9a18 h1:zOG2SSLwEb39EzfjV6L0P07lTuSEOemisBqCRouYSMw=
-github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251119180622-974b257b9a18/go.mod h1:YrbS9gj07ARleUKF6DGKis8c7ZVOxcMoK76uZjh7so8=
-github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251120121501-57a635208523 h1:1HaVOLL1BxssV0u6AQmoPiaElOV2kAuySlTcVFOvn8k=
-github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251120121501-57a635208523/go.mod h1:YrbS9gj07ARleUKF6DGKis8c7ZVOxcMoK76uZjh7so8=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251120155917-ebbc94d47e62 h1:WkM1fAh2+c0dl0BJb5/zjs+ozQgA0G+BIsI7gGj8xSU=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251120155917-ebbc94d47e62/go.mod h1:YrbS9gj07ARleUKF6DGKis8c7ZVOxcMoK76uZjh7so8=
 github.com/golang-jwt/jwt/v5 v5.3.0 h1:pv4AsKCKKZuqlgs5sUmn4x8UlGa0kEVt/puTpKx9vvo=
 github.com/golang-jwt/jwt/v5 v5.3.0/go.mod h1:fxCRLWMO43lRc8nhHWY6LGqRcf+1gQWArsqaEUEa5bE=
 github.com/gorilla/mux v1.8.1 h1:TuBL49tXwgrFYWhqrNgrUNEY92u81SPhu7sTdzQEiWY=

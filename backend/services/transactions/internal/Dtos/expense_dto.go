@@ -21,6 +21,7 @@ type ExpenseDto struct {
 }
 
 func (ex ExpenseDto) ToModel() models.Expense {
+	amount := types.FloatToMoney(ex.Amount)
 	return models.Expense{
 		ID:            ex.ID,
 		UserId:        ex.UserId,
@@ -31,6 +32,6 @@ func (ex ExpenseDto) ToModel() models.Expense {
 		PaymentMethod: ex.PaymentMethod,
 		PaymentDate:   ex.PaymentDate,
 		IsPaid:        ex.IsPaid,
-		Amount:        types.FloatToMoney(ex.Amount),
+		Amount:        amount,
 	}
 }

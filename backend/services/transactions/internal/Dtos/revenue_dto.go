@@ -19,6 +19,7 @@ type RevenueDto struct {
 }
 
 func (re RevenueDto) ToModel() models.Revenue {
+	amount := types.FloatToMoney(re.Amount)
 	return models.Revenue{
 		ID:          re.ID,
 		UserId:      re.UserId,
@@ -27,6 +28,6 @@ func (re RevenueDto) ToModel() models.Revenue {
 		Type:        re.Type,
 		ReceiveDate: re.ReceiveDate,
 		IsRecieved:  re.IsRecieved,
-		Amount:      types.FloatToMoney(re.Amount),
+		Amount:      amount,
 	}
 }

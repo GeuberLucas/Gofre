@@ -3,7 +3,7 @@ module github.com/GeuberLucas/Gofre/backend/services/transaction
 go 1.25.4
 
 require (
-	github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251120121501-57a635208523
+	github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251120155917-ebbc94d47e62
 	github.com/gorilla/mux v1.8.1
 	github.com/joho/godotenv v1.5.1
 )

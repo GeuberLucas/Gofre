@@ -45,7 +45,7 @@ func (r ExpenseRepository) Create(model models.Expense) error {
 
 func (r ExpenseRepository) GetAll() ([]models.Expense, error) {
 	var sqlCommand string = `SELECT id, user_id, description, target, category,amount, type, payment_method, payment_date, is_paid
-	FROM transactions.expense;`
+	FROM transactions.expenses;`
 
 	rows, err := r.db.Query(sqlCommand)
 	if err != nil {
@@ -67,7 +67,7 @@ func (r ExpenseRepository) GetAll() ([]models.Expense, error) {
 func (r ExpenseRepository) GetById(id int64) (models.Expense, error) {
 	var expense models.Expense
 	var sqlCommand string = `SELECT id, user_id, description, target, category,amount, type, payment_method, payment_date, is_paid
-	FROM transactions.expense
+	FROM transactions.expenses
 	WHERE id=$1;`
 
 	row := r.db.QueryRow(sqlCommand, id)
@@ -80,7 +80,7 @@ func (r ExpenseRepository) GetById(id int64) (models.Expense, error) {
 func (r ExpenseRepository) GetByUserId(userId int64) ([]models.Expense, error) {
 
 	var sqlCommand string = `SELECT id, user_id, description, target, category,amount, type, payment_method, payment_date, is_paid
-	FROM transactions.expense
+	FROM transactions.expenses
 	WHERE user_id=$1;`
 
 	rows, err := r.db.Query(sqlCommand, userId)
@@ -101,7 +101,7 @@ func (r ExpenseRepository) GetByUserId(userId int64) ([]models.Expense, error) {
 	return expenses, nil
 }
 func (r ExpenseRepository) Update(model models.Expense) error {
-	var sqlCommand string = `UPDATE transactions.expense
+	var sqlCommand string = `UPDATE transactions.expenses
 	SET description=$1, target=$2, category=$3,amount=$4, type=$5, payment_method=$6, payment_date=$7, is_paid=$8
 	WHERE id=$9;`
 
@@ -119,7 +119,7 @@ func (r ExpenseRepository) Update(model models.Expense) error {
 
 }
 func (r ExpenseRepository) Delete(id int64, userId int64) error {
-	var sqlCommand string = "DELETE FROM transactions.expense where id=$1 and user_id=$2;"
+	var sqlCommand string = "DELETE FROM transactions.expenses where id=$1 and user_id=$2;"
 
 	statement, err := r.db.Prepare(sqlCommand)
 	if err != nil {
