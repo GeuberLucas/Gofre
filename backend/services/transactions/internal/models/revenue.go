@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type Revenue struct {
 	ID          int64
@@ -9,25 +11,29 @@ type Revenue struct {
 	Origin      string
 	Type        string
 	ReceiveDate time.Time
+	Amount      Money
 	IsRecieved  bool
 }
 
+func (re Revenue) Isvalid() (bool, string) {
 
-func (re Revenue) Isvalid() (bool,string) {
-
-	if (re.UserId ==0){
+	if re.UserId == 0 {
 		return false, "repense:validate:UserId required"
 	}
-	if (re.Origin ==""){
+	if re.Origin == "" {
 		return false, "repense:validate:Target required"
 	}
-	
-	if(re.Type == "" ){
+
+	if re.Type == "" {
 		return false, "repense:validate:Category required"
 	}
-	if(re.ReceiveDate.IsZero()){
+	if re.ReceiveDate.IsZero() {
 		return false, "repense:validate:PaymentDate required"
 	}
 
-	return true,""
+	if re.Amount <= 0 {
+
+	}
+
+	return true, ""
 }
