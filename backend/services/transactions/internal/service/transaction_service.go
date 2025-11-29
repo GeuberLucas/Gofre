@@ -1,8 +1,6 @@
 package service
 
 import (
-	"errors"
-
 	dtos "github.com/GeuberLucas/Gofre/backend/services/transaction/internal/Dtos"
 	"github.com/GeuberLucas/Gofre/backend/services/transaction/internal/models"
 	"github.com/GeuberLucas/Gofre/backend/services/transaction/internal/repository"
@@ -17,14 +15,14 @@ func NewTransactionService(r repository.IRevenueRepository, e repository.IExpens
 	return &TransactionService{revenueRepository: r, expenseRepository: e}
 }
 
-func (ts TransactionService) AddExpense(dto dtos.ExpenseDto) (error, string) {
+func (ts *TransactionService) AddExpense(dto dtos.ExpenseDto) (error, string) {
 	model := dto.ToModel()
-	valid, errString := model.Isvalid()
-	if !valid {
-		return errors.New(errString), "Validation"
+	err := model.Isvalid()
+	if err != nil {
+		return err, "Validation"
 	}
 
-	err := ts.expenseRepository.Create(model)
+	err = ts.expenseRepository.Create(model)
 	if err != nil {
 		return err, "Internal"
 	}
@@ -32,14 +30,14 @@ func (ts TransactionService) AddExpense(dto dtos.ExpenseDto) (error, string) {
 	return nil, ""
 }
 
-func (ts TransactionService) AddRevenue(dto dtos.RevenueDto) (error, string) {
+func (ts *TransactionService) AddRevenue(dto dtos.RevenueDto) (error, string) {
 	model := dto.ToModel()
-	valid, errString := model.Isvalid()
-	if !valid {
-		return errors.New(errString), "Validation"
+	err := model.Isvalid()
+	if err != nil {
+		return err, "Validation"
 	}
 
-	err := ts.revenueRepository.Create(model)
+	err = ts.revenueRepository.Create(model)
 	if err != nil {
 		return err, "Internal"
 	}
@@ -47,7 +45,7 @@ func (ts TransactionService) AddRevenue(dto dtos.RevenueDto) (error, string) {
 	return nil, ""
 }
 
-func (ts TransactionService) GetByIdExpense(id int64) (dtos.ExpenseDto, error, string) {
+func (ts *TransactionService) GetByIdExpense(id int64) (dtos.ExpenseDto, error, string) {
 	expenseModel, err := ts.expenseRepository.GetById(id)
 	if err != nil {
 		return dtos.ExpenseDto{}, err, "Internal"
@@ -55,7 +53,7 @@ func (ts TransactionService) GetByIdExpense(id int64) (dtos.ExpenseDto, error, s
 	expenseDto := expenseDtoFromModel(expenseModel)
 	return expenseDto, nil, ""
 }
-func (ts TransactionService) GetByIdUserExpense(idUser int64) ([]dtos.ExpenseDto, error, string) {
+func (ts *TransactionService) GetByIdUserExpense(idUser int64) ([]dtos.ExpenseDto, error, string) {
 	expenseModels, err := ts.expenseRepository.GetByUserId(idUser)
 	if err != nil {
 		return nil, err, "Internal"
@@ -67,7 +65,7 @@ func (ts TransactionService) GetByIdUserExpense(idUser int64) ([]dtos.ExpenseDto
 	}
 	return expensesDtos, nil, ""
 }
-func (ts TransactionService) GetByIdRevenue(id int64) (dtos.RevenueDto, error, string) {
+func (ts *TransactionService) GetByIdRevenue(id int64) (dtos.RevenueDto, error, string) {
 	revenueModel, err := ts.revenueRepository.GetById(id)
 	if err != nil {
 		return dtos.RevenueDto{}, err, "Internal"
@@ -75,7 +73,7 @@ func (ts TransactionService) GetByIdRevenue(id int64) (dtos.RevenueDto, error, s
 	revenueDto := revenueDtoFromModel(revenueModel)
 	return revenueDto, nil, ""
 }
-func (ts TransactionService) GetByIdUserRevenue(idUser int64) ([]dtos.RevenueDto, error, string) {
+func (ts *TransactionService) GetByIdUserRevenue(idUser int64) ([]dtos.RevenueDto, error, string) {
 
 	revenueModels, err := ts.revenueRepository.GetByUserId(idUser)
 	if err != nil {
@@ -90,28 +88,28 @@ func (ts TransactionService) GetByIdUserRevenue(idUser int64) ([]dtos.RevenueDto
 	return revenues, nil, ""
 }
 
-func (ts TransactionService) UpdateExpense(id int64, dto dtos.ExpenseDto) (error, string) {
+func (ts *TransactionService) UpdateExpense(id int64, dto dtos.ExpenseDto) (error, string) {
 	model := dto.ToModel()
 	model.ID = id
-	valid, errString := model.Isvalid()
-	if !valid {
-		return errors.New(errString), "Validation"
+	err := model.Isvalid()
+	if err != nil {
+		return err, "Validation"
 	}
-	err := ts.expenseRepository.Update(model)
+	err = ts.expenseRepository.Update(model)
 	if err != nil {
 		return err, "Internal"
 	}
 
 	return nil, ""
 }
-func (ts TransactionService) UpdateRevenue(id int64, dto dtos.RevenueDto) (error, string) {
+func (ts *TransactionService) UpdateRevenue(id int64, dto dtos.RevenueDto) (error, string) {
 	model := dto.ToModel()
 	model.ID = id
-	valid, errString := model.Isvalid()
-	if !valid {
-		return errors.New(errString), "Validation"
+	err := model.Isvalid()
+	if err != nil {
+		return err, "Validation"
 	}
-	err := ts.revenueRepository.Update(model)
+	err = ts.revenueRepository.Update(model)
 	if err != nil {
 		return err, "Internal"
 	}
@@ -119,7 +117,7 @@ func (ts TransactionService) UpdateRevenue(id int64, dto dtos.RevenueDto) (error
 	return nil, ""
 }
 
-func (ts TransactionService) DeleteExpense(id int64, userId int64) (error, string) {
+func (ts *TransactionService) DeleteExpense(id int64, userId int64) (error, string) {
 
 	err := ts.expenseRepository.Delete(id, userId)
 	if err != nil {
@@ -127,7 +125,7 @@ func (ts TransactionService) DeleteExpense(id int64, userId int64) (error, strin
 	}
 	return nil, ""
 }
-func (ts TransactionService) DeleteRevenue(id int64, userId int64) (error, string) {
+func (ts *TransactionService) DeleteRevenue(id int64, userId int64) (error, string) {
 
 	err := ts.revenueRepository.Delete(id, userId)
 	if err != nil {

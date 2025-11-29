@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"time"
 
 	"github.com/GeuberLucas/Gofre/backend/pkg/types"
@@ -17,25 +18,25 @@ type Revenue struct {
 	IsRecieved  bool
 }
 
-func (re Revenue) Isvalid() (bool, string) {
+func (re Revenue) Isvalid() error {
 
 	if re.UserId == 0 {
-		return false, "repense:validate:UserId required"
+		return errors.New("revenue:validate:UserId required")
 	}
 	if re.Origin == "" {
-		return false, "repense:validate:Target required"
+		return errors.New("revenue:validate:Origin required")
 	}
 
 	if re.Type == "" {
-		return false, "repense:validate:Category required"
+		return errors.New("revenue:validate:Type required")
 	}
 	if re.ReceiveDate.IsZero() {
-		return false, "repense:validate:PaymentDate required"
+		return errors.New("revenue:validate:ReceiveDate required")
 	}
 
 	if re.Amount <= 0 {
-		return false, "repense:validate:Amount not be equal or minor than zero"
+		return errors.New("revenue:validate:Amount not be equal or minor than zero")
 	}
 
-	return true, ""
+	return nil
 }

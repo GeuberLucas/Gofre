@@ -78,7 +78,6 @@ func (r ExpenseRepository) GetById(id int64) (models.Expense, error) {
 	return expense, nil
 }
 func (r ExpenseRepository) GetByUserId(userId int64) ([]models.Expense, error) {
-
 	var sqlCommand string = `SELECT id, user_id, description, target, category,amount, type, payment_method, payment_date, is_paid
 	FROM transactions.expenses
 	WHERE user_id=$1;`

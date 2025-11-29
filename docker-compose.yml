@@ -8,7 +8,7 @@ services:
       context: "./backend/services/auth"
       dockerfile: Dockerfile
     env_file:
-      - backend.env
+      - ./backend.env
     networks:
       - gofre-network
     ports:
@@ -20,11 +20,12 @@ services:
       context: "./backend/services/transactions"
       dockerfile: Dockerfile
     env_file:
-      - backend.env
+      - ./backend.env
     networks:
       - gofre-network
     ports:
       - "8082:80"
+
   database:
     image: postgres:18
     environment:
@@ -82,6 +83,18 @@ services:
       - ./docker/loki/promtail-config.yml:/etc/promtail/promtail-config.yaml
     networks:
       - gofre-network
+  nats:
+    image: nats:2.12.2-alpine3.22
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    volumes:
+      - ./docker/nats/config/nats.conf:/etc/nats/nats.conf
+      - ./docker/nats/data:/data
+    command: ["-c", "/etc/nats/nats.conf"]
+    networks:
+      - gofre-network
+
 networks:
   gofre-network:
     driver: bridge

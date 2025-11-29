@@ -16,7 +16,8 @@ func JSONResponse(w http.ResponseWriter, statusCode int, data interface{}) {
 	}
 }
 
-
-func ErrorResponse(w http.ResponseWriter, statusCode int, erro error) {
-	JSONResponse(w,statusCode,struct{ Erro string `json:"erro"` }{Erro: erro.Error()})
+func ErrorResponse(w http.ResponseWriter, statusCode int, err error) {
+	JSONResponse(w, statusCode, struct {
+		Erro error `json:"erro"`
+	}{Erro: err})
 }

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	"github.com/GeuberLucas/Gofre/backend/services/transaction/internal/models"
@@ -84,7 +85,7 @@ func (r RevenueRepository) GetByUserId(userId int64) ([]models.Revenue, error) {
 
 	rows, err := r.db.Query(sqlCommand, userId)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("repository:revenue:sql query: %s ", err)
 	}
 	defer rows.Close()
 
@@ -93,7 +94,7 @@ func (r RevenueRepository) GetByUserId(userId int64) ([]models.Revenue, error) {
 		var revenue models.Revenue
 		err := rows.Scan(&revenue.ID, &revenue.UserId, &revenue.Description, &revenue.Origin, &revenue.Type, &revenue.ReceiveDate, &revenue.IsRecieved, &revenue.Amount)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("repository:revenue:scan rows: %s", err)
 		}
 		revenues = append(revenues, revenue)
 	}
