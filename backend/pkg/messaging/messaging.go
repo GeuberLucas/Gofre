@@ -1,14 +1,24 @@
 package messaging
 
 import (
-	"os"
+	"log"
 
 	"github.com/nats-io/nats.go"
 )
 
-func connectToNaTS() (*nats.Conn, error) {
-	nc, err := nats.Connect(os.Getenv("NATS_URL"))
-	return nc, err
+func connectToNaTS() (*nats.EncodedConn, error) {
+	nc, err := nats.Connect("demo.nats.io")
+	if err != nil {
+		log.Println("Error connecting to NATS:", err)
+		return nil, err
+	}
+
+	ec, err := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
+	if err != nil {
+		log.Println("Error connecting to NATS:", err)
+		return nil, err
+	}
+	return ec, nil
 }
 
 func PublishMessage(subject string, message []byte) error {
@@ -17,7 +27,7 @@ func PublishMessage(subject string, message []byte) error {
 		return err
 	}
 	defer nc.Close()
-	return nc.Publish(subject, message)
+	return nc.Publish(subject, &message)
 }
 
 func SubscribeToSubject(subject string, handler nats.MsgHandler) (*nats.Subscription, error) {

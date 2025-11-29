@@ -1,9 +1,8 @@
 package service
 
 import (
-	"bytes"
 	"database/sql"
-	"encoding/gob"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -18,6 +17,10 @@ import (
 	"github.com/GeuberLucas/Gofre/backend/services/auth/internal/security"
 )
 
+type EmailMessage struct {
+	TokenReset string `json:"tokenReset"`
+	EmailTo    string `json:"emailTo"`
+}
 type authService struct{}
 
 func NewAuthService() *authService {
@@ -167,16 +170,14 @@ func (s *authService) ResetPassword(token string, newPassword string) error {
 
 // TODO:Criar service de envio de email com comunicação por fila e pub,sub
 func sendEmail(token string, email string) {
-	var emailObj struct {
-		tokenReset string
-		emailTo    string
+	var emailObj EmailMessage
+	emailObj.TokenReset = token
+	emailObj.EmailTo = email
+	emailData, err := json.Marshal(emailObj)
+	if err != nil {
+		return
 	}
-	emailObj.tokenReset = token
-	emailObj.emailTo = email
-	var network bytes.Buffer
-	gobEncoder := gob.NewEncoder(&network)
-	gobEncoder.Encode(emailObj)
-	messaging.PublishMessage("auth.comunication.forgotPassword", network.Bytes())
+	messaging.PublishMessage("auth.comunication.forgotPassword", emailData)
 }
 
 func getUserRepository() (*sql.DB, *repository.UserRepository, error) {

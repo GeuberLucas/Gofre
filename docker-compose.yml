@@ -95,6 +95,17 @@ services:
     networks:
       - gofre-network
 
+  nats-client:
+    image: natsio/nats-box
+    container_name: nats_client
+    restart: always
+    depends_on:
+      - nats
+    entrypoint: /bin/sh
+    tty: true
+    networks:
+      - gofre-network
+
 networks:
   gofre-network:
     driver: bridge
