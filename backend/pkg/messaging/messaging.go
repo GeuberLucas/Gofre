@@ -6,34 +6,48 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
-func connectToNaTS() (*nats.EncodedConn, error) {
+type IMessaging interface {
+	ConnectToBroker() error
+	PublishMessage(subject string, message []byte) error
+	SubscribeToSubject(subject string, handler nats.MsgHandler) (*nats.Subscription, error)
+	CloseConnection() error
+}
+
+type NATSMessaging struct {
+	conn *nats.EncodedConn
+}
+
+func NewNATSMessaging() *NATSMessaging {
+	return &NATSMessaging{}
+}
+
+func (n *NATSMessaging) ConnectToBroker() error {
 	nc, err := nats.Connect("demo.nats.io")
 	if err != nil {
 		log.Println("Error connecting to NATS:", err)
-		return nil, err
+		return err
 	}
 
 	ec, err := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
 	if err != nil {
 		log.Println("Error connecting to NATS:", err)
-		return nil, err
-	}
-	return ec, nil
-}
-
-func PublishMessage(subject string, message []byte) error {
-	nc, err := connectToNaTS()
-	if err != nil {
 		return err
 	}
-	defer nc.Close()
-	return nc.Publish(subject, &message)
+	n.conn = ec
+	return nil
 }
 
-func SubscribeToSubject(subject string, handler nats.MsgHandler) (*nats.Subscription, error) {
-	nc, err := connectToNaTS()
-	if err != nil {
-		return nil, err
+func (n *NATSMessaging) PublishMessage(subject string, message []byte) error {
+	return n.conn.Publish(subject, &message)
+}
+
+func (n *NATSMessaging) SubscribeToSubject(subject string, handler nats.MsgHandler) (*nats.Subscription, error) {
+	return n.conn.Subscribe(subject, handler)
+}
+
+func (n *NATSMessaging) CloseConnection() error {
+	if n.conn != nil {
+		n.conn.Close()
 	}
-	return nc.Subscribe(subject, handler)
+	return nil
 }

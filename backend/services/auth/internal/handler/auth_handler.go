@@ -6,13 +6,14 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/GeuberLucas/Gofre/backend/pkg/messaging"
 	"github.com/GeuberLucas/Gofre/backend/pkg/response"
 	dtos "github.com/GeuberLucas/Gofre/backend/services/auth/internal/DTOs"
 	"github.com/GeuberLucas/Gofre/backend/services/auth/internal/service"
 	"github.com/gorilla/mux"
 )
 
-func LoginHandler() http.HandlerFunc {
+func LoginHandler(broker *messaging.NATSMessaging) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		bodyRequest, erro := ioutil.ReadAll(r.Body)
@@ -25,7 +26,7 @@ func LoginHandler() http.HandlerFunc {
 			response.ErrorResponse(w, http.StatusBadRequest, erro)
 			return
 		}
-		service := service.NewAuthService()
+		service := service.NewAuthService(broker)
 		serviceresult, erro, typeError := service.Login(loginDTO)
 		if erro != nil {
 			if typeError == "validation" {
@@ -46,7 +47,7 @@ func LoginHandler() http.HandlerFunc {
 	}
 }
 
-func RegisterHandler() http.HandlerFunc {
+func RegisterHandler(broker *messaging.NATSMessaging) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		bodyRequest, erro := ioutil.ReadAll(r.Body)
 		if erro != nil {
@@ -58,7 +59,7 @@ func RegisterHandler() http.HandlerFunc {
 			response.ErrorResponse(w, http.StatusBadRequest, erro)
 			return
 		}
-		service := service.NewAuthService()
+		service := service.NewAuthService(broker)
 		serviceresult, erro, typeError := service.Register(registerDTO)
 		if erro != nil {
 			switch typeError {
@@ -76,7 +77,7 @@ func RegisterHandler() http.HandlerFunc {
 	}
 }
 
-func ProfileHandler() http.HandlerFunc {
+func ProfileHandler(broker *messaging.NATSMessaging) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
 		userId, erro := strconv.ParseInt(params["userId"], 10, 64)
@@ -84,7 +85,7 @@ func ProfileHandler() http.HandlerFunc {
 			response.ErrorResponse(w, http.StatusBadRequest, erro)
 			return
 		}
-		service := service.NewAuthService()
+		service := service.NewAuthService(broker)
 		serviceresult, erro, typeError := service.Profile(userId)
 		if erro != nil {
 			if typeError == "Validation" {
@@ -102,7 +103,7 @@ func ProfileHandler() http.HandlerFunc {
 	}
 }
 
-func ForgotPasswordHandler() http.HandlerFunc {
+func ForgotPasswordHandler(broker *messaging.NATSMessaging) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		bodyRequest, erro := ioutil.ReadAll(r.Body)
 		if erro != nil {
@@ -114,7 +115,7 @@ func ForgotPasswordHandler() http.HandlerFunc {
 			response.ErrorResponse(w, http.StatusBadRequest, erro)
 			return
 		}
-		service := service.NewAuthService()
+		service := service.NewAuthService(broker)
 		erro = service.ForgotPassword(forgotPasswordDTO.Email)
 		if erro != nil {
 			response.ErrorResponse(w, http.StatusInternalServerError, erro)
@@ -124,7 +125,7 @@ func ForgotPasswordHandler() http.HandlerFunc {
 	}
 }
 
-func ResetPasswordHandler() http.HandlerFunc {
+func ResetPasswordHandler(broker *messaging.NATSMessaging) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
 		HashEncoded := params["HashEncoded"]
@@ -132,7 +133,7 @@ func ResetPasswordHandler() http.HandlerFunc {
 			response.ErrorResponse(w, http.StatusBadRequest, nil)
 			return
 		}
-		service := service.NewAuthService()
+		service := service.NewAuthService(broker)
 		bodyRequest, erro := ioutil.ReadAll(r.Body)
 		if erro != nil {
 			response.ErrorResponse(w, http.StatusUnprocessableEntity, erro)

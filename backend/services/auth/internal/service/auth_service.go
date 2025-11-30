@@ -21,10 +21,12 @@ type EmailMessage struct {
 	TokenReset string `json:"tokenReset"`
 	EmailTo    string `json:"emailTo"`
 }
-type authService struct{}
+type authService struct {
+	messasingBroker messaging.IMessaging
+}
 
-func NewAuthService() *authService {
-	return &authService{}
+func NewAuthService(broker messaging.IMessaging) *authService {
+	return &authService{messasingBroker: broker}
 }
 
 func (s *authService) Login(obj dtos.LoginDTO) (*dtos.LoginResultDto, error, string) {
@@ -138,7 +140,7 @@ func (s *authService) ForgotPassword(email string) error {
 		return err
 	}
 
-	sendEmail(token, user.Email)
+	s.sendEmail(token, user.Email)
 
 	return nil
 }
@@ -169,7 +171,7 @@ func (s *authService) ResetPassword(token string, newPassword string) error {
 }
 
 // TODO:Criar service de envio de email com comunicação por fila e pub,sub
-func sendEmail(token string, email string) {
+func (s *authService) sendEmail(token string, email string) {
 	var emailObj EmailMessage
 	emailObj.TokenReset = token
 	emailObj.EmailTo = email
@@ -177,7 +179,7 @@ func sendEmail(token string, email string) {
 	if err != nil {
 		return
 	}
-	messaging.PublishMessage("auth.comunication.forgotPassword", emailData)
+	s.messasingBroker.PublishMessage("auth.comunication.forgotPassword", emailData)
 }
 
 func getUserRepository() (*sql.DB, *repository.UserRepository, error) {
