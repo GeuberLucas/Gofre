@@ -1,5 +1,4 @@
 name: gofre-stack
-version: "3.8"
 services:
   api_gateway:
     container_name: api_gateway
