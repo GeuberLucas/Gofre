@@ -2,6 +2,8 @@ github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251120155917-ebbc94d47e62 h1:W
 github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251120155917-ebbc94d47e62/go.mod h1:YrbS9gj07ARleUKF6DGKis8c7ZVOxcMoK76uZjh7so8=
 github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251129215128-9c9b4dd083dc h1:pK90vv7YBLMqonXka7ei2zhFkuGLQ70w5tib/Ez1yBk=
 github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251129215128-9c9b4dd083dc/go.mod h1:cl1KWXGMsMq+fUFX1LSJrr7KaCqiRH0JT9139v08XYY=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251130170335-b8179a74f18c h1:RdaES1FlZx2PIMmFgHgKhWjb/T4qmzuX6V4WoDzLVwQ=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251130170335-b8179a74f18c/go.mod h1:cl1KWXGMsMq+fUFX1LSJrr7KaCqiRH0JT9139v08XYY=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/golang-jwt/jwt/v5 v5.3.0 h1:pv4AsKCKKZuqlgs5sUmn4x8UlGa0kEVt/puTpKx9vvo=

@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	jwtToken "github.com/GeuberLucas/Gofre/backend/pkg/jwt"
 	"github.com/GeuberLucas/Gofre/backend/pkg/response"
 	dtos "github.com/GeuberLucas/Gofre/backend/services/transaction/internal/Dtos"
 	"github.com/GeuberLucas/Gofre/backend/services/transaction/internal/service"
@@ -20,9 +19,10 @@ func AddExpenseHandler(s *service.TransactionService) http.HandlerFunc {
 			response.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 			return
 		}
-		userIdToken, err := jwtToken.ExtractUserId(r)
+		userIdToken := r.Header.Get("user_id")
+		userIdInt, err := strconv.ParseInt(userIdToken, 10, 64)
 		if err != nil {
-			response.ErrorResponse(w, http.StatusUnauthorized, err)
+			response.ErrorResponse(w, http.StatusBadRequest, err)
 			return
 		}
 		var expenseDto dtos.ExpenseDto
@@ -30,7 +30,8 @@ func AddExpenseHandler(s *service.TransactionService) http.HandlerFunc {
 			checkErroType(w, err, "validation")
 			return
 		}
-		expenseDto.UserId = int64(userIdToken)
+
+		expenseDto.UserId = userIdInt
 		err, stringTypeError := s.AddExpense(expenseDto)
 		if err != nil {
 			checkErroType(w, err, stringTypeError)
@@ -60,13 +61,14 @@ func GetByIdExpenseHandler(s *service.TransactionService) http.HandlerFunc {
 func GetByIdUserExpenseHandler(s *service.TransactionService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		userIdToken, err := jwtToken.ExtractUserId(r)
+		userIdToken := r.Header.Get("user_id")
+		userIdInt, err := strconv.ParseInt(userIdToken, 10, 64)
 		if err != nil {
-			response.ErrorResponse(w, http.StatusUnauthorized, err)
+			response.ErrorResponse(w, http.StatusBadRequest, err)
 			return
 		}
 
-		serviceresult, err, typeError := s.GetByIdUserExpense(int64(userIdToken))
+		serviceresult, err, typeError := s.GetByIdUserExpense(userIdInt)
 		if err != nil {
 			if typeError == "Validation" {
 				response.ErrorResponse(w, http.StatusBadRequest, err)
@@ -90,9 +92,10 @@ func UpdateExpenseHandler(s *service.TransactionService) http.HandlerFunc {
 			response.ErrorResponse(w, http.StatusBadRequest, err)
 			return
 		}
-		userIdToken, err := jwtToken.ExtractUserId(r)
+		userIdToken := r.Header.Get("user_id")
+		userIdInt, err := strconv.ParseInt(userIdToken, 10, 64)
 		if err != nil {
-			response.ErrorResponse(w, http.StatusUnauthorized, err)
+			response.ErrorResponse(w, http.StatusBadRequest, err)
 			return
 		}
 		bodyRequest, err := io.ReadAll(r.Body)
@@ -101,7 +104,7 @@ func UpdateExpenseHandler(s *service.TransactionService) http.HandlerFunc {
 			return
 		}
 		var expenseDto dtos.ExpenseDto
-		expenseDto.UserId = int64(userIdToken)
+		expenseDto.UserId = userIdInt
 		if err = json.Unmarshal(bodyRequest, &expenseDto); err != nil {
 			checkErroType(w, err, "validation")
 			return
@@ -124,12 +127,13 @@ func DeleteExpenseHandler(s *service.TransactionService) http.HandlerFunc {
 			checkErroType(w, err, "Validation")
 			return
 		}
-		userIdToken, err := jwtToken.ExtractUserId(r)
+		userIdToken := r.Header.Get("user_id")
+		userIdInt, err := strconv.ParseInt(userIdToken, 10, 64)
 		if err != nil {
-			checkErroType(w, err, "Validation")
+			response.ErrorResponse(w, http.StatusBadRequest, err)
 			return
 		}
-		err, typeError := s.DeleteExpense(id, int64(userIdToken))
+		err, typeError := s.DeleteExpense(id, userIdInt)
 		if err != nil {
 			checkErroType(w, err, typeError)
 			return
@@ -180,12 +184,13 @@ func GetByIdRevenueHandler(s *service.TransactionService) http.HandlerFunc {
 }
 func GetByIdUserRevenueHandler(s *service.TransactionService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userIdToken, err := jwtToken.ExtractUserId(r)
+		userIdToken := r.Header.Get("user_id")
+		userIdInt, err := strconv.ParseInt(userIdToken, 10, 64)
 		if err != nil {
-			checkErroType(w, err, "Validation")
+			response.ErrorResponse(w, http.StatusBadRequest, err)
 			return
 		}
-		serviceresult, err, typeError := s.GetByIdUserRevenue(int64(userIdToken))
+		serviceresult, err, typeError := s.GetByIdUserRevenue(userIdInt)
 		if err != nil {
 			checkErroType(w, err, typeError)
 			return
@@ -203,9 +208,10 @@ func UpdateRevenueHandler(s *service.TransactionService) http.HandlerFunc {
 			checkErroType(w, err, "Validation")
 			return
 		}
-		userIdToken, err := jwtToken.ExtractUserId(r)
+		userIdToken := r.Header.Get("user_id")
+		userIdInt, err := strconv.ParseInt(userIdToken, 10, 64)
 		if err != nil {
-			checkErroType(w, err, "Validation")
+			response.ErrorResponse(w, http.StatusBadRequest, err)
 			return
 		}
 		bodyRequest, err := io.ReadAll(r.Body)
@@ -214,7 +220,7 @@ func UpdateRevenueHandler(s *service.TransactionService) http.HandlerFunc {
 			return
 		}
 		var revenueDto dtos.RevenueDto
-		revenueDto.UserId = int64(userIdToken)
+		revenueDto.UserId = userIdInt
 		if err = json.Unmarshal(bodyRequest, &revenueDto); err != nil {
 			checkErroType(w, err, "Validation")
 			return
@@ -237,12 +243,13 @@ func DeleteRevenueHandler(s *service.TransactionService) http.HandlerFunc {
 			response.ErrorResponse(w, http.StatusBadRequest, err)
 			return
 		}
-		userIdToken, err := jwtToken.ExtractUserId(r)
+		userIdToken := r.Header.Get("user_id")
+		userIdInt, err := strconv.ParseInt(userIdToken, 10, 64)
 		if err != nil {
-			checkErroType(w, err, "Validation")
+			response.ErrorResponse(w, http.StatusBadRequest, err)
 			return
 		}
-		err, typeError := s.DeleteRevenue(id, int64(userIdToken))
+		err, typeError := s.DeleteRevenue(id, userIdInt)
 		if err != nil {
 
 			checkErroType(w, err, typeError)

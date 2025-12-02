@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/GeuberLucas/Gofre/backend/pkg/db"
-	jwtToken "github.com/GeuberLucas/Gofre/backend/pkg/jwt"
 	"github.com/GeuberLucas/Gofre/backend/pkg/messaging"
 	dtos "github.com/GeuberLucas/Gofre/backend/services/auth/internal/DTOs"
 	"github.com/GeuberLucas/Gofre/backend/services/auth/internal/models"
@@ -47,7 +46,7 @@ func (s *authService) Login(obj dtos.LoginDTO) (*dtos.LoginResultDto, error, str
 		return nil, errors.New("Username or Password Invalids"), "Pass"
 	}
 
-	jwtToken, _ := jwtToken.GenerateToken(int(userModel.ID))
+	jwtToken, _ := security.GenerateToken(int(userModel.ID))
 
 	var result dtos.LoginResultDto
 
@@ -83,7 +82,7 @@ func (s *authService) Register(obj dtos.RegisterDTO) (*dtos.LoginResultDto, erro
 	if err != nil {
 		return nil, fmt.Errorf("User Not created: %s", err), "Internal"
 	}
-	jwtToken, _ := jwtToken.GenerateToken(int(id))
+	jwtToken, _ := security.GenerateToken(int(id))
 
 	var result dtos.LoginResultDto
 

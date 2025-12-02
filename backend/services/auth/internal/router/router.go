@@ -12,6 +12,7 @@ func getTransactionRoutes(broker *messaging.NATSMessaging) []routes.Route {
 	return []routes.Route{
 		{Path: "/login", Method: "POST", HandlerFunc: handler.LoginHandler(broker), NeedsAuth: false},
 		{Path: "/register", Method: "POST", HandlerFunc: handler.RegisterHandler(broker), NeedsAuth: false},
+		{Path: "/is-authenticated", Method: "GET", HandlerFunc: handler.IsAuthenticatedHandler(), NeedsAuth: false},
 		{Path: "/profile/{userId}", Method: "GET", HandlerFunc: handler.ProfileHandler(broker), NeedsAuth: true},
 		{Path: "/fogort-passord", Method: "POST", HandlerFunc: handler.ForgotPasswordHandler(broker), NeedsAuth: false},
 		{Path: "/reset-password/{HashEncoded}", Method: "POST", HandlerFunc: handler.ResetPasswordHandler(broker), NeedsAuth: false},

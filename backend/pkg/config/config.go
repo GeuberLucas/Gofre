@@ -1,7 +1,7 @@
 package config
 
 import (
-	"log"
+	"fmt"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -9,7 +9,8 @@ import (
 
 func LoadEnv() {
 	err := godotenv.Load()
+	fmt.Println(os.Getenv("DB_HOST"))
 	if err != nil && os.Getenv("Enviroment") == "Development" {
-		log.Println("No .env file found")
+		fmt.Println("No .env file found")
 	}
 }

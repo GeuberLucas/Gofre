@@ -9,6 +9,7 @@ import (
 	"github.com/GeuberLucas/Gofre/backend/pkg/messaging"
 	"github.com/GeuberLucas/Gofre/backend/pkg/response"
 	dtos "github.com/GeuberLucas/Gofre/backend/services/auth/internal/DTOs"
+	"github.com/GeuberLucas/Gofre/backend/services/auth/internal/security"
 	"github.com/GeuberLucas/Gofre/backend/services/auth/internal/service"
 	"github.com/gorilla/mux"
 )
@@ -76,7 +77,24 @@ func RegisterHandler(broker *messaging.NATSMessaging) http.HandlerFunc {
 		response.JSONResponse(w, http.StatusOK, serviceresult)
 	}
 }
+func IsAuthenticatedHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if err := security.ValidateToken(r); err != nil {
+			response.ErrorResponse(w, http.StatusUnauthorized, err)
+			return
+		}
 
+		user_Id, err := security.ExtractUserId(r)
+		if err != nil {
+			response.ErrorResponse(w, http.StatusUnauthorized, err)
+			return
+		}
+		var userAuthenticated dtos.UserAuthenticatedDto
+		userAuthenticated.UserId = uint(user_Id)
+
+		response.JSONResponse(w, http.StatusOK, userAuthenticated)
+	}
+}
 func ProfileHandler(broker *messaging.NATSMessaging) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)

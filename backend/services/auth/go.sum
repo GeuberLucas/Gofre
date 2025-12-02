@@ -1,5 +1,3 @@
-github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251119180622-974b257b9a18 h1:zOG2SSLwEb39EzfjV6L0P07lTuSEOemisBqCRouYSMw=
-github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251119180622-974b257b9a18/go.mod h1:YrbS9gj07ARleUKF6DGKis8c7ZVOxcMoK76uZjh7so8=
 github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251129215128-9c9b4dd083dc h1:pK90vv7YBLMqonXka7ei2zhFkuGLQ70w5tib/Ez1yBk=
 github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251129215128-9c9b4dd083dc/go.mod h1:cl1KWXGMsMq+fUFX1LSJrr7KaCqiRH0JT9139v08XYY=
 github.com/golang-jwt/jwt/v5 v5.3.0 h1:pv4AsKCKKZuqlgs5sUmn4x8UlGa0kEVt/puTpKx9vvo=
