@@ -62,7 +62,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: geuberlu@gmail.com
       PGADMIN_DEFAULT_PASSWORD: 123456
     ports:
-      - "9090:80"
+      - "81:80"
     networks:
       - gofre-network
 

@@ -17,7 +17,7 @@ require (
 )
 
 require (
-	github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251129215128-9c9b4dd083dc
+	github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251130170335-b8179a74f18c
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 )

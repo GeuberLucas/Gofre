@@ -1,5 +1,7 @@
 github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251129215128-9c9b4dd083dc h1:pK90vv7YBLMqonXka7ei2zhFkuGLQ70w5tib/Ez1yBk=
 github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251129215128-9c9b4dd083dc/go.mod h1:cl1KWXGMsMq+fUFX1LSJrr7KaCqiRH0JT9139v08XYY=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251130170335-b8179a74f18c h1:RdaES1FlZx2PIMmFgHgKhWjb/T4qmzuX6V4WoDzLVwQ=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251130170335-b8179a74f18c/go.mod h1:cl1KWXGMsMq+fUFX1LSJrr7KaCqiRH0JT9139v08XYY=
 github.com/golang-jwt/jwt/v5 v5.3.0 h1:pv4AsKCKKZuqlgs5sUmn4x8UlGa0kEVt/puTpKx9vvo=
 github.com/golang-jwt/jwt/v5 v5.3.0/go.mod h1:fxCRLWMO43lRc8nhHWY6LGqRcf+1gQWArsqaEUEa5bE=
 github.com/gorilla/mux v1.8.1 h1:TuBL49tXwgrFYWhqrNgrUNEY92u81SPhu7sTdzQEiWY=

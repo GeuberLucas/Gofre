@@ -15,7 +15,7 @@ import (
 )
 
 type UserAuthenticated struct {
-	userId uint `json:"user_id"`
+	UserId int `json:"user_id"`
 }
 type ReverseProxy struct {
 	routes map[string][]string
@@ -55,8 +55,10 @@ func (rp *ReverseProxy) selectMicroService(path string) (string, error) {
 }
 
 func prepareCompleteUrlPath(path string) string {
+
 	parts := strings.Split(strings.TrimPrefix(path, "/"), "/")
 	newpath := strings.TrimPrefix(path, "/"+parts[0]+"/"+parts[1])
+
 	return newpath
 
 }
@@ -77,7 +79,7 @@ func (rp *ReverseProxy) createProxyRequest(w http.ResponseWriter, r *http.Reques
 }
 
 func (rp *ReverseProxy) VerifyAuthentication(ctx context.Context, headers http.Header) (int, error) {
-	microService, err := rp.selectMicroService("auth")
+	microService, err := rp.selectMicroService("/api/auth")
 	if err != nil {
 		return 0, err
 	}
@@ -88,8 +90,9 @@ func (rp *ReverseProxy) VerifyAuthentication(ctx context.Context, headers http.H
 	}
 
 	remoteUrl := baseURL
-
-	request, err := http.NewRequestWithContext(ctx, "GET", remoteUrl.String()+"/is-authenticated", nil)
+	remoteUrl.Path = "/isAuthenticated"
+	println(remoteUrl)
+	request, err := http.NewRequestWithContext(ctx, "GET", remoteUrl.String(), nil)
 	if err != nil {
 		return 0, err
 	}
@@ -110,33 +113,51 @@ func (rp *ReverseProxy) VerifyAuthentication(ctx context.Context, headers http.H
 
 		return 0, fmt.Errorf("auth service returned status: %d", resp.StatusCode)
 	}
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return 0, fmt.Errorf("failed to read response body: %w", err)
+	}
 
+	log.Println("JSON Recebido:", string(bodyBytes))
 	var user UserAuthenticated
-	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
+	if err := json.Unmarshal(bodyBytes, &user); err != nil {
 		return 0, fmt.Errorf("failed to decode user: %w", err)
 	}
 
-	if user.userId == 0 {
-		return 0, fmt.Errorf("received invalid user ID")
+	if user.UserId == 0 {
+		return 0, fmt.Errorf("authentication:received invalid user ID")
 	}
 
-	return int(user.userId), nil
+	return int(user.UserId), nil
 }
 func (rp *ReverseProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var userId string
+	pathRoute := r.URL.Path
+	isAuthRoute := strings.HasPrefix(pathRoute, "/api/auth")
+	isProfile := strings.HasPrefix(pathRoute, "/api/auth/profile")
+
+	if !isAuthRoute || isProfile {
+		user_id, err := rp.VerifyAuthentication(context.Background(), r.Header)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		userId = strconv.Itoa(user_id)
+	}
 
 	proxyRequest, err := rp.createProxyRequest(w, r)
-	proxyRequest.Header = r.Header
-
-	if !strings.Contains(proxyRequest.URL.Path, "auth") || strings.Contains(proxyRequest.URL.Path, "/auth/profile") {
-		user_id, err := rp.VerifyAuthentication(context.Background(), proxyRequest.Header)
-		if err != nil {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		}
-		proxyRequest.Header.Add("user_id", strconv.Itoa(user_id))
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Bad gateway", http.StatusBadGateway)
+		return
 	}
+	proxyRequest.Header = r.Header.Clone()
+	proxyRequest.Header.Add("user_id", userId)
 
 	resp, err := http.DefaultClient.Do(proxyRequest)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "Bad gateway", http.StatusBadGateway)
 		return
 	}
@@ -144,6 +165,7 @@ func (rp *ReverseProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "Bad gateway", http.StatusBadGateway)
 		return
 	}
@@ -162,6 +184,7 @@ func main() {
 	rp := NewProxyRoutes()
 	http.Handle("/api/", rp)
 
-	http.ListenAndServe(":8080", nil)
-
+	if err := http.ListenAndServe(":80", nil); err != nil {
+		fmt.Printf("Api stopped with error: %v\n", err)
+	}
 }
