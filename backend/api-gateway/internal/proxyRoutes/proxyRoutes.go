@@ -1,4 +1,4 @@
-package proxyroutes
+package proxyRoutes
 
 import (
 	"context"

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
-	proxyroutes "github.com/GeuberLucas/Gofre/backend/api-gateway/internal/proxyRoutes"
+	"github.com/GeuberLucas/Gofre/backend/api-gateway/internal/proxyRoutes"
 )
 
 func main() {
-	rp := proxyroutes.NewProxyRoutes()
+	rp := proxyRoutes.NewProxyRoutes()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/", rp.ServeHTTP)
 
