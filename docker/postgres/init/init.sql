@@ -4,6 +4,7 @@ WITH
 LIMIT
     = -1 IS_TEMPLATE = False;
 
+Begin;
 -- auth micro service
 CREATE SCHEMA IF NOT EXISTS auth AUTHORIZATION postgres;
 
@@ -39,8 +40,8 @@ CREATE TABLE
             time zone NOT NULL,
             CONSTRAINT users_pkey PRIMARY KEY (id)
     );
-
-
+commit;
+Begin;
 -- transaction micro service
 create schema IF NOT EXISTS transactions;
 create type expense_category as ENUM(
@@ -112,7 +113,45 @@ create table IF NOT EXISTS transactions.revenue(
     received_date timestamp with time zone not null,
     is_recieved boolean not null default False
 );
+commit;
+Begin;
+-- Investments micro service
+create schema IF NOT EXISTS investments;
+create table if not exists investments.asset(
+    id serial PRIMARY KEY,
+    name varchar(255)
+);
+
+insert into investments.asset(
+    name
+)
+values
+('Títulos privados'),
+('Títulos públicos'),
+('Ações'),
+('ETFs'),
+('FIIs'),
+('Fundos'),
+('Commodities'),
+('Derivativos'),
+('Criptomoeda'),
+('Exterior'),
+('Poupança'),
+('Outros');
 
 
 
-
+create table if not EXISTS investments.portfolio(
+    id serial PRIMARY KEY,
+    user_id integer not null,
+    asset_id interger not null,
+    deposit_date timestamp with time zone not null,
+    broker varchar(255) not null,
+    FOREIGN KEY (asset_id) REFERENCES investments.asset (id)
+);
+commit;
+BEGIN;
+alter table investments.portfolio add column if not exists  amount integer not null;
+alter table investments.portfolio add column if not exists  description varchar(255) not null;
+alter table investments.portfolio add column if not exists  is_done boolean not null default False;
+commit;

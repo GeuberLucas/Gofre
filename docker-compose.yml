@@ -12,9 +12,11 @@ services:
       - gofre-network
     ports:
       - "8080:80"
+    restart: on-failure
     depends_on:
       - auth
       - transactions
+      - investments
 
   auth:
     container_name: auth_microservice
@@ -24,6 +26,7 @@ services:
       dockerfile: Dockerfile
     env_file:
       - ./backend.env
+    restart: on-failure
     networks:
       - gofre-network
     depends_on:
@@ -34,6 +37,19 @@ services:
     image: "transactions-microservice"
     build:
       context: "./backend/services/transactions"
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend.env
+    restart: on-failure
+    networks:
+      - gofre-network
+    depends_on:
+      - database
+  investments:
+    container_name: investments_microservice
+    image: "investments-microservice"
+    build:
+      context: "./backend/services/investments"
       dockerfile: Dockerfile
     env_file:
       - ./backend.env
@@ -48,8 +64,9 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456
       POSTGRES_DB: Gofre
+    restart: always
     ports:
-      - "5432:5432"
+      - "5432432"
     volumes:
       - ./docker/postgres/init/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./docker/postgres/data:/var/lib/postgresql
@@ -67,6 +84,7 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
+    restart: unless-stopped
     ports:
       - "9090:9090"
     volumes:
@@ -77,6 +95,7 @@ services:
 
   grafana:
     image: grafana/grafana:latest
+    restart: unless-stopped
     ports:
       - "3000:3000"
     volumes:
@@ -86,6 +105,7 @@ services:
 
   loki:
     image: grafana/loki:2.9.3
+    restart: always
     ports:
       - "3100:3100"
     volumes:
@@ -95,12 +115,14 @@ services:
       - gofre-network
   promtail:
     image: grafana/promtail:latest
+    restart: always
     volumes:
       - ./docker/loki/promtail-config.yml:/etc/promtail/promtail-config.yaml
     networks:
       - gofre-network
   nats:
     image: nats:2.12.2-alpine3.22
+    restart: always
     ports:
       - "4222:4222"
       - "8222:8222"
@@ -114,7 +136,6 @@ services:
   nats-client:
     image: natsio/nats-box
     container_name: nats_client
-    restart: always
     depends_on:
       - nats
     entrypoint: /bin/sh

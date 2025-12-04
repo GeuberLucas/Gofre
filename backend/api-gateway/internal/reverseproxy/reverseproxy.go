@@ -1,11 +1,18 @@
 package reverseproxy
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
+	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type ReverseProxy struct {
@@ -20,33 +27,69 @@ func NewProxyRoutes() *ReverseProxy {
 			"budgets":     {},
 			"forecast":    {},
 			"goals":       {},
-			"investments": {},
+			"investments": {"http://investments:80"},
 			"property":    {},
 			"reports":     {},
 			"simulator":   {},
 		},
 	}
 }
-func (rp *ReverseProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	targetHost, err := rp.selectMicroService(r.URL.Path)
+func (rp *ReverseProxy) ProxyHandler(c *gin.Context) {
+	targetURL, err := rp.resolveTarget(c.Request.URL.Path)
 	if err != nil {
-		http.Error(w, "Not found", http.StatusNotFound)
-	}
-	urlMicroService, err := url.Parse(targetHost)
-	if err != nil {
-		http.Error(w, "Not found", http.StatusNotFound)
+		c.JSON(http.StatusNotFound, gin.H{"error": "Invalid microservice host"})
+		return
 	}
 
-	proxy := httputil.NewSingleHostReverseProxy(urlMicroService)
+	proxy := httputil.NewSingleHostReverseProxy(targetURL)
 
-	originHost := r.Host
-	originPath := r.URL.Path
-	r.Host = urlMicroService.Host
-	r.URL.Path = prepareCompleteUrlPath(originPath)
+	originalHost := c.Request.Host
+	originalPath := c.Request.URL.Path
+
+	c.Request.Host = targetURL.Host
+	c.Request.URL.Path = prepareCompleteUrlPath(originalPath)
+
+	if userID, exists := c.Get("user_id"); exists {
+		c.Request.Header.Set("user_id", fmt.Sprint(userID))
+	}
+
+	proxy.ServeHTTP(c.Writer, c.Request)
+
+	c.Request.Host = originalHost
+	c.Request.URL.Path = originalPath
+}
+
+func (rp *ReverseProxy) resolveTarget(path string) (*url.URL, error) {
+	host, err := rp.selectMicroService(path)
+	if err != nil {
+		return nil, err
+	}
+
+	parsed, err := url.Parse(host)
+	if err != nil {
+		return nil, err
+	}
+	return parsed, nil
+}
+func (rp *ReverseProxy) forwardRequest(target *url.URL, userID string, w http.ResponseWriter, r *http.Request) {
+	proxy := httputil.NewSingleHostReverseProxy(target)
+
+	// Salva estado original do request
+	originalHost := r.Host
+	originalPath := r.URL.Path
+
+	// Reescreve request
+	r.Host = target.Host
+	r.URL.Path = prepareCompleteUrlPath(originalPath)
+	if userID != "" {
+		r.Header.Set("user_id", userID)
+	}
 
 	proxy.ServeHTTP(w, r)
-	r.Host = originHost
-	r.URL.Path = originPath
+
+	// Restaura estado original
+	r.Host = originalHost
+	r.URL.Path = originalPath
 }
 
 func (rp *ReverseProxy) selectMicroService(path string) (string, error) {
@@ -75,58 +118,53 @@ func prepareCompleteUrlPath(path string) string {
 
 }
 
-// type UserAuthenticated struct {
-// 	UserId int `json:"user_id"`
-// }
+type UserAuthenticated struct {
+	UserId int `json:"user_id"`
+}
 
-// func (rp *ReverseProxy) VerifyAuthentication(ctx context.Context, headers http.Header) (int, error) {
-// 	microService, err := rp.selectMicroService("/api/auth")
-// 	if err != nil {
-// 		return 0, err
-// 	}
+func (rp *ReverseProxy) VerifyAuthentication(ctx context.Context, headers http.Header) (int, error) {
 
-// 	baseURL, err := url.Parse(microService)
-// 	if err != nil {
-// 		return 0, err
-// 	}
+	microServiceHost, err := rp.selectMicroService("/api/auth/check")
+	if err != nil {
+		return 0, err
+	}
 
-// 	remoteUrl := baseURL
-// 	remoteUrl.Path = "/isAuthenticated"
-// 	println(remoteUrl)
-// 	request, err := http.NewRequestWithContext(ctx, "GET", remoteUrl.String(), nil)
-// 	if err != nil {
-// 		return 0, err
-// 	}
+	remoteUrl := fmt.Sprintf("%s/isAuthenticated", microServiceHost)
 
-// 	request.Header = headers.Clone()
+	request, err := http.NewRequestWithContext(ctx, "GET", remoteUrl, nil)
+	if err != nil {
+		return 0, err
+	}
 
-// 	client := &http.Client{
-// 		Timeout: 5 * time.Second,
-// 	}
+	request.Header = headers.Clone()
 
-// 	resp, err := client.Do(request)
-// 	if err != nil {
-// 		return 0, err
-// 	}
-// 	defer resp.Body.Close()
+	client := &http.Client{
+		Timeout: 5 * time.Second,
+	}
 
-// 	if resp.StatusCode != http.StatusOK {
+	resp, err := client.Do(request)
+	if err != nil {
+		return 0, err
+	}
+	defer resp.Body.Close()
 
-// 		return 0, fmt.Errorf("auth service returned status: %d", resp.StatusCode)
-// 	}
-// 	bodyBytes, err := io.ReadAll(resp.Body)
-// 	if err != nil {
-// 		return 0, fmt.Errorf("failed to read response body: %w", err)
-// 	}
+	if resp.StatusCode != http.StatusOK {
+		return 0, fmt.Errorf("auth service returned status: %d", resp.StatusCode)
+	}
 
-// 	var user UserAuthenticated
-// 	if err := json.Unmarshal(bodyBytes, &user); err != nil {
-// 		return 0, fmt.Errorf("failed to decode user: %w", err)
-// 	}
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return 0, fmt.Errorf("failed to read response body: %w", err)
+	}
 
-// 	if user.UserId == 0 {
-// 		return 0, fmt.Errorf("authentication:received invalid user ID")
-// 	}
+	var user UserAuthenticated
+	if err := json.Unmarshal(bodyBytes, &user); err != nil {
+		return 0, fmt.Errorf("failed to decode user: %w", err)
+	}
 
-// 	return int(user.UserId), nil
-// }
+	if user.UserId == 0 {
+		return 0, fmt.Errorf("authentication: received invalid user ID")
+	}
+
+	return int(user.UserId), nil
+}
