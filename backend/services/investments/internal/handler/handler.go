@@ -7,6 +7,7 @@ import (
 
 	"github.com/GeuberLucas/Gofre/backend/pkg/response"
 	dtos "github.com/GeuberLucas/Gofre/backend/services/investments/internal/DTOs"
+	"github.com/GeuberLucas/Gofre/backend/services/investments/internal/helpers"
 	"github.com/GeuberLucas/Gofre/backend/services/investments/internal/service"
 	"github.com/gorilla/mux"
 )
@@ -34,18 +35,19 @@ func (hd *HandlerService) AddInvestmentHandler() http.HandlerFunc {
 		var dto dtos.Portfolio
 		dec := json.NewDecoder(r.Body)
 		if err := dec.Decode(&dto); err != nil {
-			response.ErrorResponse(w, 500, err)
+			checkErroType(w, helpers.INTERNAL, err)
+			return
 		}
 		userIdHeader := r.Header.Get("user_id")
 		userId, err := strconv.ParseInt(userIdHeader, 10, 64)
 		if err != nil {
-			response.ErrorResponse(w, http.StatusBadRequest, err)
+			checkErroType(w, helpers.INTERNAL, err)
 			return
 		}
 		dto.User_id = int(userId)
-		err, stringTypeError := hd.portfolioService.Add(dto)
+		typeError, err := hd.portfolioService.Add(dto)
 		if err != nil {
-			checkErroType(w, err, stringTypeError)
+			checkErroType(w, typeError, err)
 			return
 		}
 	}
@@ -55,18 +57,15 @@ func (hd *HandlerService) GetInvestmentHandler() http.HandlerFunc {
 		userIdHeader := r.Header.Get("user_id")
 		userId, err := strconv.ParseInt(userIdHeader, 10, 64)
 		if err != nil {
-			response.ErrorResponse(w, http.StatusBadRequest, err)
+			checkErroType(w, helpers.INTERNAL, err)
 			return
 		}
-		serviceresult, err, typeError := hd.portfolioService.GetAll(userIdInt)
+		serviceresult, typeError, err := hd.portfolioService.GetAll(int(userId))
 		if err != nil {
-			if typeError == "Validation" {
-				response.ErrorResponse(w, http.StatusBadRequest, err)
+			if err != nil {
+				checkErroType(w, typeError, err)
 				return
-			}
-			if typeError == "Internal" {
-				response.ErrorResponse(w, http.StatusInternalServerError, err)
-				return
+
 			}
 
 		}
@@ -79,19 +78,13 @@ func (hd *HandlerService) GetByIdInvestmentHandler() http.HandlerFunc {
 		params := mux.Vars(r)
 		id, err := strconv.ParseInt(params["idTransaction"], 10, 64)
 		if err != nil {
-			checkErroType(w, err, "Validation")
+			checkErroType(w, helpers.VALIDATION, err)
 			return
 		}
-		serviceresult, err, typeError := hd.portfolioService.GetById(id)
+		serviceresult, typeError, err := hd.portfolioService.GetById(uint(id))
 		if err != nil {
-			if typeError == "Validation" {
-				response.ErrorResponse(w, http.StatusBadRequest, err)
-				return
-			}
-			if typeError == "Internal" {
-				response.ErrorResponse(w, http.StatusInternalServerError, err)
-				return
-			}
+			checkErroType(w, typeError, err)
+			return
 
 		}
 
@@ -103,13 +96,14 @@ func (hd *HandlerService) UpdateInvestmentHandler() http.HandlerFunc {
 		params := mux.Vars(r)
 		id, err := strconv.ParseInt(params["idTransaction"], 10, 64)
 		if err != nil {
-			checkErroType(w, err, "Validation")
+			checkErroType(w, helpers.VALIDATION, err)
 			return
 		}
 		var dto dtos.Portfolio
 		dec := json.NewDecoder(r.Body)
 		if err := dec.Decode(&dto); err != nil {
-			response.ErrorResponse(w, 500, err)
+			checkErroType(w, helpers.INTERNAL, err)
+			return
 		}
 		userIdHeader := r.Header.Get("user_id")
 		userId, err := strconv.ParseInt(userIdHeader, 10, 64)
@@ -119,9 +113,9 @@ func (hd *HandlerService) UpdateInvestmentHandler() http.HandlerFunc {
 		}
 		dto.Id = uint(id)
 		dto.User_id = int(userId)
-		err, stringTypeError := hd.portfolioService.Update(dto)
+		typeError, err := hd.portfolioService.Update(dto)
 		if err != nil {
-			checkErroType(w, err, stringTypeError)
+			checkErroType(w, typeError, err)
 			return
 		}
 
@@ -132,21 +126,34 @@ func (hd *HandlerService) DeleteInvestmentHandler() http.HandlerFunc {
 		params := mux.Vars(r)
 		id, err := strconv.ParseInt(params["idTransaction"], 10, 64)
 		if err != nil {
-			checkErroType(w, err, "Validation")
+			checkErroType(w, helpers.VALIDATION, err)
 			return
 		}
-		err, stringTypeError := hd.portfolioService.Delete(uint(id))
+		userIdHeader := r.Header.Get("user_id")
+		userId, err := strconv.ParseInt(userIdHeader, 10, 64)
 		if err != nil {
-			checkErroType(w, err, stringTypeError)
+			checkErroType(w, helpers.INTERNAL, err)
+			return
+		}
+		typeError, err := hd.portfolioService.Delete(id, userId)
+		if err != nil {
+			checkErroType(w, typeError, err)
 			return
 		}
 	}
 }
 
-func checkErroType(w http.ResponseWriter, err error, typeError string) {
+func checkErroType(w http.ResponseWriter, typeError helpers.ErrorType, err error) {
+
 	switch typeError {
-	case "Validation":
+	case helpers.VALIDATION:
 		response.ErrorResponse(w, http.StatusBadRequest, err)
+		return
+	case helpers.MISSING:
+		response.ErrorResponse(w, http.StatusNotFound, err)
+		return
+	case helpers.STATE:
+		response.ErrorResponse(w, http.StatusConflict, err)
 		return
 	default:
 		response.ErrorResponse(w, http.StatusInternalServerError, err)

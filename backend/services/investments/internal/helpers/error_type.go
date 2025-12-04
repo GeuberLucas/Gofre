@@ -1,4 +1,4 @@
-package types
+package helpers
 
 type ErrorType int
 
@@ -7,8 +7,9 @@ const (
 	INTERNAL
 	MISSING
 	STATE
+	NONE
 )
 
 func (et ErrorType) String() string {
-	return [...]string{"validation", "internal", "missing", "state"}[et]
+	return [...]string{"validation", "internal", "missing", "state", "none"}[et]
 }
