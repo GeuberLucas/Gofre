@@ -1,7 +1,12 @@
 package service
 
 import (
+	"encoding/json"
+	"fmt"
+	"log"
+
 	"github.com/GeuberLucas/Gofre/backend/pkg/messaging"
+	"github.com/GeuberLucas/Gofre/backend/pkg/types"
 	dtos "github.com/GeuberLucas/Gofre/backend/services/investments/internal/DTOs"
 	"github.com/GeuberLucas/Gofre/backend/services/investments/internal/helpers"
 	"github.com/GeuberLucas/Gofre/backend/services/investments/internal/repository"
@@ -98,9 +103,36 @@ func NewPortfolioService(repo repository.IPortfolioRepository, broker messaging.
 	}
 }
 
-func (p *PortfolioService) sendMessagingToBroker() {
-	var ms messaging.MessagingDto
+func (p *PortfolioService) sendMessagingToBroker(month uint,
+	year uint,
+	amount types.Money,
+	movementType string,
+	isConfirmed bool,
+	action messaging.ActionType) error {
+	ms, err := messaging.NewMessagingDto(
+		month,
+		year,
+		amount,
+		messaging.TypeInvestment,
+		movementType,
+		"",
+		false,
+		isConfirmed,
+		action,
+	)
 
-	ms = messaging.NewMessagingDto()
+	if err != nil {
+		return err
+	}
+
+	log.Println(ms)
+	eventName := fmt.Sprintf("finance.%s.%d", messaging.TypeInvestment, action)
+	json, err := json.Marshal(ms)
+	if err != nil {
+		return err
+	}
+	p.broker.PublishMessage(eventName, json)
+
+	return nil
 
 }
