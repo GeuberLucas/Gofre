@@ -53,12 +53,14 @@
             "id": "ea0db873919d27d7",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "Pasted image 20251116075218.png"
+                "file": "Cenários de teste.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-image",
-              "title": "Pasted image 20251116075218"
+              "icon": "lucide-file",
+              "title": "Cenários de teste"
             }
           }
         ],
@@ -224,12 +226,15 @@
       "bases:Create new base": false
     }
   },
-  "active": "ea0db873919d27d7",
+  "active": "0cd752b65b5572fe",
   "lastOpenFiles": [
-    "general/Regras de Domínio do Sistema.md",
+    "Cenarios de Teste/Untitled",
+    "Cenarios de Teste",
+    "Untitled.base",
     "Cenários de teste.md",
+    "Pasted image 20251116075218.png",
+    "general/Regras de Domínio do Sistema.md",
     "general/Struct folders.md",
-    "general/Technical Decision Record (TDR).md",
-    "Pasted image 20251116075218.png"
+    "general/Technical Decision Record (TDR).md"
   ]
 }

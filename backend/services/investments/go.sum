@@ -1,5 +1,7 @@
 github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251202215107-6d23fd95c86d h1:x89wDRPF5N7atMUFwZ+rltgwNYHLlTx+9ztE9wChEmQ=
 github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251202215107-6d23fd95c86d/go.mod h1:cl1KWXGMsMq+fUFX1LSJrr7KaCqiRH0JT9139v08XYY=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251204175532-f7ca70d39b2a h1:jZ0h5FoenDFSXdCrlQxg589FTBJc6nFkm1FvMIibjpY=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251204175532-f7ca70d39b2a/go.mod h1:UH0aCMfjyLeC7kxmfNKyDCFHeJv6cTXGzOpXiHWNQFI=
 github.com/gorilla/mux v1.8.1 h1:TuBL49tXwgrFYWhqrNgrUNEY92u81SPhu7sTdzQEiWY=
 github.com/gorilla/mux v1.8.1/go.mod h1:AKf9I4AEqPTmMytcMc0KkNouC66V3BtZ4qD5fmWSiMQ=
 github.com/joho/godotenv v1.5.1 h1:7eLL/+HRGLY0ldzfGMeQkb7vMd0as4CfYvUVzLqw0N0=
