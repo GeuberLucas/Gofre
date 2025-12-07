@@ -97,3 +97,10 @@ func NewPortfolioService(repo repository.IPortfolioRepository, broker messaging.
 		broker:               broker,
 	}
 }
+
+func (p *PortfolioService) sendMessagingToBroker() {
+	var ms messaging.MessagingDto
+
+	ms = messaging.NewMessagingDto()
+
+}

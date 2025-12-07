@@ -48,25 +48,25 @@ type MessagingDto struct {
 
 func (md *MessagingDto) IsValid() error {
 	if md.Month == 0 || md.Month > 12 {
-		return errors.New("Messaging: validade struct: Invalid Month")
+		return errors.New("Messaging: validate struct: Invalid Month")
 	}
 	if md.Year < 1 {
-		return errors.New("Messaging: validade struct: Invalid Year")
+		return errors.New("Messaging: validate struct: Invalid Year")
 	}
 	if !md.Movement.IsValid() {
-		return errors.New("Messaging: validade struct: Invalid Movement")
+		return errors.New("Messaging: validate struct: Invalid Movement")
 	}
 	if !md.Action.IsValid() {
-		return errors.New("Messaging: validade struct: Invalid Action")
+		return errors.New("Messaging: validate struct: Invalid Action")
 	}
 	if len(md.MovementType) == 0 {
-		return errors.New("Messaging: validade struct: Invalid Movement")
+		return errors.New("Messaging: validate struct: Invalid Movement")
 	}
 	if md.Movement == TypeExpense && len(md.MovementCategory) == 0 {
-		return errors.New("Messaging: validade struct: MovementCategory is required for Expense")
+		return errors.New("Messaging: validate struct: MovementCategory is required for Expense")
 	}
 	if md.Movement == TypeExpense && len(md.MovementCategory) == 0 {
-		return errors.New("Messaging: validade struct: MovementCategory is required for Expense")
+		return errors.New("Messaging: validate struct: MovementCategory is required for Expense")
 	}
 	return nil
 }
@@ -79,7 +79,7 @@ func NewMessagingDto(month uint,
 	movementCategory string,
 	withCredit bool,
 	isConfirmed bool,
-	action ActionType) (*MessagingDto, error) {
+	action ActionType) (MessagingDto, error) {
 	messagingDto := MessagingDto{
 		Month:            month,
 		Year:             year,
@@ -92,8 +92,8 @@ func NewMessagingDto(month uint,
 		Action:           action,
 	}
 	if err := messagingDto.IsValid(); err != nil {
-		return nil, err
+		return MessagingDto{}, err
 	}
-	return &messagingDto, nil
+	return messagingDto, nil
 
 }

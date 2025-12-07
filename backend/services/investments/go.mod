@@ -5,7 +5,7 @@ go 1.25.4
 require github.com/gorilla/mux v1.8.1
 
 require (
-	github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251204175532-f7ca70d39b2a // indirect
+	github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251204175532-f7ca70d39b2a
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/lib/pq v1.10.9 // indirect

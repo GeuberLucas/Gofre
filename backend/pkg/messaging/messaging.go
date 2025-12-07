@@ -2,6 +2,7 @@ package messaging
 
 import (
 	"log"
+	"os"
 
 	"github.com/nats-io/nats.go"
 )
@@ -22,7 +23,7 @@ func NewNATSMessaging() *NATSMessaging {
 }
 
 func (n *NATSMessaging) ConnectToBroker() error {
-	nc, err := nats.Connect("demo.nats.io")
+	nc, err := nats.Connect(os.Getenv("NATS_URL"))
 	if err != nil {
 		log.Println("Error connecting to NATS:", err)
 		return err
