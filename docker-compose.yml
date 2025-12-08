@@ -53,6 +53,7 @@ services:
       dockerfile: Dockerfile
     env_file:
       - ./backend.env
+    restart: on-failure
     networks:
       - gofre-network
     depends_on:
