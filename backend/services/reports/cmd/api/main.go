@@ -9,8 +9,7 @@ import (
 	"github.com/GeuberLucas/Gofre/backend/pkg/config"
 	"github.com/GeuberLucas/Gofre/backend/pkg/db"
 	gracefulshutdown "github.com/GeuberLucas/Gofre/backend/pkg/graceful_shutdown"
-	"github.com/GeuberLucas/Gofre/backend/pkg/messaging"
-	"github.com/GeuberLucas/Gofre/backend/services/reports/internal/handler"
+	"github.com/GeuberLucas/Gofre/backend/services/reports/internal/query/handler"
 	"github.com/GeuberLucas/Gofre/backend/services/reports/internal/router"
 )
 
@@ -21,11 +20,8 @@ func main() {
 		log.Fatalf("Connecting database: %v", err)
 	}
 
-	messagingService := messaging.NewNATSMessaging()
-	messagingService.ConnectToBroker()
-
 	//portfolioRepository := repository.NewPortfolioRepository(dbConn)
-	//portfolioService := service.NewPortfolioService(portfolioRepository, messagingService)
+	//portfolioService := service.NewPortfolioService(portfolioRepository)
 	handlerService := handler.NewHandlerService()
 
 	routers := router.SetupRoutes(handlerService)
@@ -38,7 +34,7 @@ func main() {
 		Handler: routers,
 	}
 
-	shutdownManager := gracefulshutdown.NewGracefulShutdown(dbConn, messagingService, &serverConfig)
+	shutdownManager := gracefulshutdown.NewGracefulShutdown(dbConn, nil, &serverConfig)
 
 	go func() {
 		if err := serverConfig.ListenAndServe(); err != nil {

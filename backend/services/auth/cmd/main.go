@@ -12,8 +12,8 @@ import (
 
 func main() {
 	config.LoadEnv()
-	messagingService := messaging.NewNATSMessaging()
-	messagingService.ConnectToBroker()
+	messagingService, _ := messaging.NewNATSMessaging()
+
 	router := router.SetupRoutes(messagingService)
 
 	var portApi string = ":50728"

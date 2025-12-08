@@ -23,8 +23,7 @@ func main() {
 		log.Fatalf("Connecting database: %v", err)
 	}
 
-	messagingService := messaging.NewNATSMessaging()
-	messagingService.ConnectToBroker()
+	messagingService, _ := messaging.NewNATSMessaging()
 
 	portfolioRepository := repository.NewPortfolioRepository(dbConn)
 	portfolioService := service.NewPortfolioService(portfolioRepository, messagingService)

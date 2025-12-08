@@ -157,71 +157,66 @@ alter table investments.portfolio add column if not exists  is_done boolean not 
 commit;
 
 
-begin;
-create schema IF NOT EXISTS reports;
-CREATE TABLE reports.revenue (
-  Month int,
-  Year int,
-  Planned decimal(10,2),
-  Actual decimal(10,2),
-  Pending decimal(10,2),
-  User_Id int
-  UNIQUE ("Month", "Year", "User_Id")
+BEGIN;
+CREATE SCHEMA IF NOT EXISTS reports;
+
+create table reports.revenue (
+  "month" int,
+  "year" int,
+  planned decimal(10,2),
+  actual decimal(10,2),
+  pending decimal(10,2),
+  "user_id" int,
+  unique ("month", "year", "user_id")
 );
 
-
-CREATE TABLE reports."Aggregated" (
-  "Month" int,
-  "Year" int,
-  "Revenue" decimal(10,2),
-  "Expense" decimal(10,2),
-  "Investments" decimal(10,2),
-  "Montly_without_credit" decimal(10,2),
-  "Montly_with_credit" decimal(10,2),
-  "Variable_without_credit" decimal(10,2),
-  "Variable_with_credit" decimal(10,2),
-  "Invoice" decimal(10,2),
-  "Result" decimal(10,2),
-  "User_Id" int
-
-  UNIQUE ("Month", "Year", "User_Id")
+create table reports.aggregated (
+  "month" int,
+  "year" int,
+  "revenue" decimal(10,2),
+  "expense" decimal(10,2),
+  "investments" decimal(10,2),
+  "montly_without_credit" decimal(10,2),
+  "montly_with_credit" decimal(10,2),
+  "variable_without_credit" decimal(10,2),
+  "variable_with_credit" decimal(10,2),
+  "invoice" decimal(10,2),
+  "result" decimal(10,2),
+  "user_id" int,
+  unique ("month", "year", "user_id")
 );
 
-
-CREATE TABLE reports."Investments" (
-  "Month" int,
-  "Year" int,
-  "Planned" decimal(10,2),
-  "Actual" decimal(10,2),
-  "Pending" decimal(10,2),
-  "User_Id" int
-  UNIQUE ("Month", "Year", "User_Id")
+create table reports.investments (
+  "month" int,
+  "year" int,
+  "planned" decimal(10,2),
+  "actual" decimal(10,2),
+  "pending" decimal(10,2),
+  "user_id" int,
+  unique ("month", "year", "user_id")
 );
 
-
-
-CREATE TABLE reports."Expense" (
-  "Month" int,
-  "Year" int,
-  "Planned" decimal(10,2),
-  "Actual" decimal(10,2),
-  "Pending" decimal(10,2),
-  "Invoice" decimal(10,2),
-  "Variable" decimal(10,2),
-  "Monthly" decimal(10,2),
-  "User_Id" int
-  UNIQUE ("Month", "Year", "User_Id")
+create table reports.expense (
+  "month" int,
+  "year" int,
+  "planned" decimal(10,2),
+  "actual" decimal(10,2),
+  "pending" decimal(10,2),
+  "invoice" decimal(10,2),
+  "variable" decimal(10,2),
+  "monthly" decimal(10,2),
+  "user_id" int,
+  unique ("month", "year", "user_id")
 );
 
 commit;
 
 BEGIN;
 CREATE TABLE public."event_track" (
-  "event_ID" uuid,
+  "event_id" uuid PRIMARY KEY,
   "aggregate_id" int,
   "consumer_group" varchar(50),
   "processed_at" timestamp
 );
 
-CREATE INDEX "pk" ON  "event_track" ("event_ID");
 COMMIT;

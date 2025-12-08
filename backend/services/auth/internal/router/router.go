@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func getTransactionRoutes(broker *messaging.NATSMessaging) []routes.Route {
+func getTransactionRoutes(broker messaging.IMessaging) []routes.Route {
 	return []routes.Route{
 		{Path: "/login", Method: "POST", HandlerFunc: handler.LoginHandler(broker)},
 		{Path: "/register", Method: "POST", HandlerFunc: handler.RegisterHandler(broker)},
@@ -19,7 +19,7 @@ func getTransactionRoutes(broker *messaging.NATSMessaging) []routes.Route {
 }
 
 // SetupRoutes initializes the router and defines the routes
-func SetupRoutes(broker *messaging.NATSMessaging) *mux.Router {
+func SetupRoutes(broker messaging.IMessaging) *mux.Router {
 	r := mux.NewRouter()
 
 	return routes.ConfigureRoutes(r, getTransactionRoutes(broker))

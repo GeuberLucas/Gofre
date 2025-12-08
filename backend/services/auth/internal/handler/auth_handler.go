@@ -14,7 +14,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func LoginHandler(broker *messaging.NATSMessaging) http.HandlerFunc {
+func LoginHandler(broker messaging.IMessaging) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		bodyRequest, erro := ioutil.ReadAll(r.Body)
@@ -48,7 +48,7 @@ func LoginHandler(broker *messaging.NATSMessaging) http.HandlerFunc {
 	}
 }
 
-func RegisterHandler(broker *messaging.NATSMessaging) http.HandlerFunc {
+func RegisterHandler(broker messaging.IMessaging) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		bodyRequest, erro := ioutil.ReadAll(r.Body)
 		if erro != nil {
@@ -95,7 +95,7 @@ func IsAuthenticatedHandler() http.HandlerFunc {
 		response.JSONResponse(w, http.StatusOK, userAuthenticated)
 	}
 }
-func ProfileHandler(broker *messaging.NATSMessaging) http.HandlerFunc {
+func ProfileHandler(broker messaging.IMessaging) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
 		userId, erro := strconv.ParseInt(params["userId"], 10, 64)
@@ -121,7 +121,7 @@ func ProfileHandler(broker *messaging.NATSMessaging) http.HandlerFunc {
 	}
 }
 
-func ForgotPasswordHandler(broker *messaging.NATSMessaging) http.HandlerFunc {
+func ForgotPasswordHandler(broker messaging.IMessaging) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		bodyRequest, erro := ioutil.ReadAll(r.Body)
 		if erro != nil {
@@ -143,7 +143,7 @@ func ForgotPasswordHandler(broker *messaging.NATSMessaging) http.HandlerFunc {
 	}
 }
 
-func ResetPasswordHandler(broker *messaging.NATSMessaging) http.HandlerFunc {
+func ResetPasswordHandler(broker messaging.IMessaging) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
 		HashEncoded := params["HashEncoded"]
