@@ -76,7 +76,7 @@ func (hd *HandlerService) GetInvestmentHandler() http.HandlerFunc {
 func (hd *HandlerService) GetByIdInvestmentHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
-		id, err := strconv.ParseInt(params["idTransaction"], 10, 64)
+		id, err := strconv.ParseInt(params["idInvestment"], 10, 64)
 		if err != nil {
 			checkErroType(w, helpers.VALIDATION, err)
 			return
@@ -94,7 +94,7 @@ func (hd *HandlerService) GetByIdInvestmentHandler() http.HandlerFunc {
 func (hd *HandlerService) UpdateInvestmentHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
-		id, err := strconv.ParseInt(params["idTransaction"], 10, 64)
+		id, err := strconv.ParseInt(params["idInvestment"], 10, 64)
 		if err != nil {
 			checkErroType(w, helpers.VALIDATION, err)
 			return
@@ -124,7 +124,7 @@ func (hd *HandlerService) UpdateInvestmentHandler() http.HandlerFunc {
 func (hd *HandlerService) DeleteInvestmentHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
-		id, err := strconv.ParseInt(params["idTransaction"], 10, 64)
+		id, err := strconv.ParseInt(params["idInvestment"], 10, 64)
 		if err != nil {
 			checkErroType(w, helpers.VALIDATION, err)
 			return

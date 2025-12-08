@@ -19,7 +19,8 @@ type NATSMessaging struct {
 }
 
 func NewNATSMessaging() (IMessaging, error) {
-	nc, err := nats.Connect(os.Getenv("NATS_URL"))
+	var urlNats = os.Getenv("NATS_URL")
+	nc, err := nats.Connect(urlNats)
 	if err != nil {
 		log.Println("Error connecting to NATS:", err)
 		return nil, err
@@ -31,20 +32,28 @@ func NewNATSMessaging() (IMessaging, error) {
 		return nil, err
 	}
 	StreamName := "finance"
+	cfg := &nats.StreamConfig{
+		Name:     StreamName,
+		Subjects: []string{"finance.>"},
+	}
 	stream, err := js.StreamInfo(StreamName)
 
 	if stream == nil {
 		log.Printf("Creating stream: %s\n", StreamName)
 
-		_, err = js.AddStream(&nats.StreamConfig{
-			Name:     StreamName,
-			Subjects: []string{"finance.*"},
-		})
+		_, err = js.AddStream(cfg)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+
+		log.Printf("Updating stream: %s\n", StreamName)
+		_, err = js.UpdateStream(cfg)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return &NATSMessaging{js: js}, nil
+	return &NATSMessaging{js: js, conn: nc}, nil
 }
 
 func (n *NATSMessaging) PublishMessage(subject string, message []byte) error {
