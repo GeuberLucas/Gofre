@@ -1,6 +1,13 @@
 package service
 
 import (
+	"encoding/json"
+	"fmt"
+	"time"
+
+	"github.com/GeuberLucas/Gofre/backend/pkg/helpers"
+	"github.com/GeuberLucas/Gofre/backend/pkg/messaging"
+	"github.com/GeuberLucas/Gofre/backend/pkg/types"
 	dtos "github.com/GeuberLucas/Gofre/backend/services/transaction/internal/Dtos"
 	"github.com/GeuberLucas/Gofre/backend/services/transaction/internal/models"
 	"github.com/GeuberLucas/Gofre/backend/services/transaction/internal/repository"
@@ -9,40 +16,63 @@ import (
 type TransactionService struct {
 	revenueRepository repository.IRevenueRepository
 	expenseRepository repository.IExpenseRepository
+	broker            messaging.IMessaging
 }
 
-func NewTransactionService(r repository.IRevenueRepository, e repository.IExpenseRepository) *TransactionService {
-	return &TransactionService{revenueRepository: r, expenseRepository: e}
+func NewTransactionService(r repository.IRevenueRepository, e repository.IExpenseRepository, b messaging.IMessaging) *TransactionService {
+	return &TransactionService{revenueRepository: r, expenseRepository: e, broker: b}
 }
 
-func (ts *TransactionService) AddExpense(dto dtos.ExpenseDto) (error, string) {
+func (ts *TransactionService) AddExpense(dto dtos.ExpenseDto) (string, error) {
 	model := dto.ToModel()
 	err := model.Isvalid()
 	if err != nil {
-		return err, "Validation"
+		return "Validation", err
 	}
 
 	err = ts.expenseRepository.Create(model)
 	if err != nil {
-		return err, "Internal"
+		return "Internal", err
 	}
-
-	return nil, ""
+	err = ts.sendMessagingToBroker(model.PaymentDate.Month(),
+		uint(model.PaymentDate.Year()),
+		model.Amount,
+		model.Type,
+		messaging.TypeExpense,
+		model.Category,
+		model.PaymentMethod == string(dtos.PaymentMethodCredito),
+		model.IsPaid,
+		messaging.ActionInsert)
+	if err != nil {
+		return helpers.INTERNAL.String(), err
+	}
+	return "", nil
 }
 
-func (ts *TransactionService) AddRevenue(dto dtos.RevenueDto) (error, string) {
+func (ts *TransactionService) AddRevenue(dto dtos.RevenueDto) (string, error) {
 	model := dto.ToModel()
 	err := model.Isvalid()
 	if err != nil {
-		return err, "Validation"
+		return "Validation", err
 	}
 
 	err = ts.revenueRepository.Create(model)
 	if err != nil {
-		return err, "Internal"
+		return "Internal", err
 	}
-
-	return nil, ""
+	err = ts.sendMessagingToBroker(model.ReceiveDate.Month(),
+		uint(model.ReceiveDate.Year()),
+		model.Amount,
+		model.Type,
+		messaging.TypeIncome,
+		"",
+		false,
+		model.IsRecieved,
+		messaging.ActionInsert)
+	if err != nil {
+		return helpers.INTERNAL.String(), err
+	}
+	return "", err
 }
 
 func (ts *TransactionService) GetByIdExpense(id int64) (dtos.ExpenseDto, error, string) {
@@ -99,7 +129,18 @@ func (ts *TransactionService) UpdateExpense(id int64, dto dtos.ExpenseDto) (erro
 	if err != nil {
 		return err, "Internal"
 	}
-
+	err = ts.sendMessagingToBroker(model.PaymentDate.Month(),
+		uint(model.PaymentDate.Year()),
+		model.Amount,
+		model.Type,
+		messaging.TypeExpense,
+		model.Category,
+		model.PaymentMethod == string(dtos.PaymentMethodCredito),
+		model.IsPaid,
+		messaging.ActionUpdate)
+	if err != nil {
+		return err, helpers.INTERNAL.String()
+	}
 	return nil, ""
 }
 func (ts *TransactionService) UpdateRevenue(id int64, dto dtos.RevenueDto) (error, string) {
@@ -113,24 +154,67 @@ func (ts *TransactionService) UpdateRevenue(id int64, dto dtos.RevenueDto) (erro
 	if err != nil {
 		return err, "Internal"
 	}
-
+	err = ts.sendMessagingToBroker(model.ReceiveDate.Month(),
+		uint(model.ReceiveDate.Year()),
+		model.Amount,
+		model.Type,
+		messaging.TypeIncome,
+		"",
+		false,
+		model.IsRecieved,
+		messaging.ActionUpdate)
+	if err != nil {
+		return err, helpers.INTERNAL.String()
+	}
 	return nil, ""
 }
 
 func (ts *TransactionService) DeleteExpense(id int64, userId int64) (error, string) {
-
-	err := ts.expenseRepository.Delete(id, userId)
+	model, err := ts.expenseRepository.GetById(id)
 	if err != nil {
 		return err, "Internal"
+	}
+	err = ts.expenseRepository.Delete(id, userId)
+	if err != nil {
+		return err, "Internal"
+	}
+	err = ts.sendMessagingToBroker(model.PaymentDate.Month(),
+		uint(model.PaymentDate.Year()),
+		model.Amount,
+		model.Type,
+		messaging.TypeExpense,
+		model.Category,
+		model.PaymentMethod == string(dtos.PaymentMethodCredito),
+		model.IsPaid,
+		messaging.ActionDelete)
+	if err != nil {
+		return err, helpers.INTERNAL.String()
 	}
 	return nil, ""
 }
 func (ts *TransactionService) DeleteRevenue(id int64, userId int64) (error, string) {
-
-	err := ts.revenueRepository.Delete(id, userId)
+	model, err := ts.revenueRepository.GetById(id)
 	if err != nil {
 		return err, "Internal"
 	}
+	err = ts.revenueRepository.Delete(id, userId)
+	if err != nil {
+		return err, "Internal"
+	}
+
+	err = ts.sendMessagingToBroker(model.ReceiveDate.Month(),
+		uint(model.ReceiveDate.Year()),
+		model.Amount,
+		model.Type,
+		messaging.TypeIncome,
+		"",
+		false,
+		model.IsRecieved,
+		messaging.ActionDelete)
+	if err != nil {
+		return err, helpers.INTERNAL.String()
+	}
+
 	return nil, ""
 }
 
@@ -159,4 +243,41 @@ func revenueDtoFromModel(re models.Revenue) dtos.RevenueDto {
 		IsRecieved:  re.IsRecieved,
 		Amount:      re.Amount.ToFloat(),
 	}
+}
+
+func (ts *TransactionService) sendMessagingToBroker(month time.Month,
+	year uint,
+	amount types.Money,
+	movementType string,
+	movement messaging.Movement,
+	movementCategory string,
+	creditCard bool,
+	isConfirmed bool,
+
+	action messaging.ActionType) error {
+	ms, err := messaging.NewMessagingDto(
+		month,
+		year,
+		amount,
+		movement,
+		movementType,
+		movementCategory,
+		creditCard,
+		isConfirmed,
+		action,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	eventName := fmt.Sprintf("finance.%s.%s", messaging.TypeInvestment, action)
+	json, err := json.Marshal(ms)
+	if err != nil {
+		return err
+	}
+	ts.broker.PublishMessage(eventName, json)
+
+	return nil
+
 }

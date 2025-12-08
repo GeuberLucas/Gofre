@@ -35,3 +35,15 @@ func (ex ExpenseDto) ToModel() models.Expense {
 		Amount:        amount,
 	}
 }
+
+type PaymentMethod string
+
+const (
+	PaymentMethodPix      PaymentMethod = "pix"
+	PaymentMethodDebito   PaymentMethod = "debito"
+	PaymentMethodCredito  PaymentMethod = "credito"
+	PaymentMethodBoleto   PaymentMethod = "boleto"
+	PaymentMethodDinheiro PaymentMethod = "dinheiro"
+	PaymentMethodTED      PaymentMethod = "ted"
+	PaymentMethodCheque   PaymentMethod = "cheque"
+)

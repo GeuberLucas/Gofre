@@ -32,7 +32,7 @@ func AddExpenseHandler(s *service.TransactionService) http.HandlerFunc {
 		}
 
 		expenseDto.UserId = userIdInt
-		err, stringTypeError := s.AddExpense(expenseDto)
+		stringTypeError, err := s.AddExpense(expenseDto)
 		if err != nil {
 			checkErroType(w, err, stringTypeError)
 			return
@@ -156,7 +156,7 @@ func AddRevenueHandler(s *service.TransactionService) http.HandlerFunc {
 			return
 		}
 
-		err, stringTypeError := s.AddRevenue(revenueDto)
+		stringTypeError, err := s.AddRevenue(revenueDto)
 		if err != nil {
 			checkErroType(w, err, stringTypeError)
 			return

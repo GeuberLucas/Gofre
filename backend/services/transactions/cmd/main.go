@@ -26,7 +26,7 @@ func main() {
 	messagingService.ConnectToBroker()
 	revenueRepository := repository.NewRevenueRepository(dbConn)
 	expenseRepository := repository.NewExpenseRepository(dbConn)
-	transactionService := service.NewTransactionService(revenueRepository, expenseRepository)
+	transactionService := service.NewTransactionService(revenueRepository, expenseRepository, messagingService)
 
 	routers := router.SetupRoutes(transactionService)
 	var portApi string = ":50728"

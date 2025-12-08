@@ -155,3 +155,73 @@ alter table investments.portfolio add column if not exists  amount integer not n
 alter table investments.portfolio add column if not exists  description varchar(255) not null;
 alter table investments.portfolio add column if not exists  is_done boolean not null default False;
 commit;
+
+
+begin;
+create schema IF NOT EXISTS reports;
+CREATE TABLE reports.revenue (
+  Month int,
+  Year int,
+  Planned decimal(10,2),
+  Actual decimal(10,2),
+  Pending decimal(10,2),
+  User_Id int
+  UNIQUE ("Month", "Year", "User_Id")
+);
+
+
+CREATE TABLE reports."Aggregated" (
+  "Month" int,
+  "Year" int,
+  "Revenue" decimal(10,2),
+  "Expense" decimal(10,2),
+  "Investments" decimal(10,2),
+  "Montly_without_credit" decimal(10,2),
+  "Montly_with_credit" decimal(10,2),
+  "Variable_without_credit" decimal(10,2),
+  "Variable_with_credit" decimal(10,2),
+  "Invoice" decimal(10,2),
+  "Result" decimal(10,2),
+  "User_Id" int
+
+  UNIQUE ("Month", "Year", "User_Id")
+);
+
+
+CREATE TABLE reports."Investments" (
+  "Month" int,
+  "Year" int,
+  "Planned" decimal(10,2),
+  "Actual" decimal(10,2),
+  "Pending" decimal(10,2),
+  "User_Id" int
+  UNIQUE ("Month", "Year", "User_Id")
+);
+
+
+
+CREATE TABLE reports."Expense" (
+  "Month" int,
+  "Year" int,
+  "Planned" decimal(10,2),
+  "Actual" decimal(10,2),
+  "Pending" decimal(10,2),
+  "Invoice" decimal(10,2),
+  "Variable" decimal(10,2),
+  "Monthly" decimal(10,2),
+  "User_Id" int
+  UNIQUE ("Month", "Year", "User_Id")
+);
+
+commit;
+
+BEGIN;
+CREATE TABLE public."event_track" (
+  "event_ID" uuid,
+  "aggregate_id" int,
+  "consumer_group" varchar(50),
+  "processed_at" timestamp
+);
+
+CREATE INDEX "pk" ON  "event_track" ("event_ID");
+COMMIT;
