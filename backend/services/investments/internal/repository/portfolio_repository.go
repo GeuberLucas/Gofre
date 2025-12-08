@@ -21,7 +21,7 @@ type PortfolioRepository struct {
 // Create implements IPortfolioRepository.
 func (p *PortfolioRepository) Create(model models.Portfolio) error {
 	sqlCommand := `INSERT INTO investments.portfolio(user_id,asset_id,deposit_date,broker,amount,description,is_done)
-value ($1,$2,$3,$4,$5,$6,$7);`
+					values ($1,$2,$3,$4,$5,$6,$7);`
 
 	statement, err := p.db.Prepare(sqlCommand)
 	if err != nil {

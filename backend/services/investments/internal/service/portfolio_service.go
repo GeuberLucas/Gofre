@@ -38,10 +38,10 @@ func (p *PortfolioService) Add(dto dtos.Portfolio) (helpers.ErrorType, error) {
 	if err != nil {
 		return helpers.INTERNAL, err
 	}
-	err = p.sendMessagingToBroker(dto.Deposit_date.Month(),
-		uint(dto.Deposit_date.Year()),
+	err = p.sendMessagingToBroker(dto.DepositDate.Month(),
+		uint(dto.DepositDate.Year()),
 		types.FloatToMoney(dto.Amount),
-		models.GetAssetName(dto.Asset_id),
+		models.GetAssetName(dto.AssetID),
 		dto.IsDone,
 		messaging.ActionInsert)
 	if err != nil {

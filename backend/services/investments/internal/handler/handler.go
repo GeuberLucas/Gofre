@@ -44,7 +44,7 @@ func (hd *HandlerService) AddInvestmentHandler() http.HandlerFunc {
 			checkErroType(w, helpers.INTERNAL, err)
 			return
 		}
-		dto.User_id = int(userId)
+		dto.UserID = int(userId)
 		typeError, err := hd.portfolioService.Add(dto)
 		if err != nil {
 			checkErroType(w, typeError, err)
@@ -112,7 +112,7 @@ func (hd *HandlerService) UpdateInvestmentHandler() http.HandlerFunc {
 			return
 		}
 		dto.Id = uint(id)
-		dto.User_id = int(userId)
+		dto.UserID = int(userId)
 		typeError, err := hd.portfolioService.Update(dto)
 		if err != nil {
 			checkErroType(w, typeError, err)

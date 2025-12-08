@@ -2,6 +2,8 @@ github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251204175532-f7ca70d39b2a h1:j
 github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251204175532-f7ca70d39b2a/go.mod h1:UH0aCMfjyLeC7kxmfNKyDCFHeJv6cTXGzOpXiHWNQFI=
 github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251207140035-d1edeaa2b2a9 h1:EcT1G3Luu/POyJ+NWJoWZzgdDen/7nTwryTm2dGIR0o=
 github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251207140035-d1edeaa2b2a9/go.mod h1:zPdg+TsWt1+hTFfN6CsInT7E+WPTXVOXyitb525iOL8=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251208005430-7ecb285c045b h1:dGHZAtK2uNh+lQeYDnsnAJMff2HDcyXlqGTvg4De0As=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251208005430-7ecb285c045b/go.mod h1:zPdg+TsWt1+hTFfN6CsInT7E+WPTXVOXyitb525iOL8=
 github.com/gorilla/mux v1.8.1 h1:TuBL49tXwgrFYWhqrNgrUNEY92u81SPhu7sTdzQEiWY=
 github.com/gorilla/mux v1.8.1/go.mod h1:AKf9I4AEqPTmMytcMc0KkNouC66V3BtZ4qD5fmWSiMQ=
 github.com/joho/godotenv v1.5.1 h1:7eLL/+HRGLY0ldzfGMeQkb7vMd0as4CfYvUVzLqw0N0=

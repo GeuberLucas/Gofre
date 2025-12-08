@@ -5,12 +5,12 @@ import (
 )
 
 type Portfolio struct {
-	Id           uint
-	User_id      int
-	Asset_id     uint
-	Deposit_date time.Time
-	Broker       string
-	Amount       float64
-	IsDone       bool
-	Description  string
+	Id          uint      `json:"id"`
+	UserID      int       `json:"user_id"`
+	AssetID     uint      `json:"asset_id"`
+	DepositDate time.Time `json:"deposit_date"`
+	Broker      string    `json:"broker"`
+	Amount      float64   `json:"amount"`
+	IsDone      bool      `json:"is_done"`
+	Description string    `json:"description"`
 }

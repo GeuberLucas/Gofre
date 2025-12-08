@@ -9,9 +9,9 @@ import (
 func MapperDtoToModel(dto dtos.Portfolio) models.Portfolio {
 	return models.Portfolio{
 		Id:           dto.Id,
-		User_id:      dto.User_id,
-		Asset_id:     dto.Asset_id,
-		Deposit_date: dto.Deposit_date,
+		User_id:      dto.UserID,
+		Asset_id:     dto.AssetID,
+		Deposit_date: dto.DepositDate,
 		Broker:       dto.Broker,
 		Amount:       types.FloatToMoney(dto.Amount),
 		IsDone:       dto.IsDone,
@@ -21,13 +21,13 @@ func MapperDtoToModel(dto dtos.Portfolio) models.Portfolio {
 
 func MapperModelToDto(model models.Portfolio) dtos.Portfolio {
 	return dtos.Portfolio{
-		Id:           model.Id,
-		User_id:      model.User_id,
-		Asset_id:     model.Asset_id,
-		Deposit_date: model.Deposit_date,
-		Broker:       model.Broker,
-		Amount:       model.Amount.ToFloat(),
-		IsDone:       model.IsDone,
-		Description:  model.Description,
+		Id:          model.Id,
+		UserID:      model.User_id,
+		AssetID:     model.Asset_id,
+		DepositDate: model.Deposit_date,
+		Broker:      model.Broker,
+		Amount:      model.Amount.ToFloat(),
+		IsDone:      model.IsDone,
+		Description: model.Description,
 	}
 }
