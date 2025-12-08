@@ -2,6 +2,7 @@ package messaging
 
 import (
 	"errors"
+	"time"
 
 	"github.com/GeuberLucas/Gofre/backend/pkg/types"
 )
@@ -35,7 +36,7 @@ func (act ActionType) IsValid() bool {
 }
 
 type MessagingDto struct {
-	Month            uint        `json:"month"`
+	Month            time.Month  `json:"month"`
 	Year             uint        `json:"year"`
 	Amount           types.Money `json:"amount"`
 	Movement         Movement    `json:"movement"`
@@ -71,7 +72,7 @@ func (md *MessagingDto) IsValid() error {
 	return nil
 }
 
-func NewMessagingDto(month uint,
+func NewMessagingDto(month time.Month,
 	year uint,
 	amount types.Money,
 	movement Movement,

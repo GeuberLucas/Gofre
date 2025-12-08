@@ -3,12 +3,13 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	"time"
 
 	"github.com/GeuberLucas/Gofre/backend/pkg/messaging"
 	"github.com/GeuberLucas/Gofre/backend/pkg/types"
 	dtos "github.com/GeuberLucas/Gofre/backend/services/investments/internal/DTOs"
 	"github.com/GeuberLucas/Gofre/backend/services/investments/internal/helpers"
+	"github.com/GeuberLucas/Gofre/backend/services/investments/internal/models"
 	"github.com/GeuberLucas/Gofre/backend/services/investments/internal/repository"
 )
 
@@ -37,18 +38,38 @@ func (p *PortfolioService) Add(dto dtos.Portfolio) (helpers.ErrorType, error) {
 	if err != nil {
 		return helpers.INTERNAL, err
 	}
-
+	err = p.sendMessagingToBroker(dto.Deposit_date.Month(),
+		uint(dto.Deposit_date.Year()),
+		types.FloatToMoney(dto.Amount),
+		models.GetAssetName(dto.Asset_id),
+		dto.IsDone,
+		messaging.ActionInsert)
+	if err != nil {
+		return helpers.INTERNAL, err
+	}
 	return helpers.NONE, nil
 
 }
 
 // Delete implements IPortfolioService.
 func (p *PortfolioService) Delete(id int64, userId int64) (helpers.ErrorType, error) {
-	err := p.portifolioRepository.Delete(id, userId)
+	portfolioModel, err := p.portifolioRepository.GetById(uint(id))
 	if err != nil {
 		return helpers.INTERNAL, err
 	}
-
+	err = p.portifolioRepository.Delete(id, userId)
+	if err != nil {
+		return helpers.INTERNAL, err
+	}
+	err = p.sendMessagingToBroker(portfolioModel.Deposit_date.Month(),
+		uint(portfolioModel.Deposit_date.Year()),
+		portfolioModel.Amount,
+		models.GetAssetName(portfolioModel.Asset_id),
+		portfolioModel.IsDone,
+		messaging.ActionDelete)
+	if err != nil {
+		return helpers.INTERNAL, err
+	}
 	return helpers.NONE, nil
 }
 
@@ -92,7 +113,15 @@ func (p *PortfolioService) Update(dto dtos.Portfolio) (helpers.ErrorType, error)
 	if err != nil {
 		return helpers.INTERNAL, err
 	}
-
+	err = p.sendMessagingToBroker(portfolioModel.Deposit_date.Month(),
+		uint(portfolioModel.Deposit_date.Year()),
+		portfolioModel.Amount,
+		models.GetAssetName(portfolioModel.Asset_id),
+		portfolioModel.IsDone,
+		messaging.ActionUpdate)
+	if err != nil {
+		return helpers.INTERNAL, err
+	}
 	return helpers.NONE, nil
 }
 
@@ -103,7 +132,7 @@ func NewPortfolioService(repo repository.IPortfolioRepository, broker messaging.
 	}
 }
 
-func (p *PortfolioService) sendMessagingToBroker(month uint,
+func (p *PortfolioService) sendMessagingToBroker(month time.Month,
 	year uint,
 	amount types.Money,
 	movementType string,
@@ -125,8 +154,7 @@ func (p *PortfolioService) sendMessagingToBroker(month uint,
 		return err
 	}
 
-	log.Println(ms)
-	eventName := fmt.Sprintf("finance.%s.%d", messaging.TypeInvestment, action)
+	eventName := fmt.Sprintf("finance.%s.%s", messaging.TypeInvestment, action)
 	json, err := json.Marshal(ms)
 	if err != nil {
 		return err
