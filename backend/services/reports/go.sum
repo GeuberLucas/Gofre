@@ -1,5 +1,7 @@
 github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251208012407-a44d06bf2a50 h1:xcEYYASzJeBOYrYLftN3M5hCcsqVZZoK4lghIhW1vAE=
 github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251208012407-a44d06bf2a50/go.mod h1:zPdg+TsWt1+hTFfN6CsInT7E+WPTXVOXyitb525iOL8=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251208195914-07ce8edcb177 h1:LjRgTJDrBUx6gGTefFoxtd9x2Hu9s3BAcYfvPSrgKik=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251208195914-07ce8edcb177/go.mod h1:zPdg+TsWt1+hTFfN6CsInT7E+WPTXVOXyitb525iOL8=
 github.com/gorilla/mux v1.8.1 h1:TuBL49tXwgrFYWhqrNgrUNEY92u81SPhu7sTdzQEiWY=
 github.com/gorilla/mux v1.8.1/go.mod h1:AKf9I4AEqPTmMytcMc0KkNouC66V3BtZ4qD5fmWSiMQ=
 github.com/joho/godotenv v1.5.1 h1:7eLL/+HRGLY0ldzfGMeQkb7vMd0as4CfYvUVzLqw0N0=
@@ -16,5 +18,9 @@ github.com/nats-io/nuid v1.0.1 h1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=
 github.com/nats-io/nuid v1.0.1/go.mod h1:19wcPz3Ph3q0Jbyiqsd0kePYG7A95tJPxeL+1OSON2c=
 golang.org/x/crypto v0.45.0 h1:jMBrvKuj23MTlT0bQEOBcAE0mjg8mK9RXFhRH6nyF3Q=
 golang.org/x/crypto v0.45.0/go.mod h1:XTGrrkGJve7CYK7J8PEww4aY7gM3qMCElcJQ8n8JdX4=
+golang.org/x/crypto v0.46.0 h1:cKRW/pmt1pKAfetfu+RCEvjvZkA9RimPbh7bhFjGVBU=
+golang.org/x/crypto v0.46.0/go.mod h1:Evb/oLKmMraqjZ2iQTwDwvCtJkczlDuTmdJXoZVzqU0=
 golang.org/x/sys v0.38.0 h1:3yZWxaJjBmCWXqhN1qh02AkOnCQ1poK6oF+a7xWL6Gc=
 golang.org/x/sys v0.38.0/go.mod h1:OgkHotnGiDImocRcuBABYBEXf8A9a87e/uXjp9XT3ks=
+golang.org/x/sys v0.39.0 h1:CvCKL8MeisomCi6qNZ+wbb0DN9E5AATixKsvNtMoMFk=
+golang.org/x/sys v0.39.0/go.mod h1:OgkHotnGiDImocRcuBABYBEXf8A9a87e/uXjp9XT3ks=
