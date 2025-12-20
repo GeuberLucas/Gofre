@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/GeuberLucas/Gofre/backend/pkg/routes"
-	"github.com/GeuberLucas/Gofre/backend/services/reports/internal/query/handler"
+	"github.com/GeuberLucas/Gofre/backend/services/reports/internal/handler"
 	"github.com/gorilla/mux"
 )
 

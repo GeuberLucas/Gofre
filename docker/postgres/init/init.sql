@@ -163,9 +163,9 @@ CREATE SCHEMA IF NOT EXISTS reports;
 create table reports.revenue (
   "month" int,
   "year" int,
-  planned decimal(10,2),
-  actual decimal(10,2),
-  pending decimal(10,2),
+  "planned" bigint,
+  "actual" bigint,
+  "pending" bigint,
   "user_id" int,
   unique ("month", "year", "user_id")
 );
@@ -173,15 +173,15 @@ create table reports.revenue (
 create table reports.aggregated (
   "month" int,
   "year" int,
-  "revenue" decimal(10,2),
-  "expense" decimal(10,2),
-  "investments" decimal(10,2),
-  "montly_without_credit" decimal(10,2),
-  "montly_with_credit" decimal(10,2),
-  "variable_without_credit" decimal(10,2),
-  "variable_with_credit" decimal(10,2),
-  "invoice" decimal(10,2),
-  "result" decimal(10,2),
+  "revenue" bigint,
+  "expense" bigint,
+  "investments" bigint,
+  "monthly_without_credit" bigint,
+  "monthly_with_credit" bigint,
+  "variable_without_credit" bigint,
+  "variable_with_credit" bigint,
+  "invoice" bigint,
+  "result" bigint,
   "user_id" int,
   unique ("month", "year", "user_id")
 );
@@ -189,9 +189,9 @@ create table reports.aggregated (
 create table reports.investments (
   "month" int,
   "year" int,
-  "planned" decimal(10,2),
-  "actual" decimal(10,2),
-  "pending" decimal(10,2),
+  "planned" bigint,
+  "actual" bigint,
+  "pending" bigint,
   "user_id" int,
   unique ("month", "year", "user_id")
 );
@@ -199,12 +199,12 @@ create table reports.investments (
 create table reports.expense (
   "month" int,
   "year" int,
-  "planned" decimal(10,2),
-  "actual" decimal(10,2),
-  "pending" decimal(10,2),
-  "invoice" decimal(10,2),
-  "variable" decimal(10,2),
-  "monthly" decimal(10,2),
+  "planned" bigint,
+  "actual" bigint,
+  "pending" bigint,
+  "invoice" bigint,
+  "variable" bigint,
+  "monthly" bigint,
   "user_id" int,
   unique ("month", "year", "user_id")
 );
