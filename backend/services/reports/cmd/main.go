@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,7 +11,9 @@ import (
 	"github.com/GeuberLucas/Gofre/backend/pkg/db"
 	gracefulshutdown "github.com/GeuberLucas/Gofre/backend/pkg/graceful_shutdown"
 	"github.com/GeuberLucas/Gofre/backend/pkg/messaging"
+	service "github.com/GeuberLucas/Gofre/backend/services/reports/internal/Service"
 	"github.com/GeuberLucas/Gofre/backend/services/reports/internal/repository"
+	"github.com/nats-io/nats.go"
 )
 
 func main() {
@@ -29,13 +32,27 @@ func main() {
 		return
 	}
 	aggregatedRepository := repository.NewAggregatedRepository(dbConn)
-	eventTrackRepository := repository.NewEventTrackRepository(dbConn)
+	//eventTrackRepository := repository.NewEventTrackRepository(dbConn)
 	expenseRepository := repository.NewExpensesRepository(dbConn)
 	investmentsRepository := repository.NewInvestmentsRepository(dbConn)
 	revenueRepository := repository.NewRevenueRepository(dbConn)
-	Service := service.NewPortfolioService(portfolioRepository)
-	// handlerService := handler.NewHandlerService()
+	aggregatedService := service.NewService(aggregatedRepository, revenueRepository, investmentsRepository)
+	expenseService := service.NewExpenseService(expenseRepository)
+	// // handlerService := handler.NewHandlerService()
+	messagingService.SubscribeToSubject("finance.>", func(msg *nats.Msg) {
+		var dto messaging.MessagingDto
+		err := json.Unmarshal(msg.Data, &dto)
+		if err != nil {
+			log.Fatalln("decode error mesage")
+		}
 
+		switch dto.Movement {
+		case messaging.TypeExpense:
+			err = expenseService.RegisterEvent(dto)
+			err = aggregatedService.RegisterEventExpense(dto)
+		}
+
+	})
 	// routers := router.SetupRoutes(handlerService)
 	var portApi string = ":50728"
 	if os.Getenv("Enviroment") != "Development" {

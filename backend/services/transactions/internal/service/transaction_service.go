@@ -42,7 +42,7 @@ func (ts *TransactionService) AddExpense(dto dtos.ExpenseDto) (string, error) {
 		model.Category,
 		model.PaymentMethod == string(dtos.PaymentMethodCredito),
 		model.IsPaid,
-		messaging.ActionInsert)
+		messaging.ActionInsert, int(model.UserId), 0)
 	if err != nil {
 		return helpers.INTERNAL.String(), err
 	}
@@ -68,7 +68,7 @@ func (ts *TransactionService) AddRevenue(dto dtos.RevenueDto) (string, error) {
 		"",
 		false,
 		model.IsRecieved,
-		messaging.ActionInsert)
+		messaging.ActionInsert, int(model.UserId), 0)
 	if err != nil {
 		return helpers.INTERNAL.String(), err
 	}
@@ -119,9 +119,13 @@ func (ts *TransactionService) GetByIdUserRevenue(idUser int64) ([]dtos.RevenueDt
 }
 
 func (ts *TransactionService) UpdateExpense(id int64, dto dtos.ExpenseDto) (error, string) {
+	oldModel, err := ts.expenseRepository.GetById(id)
+	if err != nil {
+		return err, "Internal"
+	}
 	model := dto.ToModel()
 	model.ID = id
-	err := model.Isvalid()
+	err = model.Isvalid()
 	if err != nil {
 		return err, "Validation"
 	}
@@ -137,16 +141,20 @@ func (ts *TransactionService) UpdateExpense(id int64, dto dtos.ExpenseDto) (erro
 		model.Category,
 		model.PaymentMethod == string(dtos.PaymentMethodCredito),
 		model.IsPaid,
-		messaging.ActionUpdate)
+		messaging.ActionUpdate, int(model.UserId), oldModel.Amount)
 	if err != nil {
 		return err, helpers.INTERNAL.String()
 	}
 	return nil, ""
 }
 func (ts *TransactionService) UpdateRevenue(id int64, dto dtos.RevenueDto) (error, string) {
+	oldModel, err := ts.revenueRepository.GetById(id)
+	if err != nil {
+		return err, "Internal"
+	}
 	model := dto.ToModel()
 	model.ID = id
-	err := model.Isvalid()
+	err = model.Isvalid()
 	if err != nil {
 		return err, "Validation"
 	}
@@ -162,7 +170,7 @@ func (ts *TransactionService) UpdateRevenue(id int64, dto dtos.RevenueDto) (erro
 		"",
 		false,
 		model.IsRecieved,
-		messaging.ActionUpdate)
+		messaging.ActionUpdate, int(model.UserId), oldModel.Amount)
 	if err != nil {
 		return err, helpers.INTERNAL.String()
 	}
@@ -186,7 +194,7 @@ func (ts *TransactionService) DeleteExpense(id int64, userId int64) (error, stri
 		model.Category,
 		model.PaymentMethod == string(dtos.PaymentMethodCredito),
 		model.IsPaid,
-		messaging.ActionDelete)
+		messaging.ActionDelete, int(model.UserId), 0)
 	if err != nil {
 		return err, helpers.INTERNAL.String()
 	}
@@ -210,7 +218,7 @@ func (ts *TransactionService) DeleteRevenue(id int64, userId int64) (error, stri
 		"",
 		false,
 		model.IsRecieved,
-		messaging.ActionDelete)
+		messaging.ActionDelete, int(model.UserId), 0)
 	if err != nil {
 		return err, helpers.INTERNAL.String()
 	}
@@ -254,24 +262,26 @@ func (ts *TransactionService) sendMessagingToBroker(month time.Month,
 	creditCard bool,
 	isConfirmed bool,
 
-	action messaging.ActionType) error {
+	action messaging.ActionType, userId int, amoutOld types.Money) error {
 	ms, err := messaging.NewMessagingDto(
 		month,
 		year,
 		amount,
+		amoutOld,
 		movement,
 		movementType,
 		movementCategory,
 		creditCard,
 		isConfirmed,
 		action,
+		userId,
 	)
 
 	if err != nil {
 		return err
 	}
 
-	eventName := fmt.Sprintf("finance.%s.%s", messaging.TypeInvestment, action)
+	eventName := fmt.Sprintf("finance.%s.%s", ms.Movement, action)
 	json, err := json.Marshal(ms)
 	if err != nil {
 		return err

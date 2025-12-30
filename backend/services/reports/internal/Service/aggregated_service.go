@@ -1,43 +1,98 @@
 package service
 
 import (
+	"database/sql"
+	"errors"
+
+	"github.com/GeuberLucas/Gofre/backend/pkg/messaging"
+	"github.com/GeuberLucas/Gofre/backend/pkg/types"
 	"github.com/GeuberLucas/Gofre/backend/services/reports/internal/interfaces"
 	"github.com/GeuberLucas/Gofre/backend/services/reports/internal/models"
 )
 
-type IService interface {
-	InsertOrUpdateExpense(model models.Expense) error
+type IAggregatedService interface {
+	RegisterEventExpense(subscriberDTO messaging.MessagingDto) error
 	InsertOrUpdateRevenue(model models.Expense) error
 	InsertOrUpdateInvestment(model models.Expense) error
 }
 
-type Service struct {
+type AggregatedService struct {
 	aggregatedRepository interfaces.IReportsRepository[models.Aggregated]
-	expenseRepository    interfaces.IReportsRepository[models.Expense]
+
 	revenueRepository    interfaces.IReportsRepository[models.Revenue]
 	investmentRepository interfaces.IReportsRepository[models.Investment]
 }
 
 // InsertOrUpdateExpense implements IService.
-func (s *Service) InsertOrUpdateExpense(model models.Expense) error {
-	panic("unimplemented")
-}
 
 // InsertOrUpdateInvestment implements IService.
-func (s *Service) InsertOrUpdateInvestment(model models.Expense) error {
+func (s *AggregatedService) InsertOrUpdateInvestment(model models.Expense) error {
 	panic("unimplemented")
 }
 
 // InsertOrUpdateRevenue implements IService.
-func (s *Service) InsertOrUpdateRevenue(model models.Expense) error {
+func (s *AggregatedService) InsertOrUpdateRevenue(model models.Expense) error {
 	panic("unimplemented")
 }
 
-func NewService(ag interfaces.IReportsRepository[models.Aggregated], ex interfaces.IReportsRepository[models.Expense], rv interfaces.IReportsRepository[models.Revenue], ivt interfaces.IReportsRepository[models.Investment]) IService {
-	return &Service{
+func NewService(ag interfaces.IReportsRepository[models.Aggregated], rv interfaces.IReportsRepository[models.Revenue], ivt interfaces.IReportsRepository[models.Investment]) IAggregatedService {
+	return &AggregatedService{
 		aggregatedRepository: ag,
 		revenueRepository:    rv,
-		expenseRepository:    ex,
 		investmentRepository: ivt,
 	}
+}
+
+func (s *AggregatedService) RegisterEventExpense(subscriberDTO messaging.MessagingDto) error {
+
+	model, _, err := s.aggregatedRepository.GetByMonthAndYear(subscriberDTO.UserId, int(subscriberDTO.Month), int(subscriberDTO.Year))
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			err = nil
+
+			model = models.Aggregated{
+				UserId: subscriberDTO.UserId,
+				Month:  int(subscriberDTO.Month),
+				Year:   int(subscriberDTO.Year),
+			}
+		} else {
+			return err
+		}
+	}
+	delta := calculateValueForModel(subscriberDTO)
+	model.Expense += delta
+	switch subscriberDTO.MovementType {
+	case "Mensal":
+		if subscriberDTO.WithCredit {
+			model.MonthlyWithCredit += delta
+		} else {
+			model.MonthlyWithoutCredit += delta
+		}
+	case "Variavel":
+		if subscriberDTO.WithCredit {
+			model.VariableWithCredit += delta
+		} else {
+			model.VariableWithoutCredit += delta
+		}
+	case "Fatura":
+		model.Invoice += delta
+	}
+
+	model.Result = model.Revenue - model.Expense - model.Investments
+	_, err = s.aggregatedRepository.InsertOrUpdate(&model)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func calculateValueForModel(subscriberDTO messaging.MessagingDto) types.Money {
+	switch subscriberDTO.Action {
+	case messaging.ActionUpdate:
+		return subscriberDTO.Amount - subscriberDTO.AmountOld
+	case messaging.ActionDelete:
+		return -subscriberDTO.Amount
+	case messaging.ActionInsert:
+		return subscriberDTO.Amount
+	}
+	return types.Money(0)
 }

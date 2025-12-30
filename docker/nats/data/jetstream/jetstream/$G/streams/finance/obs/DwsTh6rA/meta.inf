@@ -1,0 +1,1 @@
+{"Created":"2025-12-30T20:07:00.404091012Z","Name":"DwsTh6rA","name":"DwsTh6rA","deliver_policy":"all","ack_policy":"explicit","ack_wait":30000000000,"max_deliver":-1,"filter_subject":"finance.\u003e","replay_policy":"instant","max_ack_pending":1000,"deliver_subject":"_INBOX.4YJhFUqpV15PEnxzaNbLsJ","num_replicas":0,"metadata":{"_nats.req.level":"0"}}

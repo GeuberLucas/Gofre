@@ -45,6 +45,21 @@ services:
       - gofre-network
     depends_on:
       - database
+
+  reports:
+    container_name: reports_microservice
+    image: "reports-microservice"
+    build:
+      context: "./backend/services/reports"
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend.env
+    restart: on-failure
+    networks:
+      - gofre-network
+    depends_on:
+      - database
+      - nats
   investments:
     container_name: investments_microservice
     image: "investments-microservice"

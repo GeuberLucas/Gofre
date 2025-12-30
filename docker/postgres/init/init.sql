@@ -209,6 +209,8 @@ create table reports.expense (
   unique ("month", "year", "user_id")
 );
 
+
+
 commit;
 
 BEGIN;

@@ -39,12 +39,14 @@ type MessagingDto struct {
 	Month            time.Month  `json:"month"`
 	Year             uint        `json:"year"`
 	Amount           types.Money `json:"amount"`
+	AmountOld        types.Money `json:"old_amount"`
 	Movement         Movement    `json:"movement"`
 	MovementType     string      `json:"movement_type"`
 	MovementCategory string      `json:"movement_category"`
 	WithCredit       bool        `json:"with_credit"`
 	IsConfirmed      bool        `json:"is_confirmed"`
 	Action           ActionType  `json:"action"`
+	UserId           int         `json:"user_id"`
 }
 
 func (md *MessagingDto) IsValid() error {
@@ -66,8 +68,8 @@ func (md *MessagingDto) IsValid() error {
 	if md.Movement == TypeExpense && len(md.MovementCategory) == 0 {
 		return errors.New("Messaging: validate struct: MovementCategory is required for Expense")
 	}
-	if md.Movement == TypeExpense && len(md.MovementCategory) == 0 {
-		return errors.New("Messaging: validate struct: MovementCategory is required for Expense")
+	if md.Action == ActionUpdate && md.AmountOld == 0 {
+		return errors.New("Messaging: validate struct: Amount Old is required for update")
 	}
 	return nil
 }
@@ -75,12 +77,14 @@ func (md *MessagingDto) IsValid() error {
 func NewMessagingDto(month time.Month,
 	year uint,
 	amount types.Money,
+	amountOld types.Money,
 	movement Movement,
 	movementType string,
 	movementCategory string,
 	withCredit bool,
 	isConfirmed bool,
-	action ActionType) (MessagingDto, error) {
+	action ActionType,
+	userId int) (MessagingDto, error) {
 	messagingDto := MessagingDto{
 		Month:            month,
 		Year:             year,
@@ -91,6 +95,8 @@ func NewMessagingDto(month time.Month,
 		WithCredit:       withCredit,
 		IsConfirmed:      isConfirmed,
 		Action:           action,
+		UserId:           userId,
+		AmountOld:        amountOld,
 	}
 	if err := messagingDto.IsValid(); err != nil {
 		return MessagingDto{}, err

@@ -17,7 +17,16 @@ func NewExpensesRepository(conn *sql.DB) interfaces.IReportsRepository[models.Ex
 }
 
 func (inv *ExpensesRepository) InsertOrUpdate(model *models.Expense) (helpers.ErrorType, error) {
-	sqlCommand := ``
+	sqlCommand := `INSERT INTO reports.expense (month, year, user_id, planned, actual, pending, invoice, variable, monthly) 
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
+ON CONFLICT (month, year, user_id) 
+DO UPDATE SET 
+    planned = EXCLUDED.planned,
+    actual = EXCLUDED.actual,
+    pending = EXCLUDED.pending,
+    invoice = EXCLUDED.invoice,
+    variable = EXCLUDED.variable,
+    monthly = EXCLUDED.monthly;`
 
 	statement, err := inv.db.Prepare(sqlCommand)
 	if err != nil {

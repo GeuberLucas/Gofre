@@ -41,9 +41,10 @@ func (p *PortfolioService) Add(dto dtos.Portfolio) (helpers.ErrorType, error) {
 	err = p.sendMessagingToBroker(dto.DepositDate.Month(),
 		uint(dto.DepositDate.Year()),
 		types.FloatToMoney(dto.Amount),
+
 		models.GetAssetName(dto.AssetID),
 		dto.IsDone,
-		messaging.ActionInsert)
+		messaging.ActionInsert, portfolioModel.User_id, 0)
 	if err != nil {
 		return helpers.INTERNAL, err
 	}
@@ -66,7 +67,7 @@ func (p *PortfolioService) Delete(id int64, userId int64) (helpers.ErrorType, er
 		portfolioModel.Amount,
 		models.GetAssetName(portfolioModel.Asset_id),
 		portfolioModel.IsDone,
-		messaging.ActionDelete)
+		messaging.ActionDelete, portfolioModel.User_id, 0)
 	if err != nil {
 		return helpers.INTERNAL, err
 	}
@@ -103,8 +104,12 @@ func (p *PortfolioService) GetById(id uint) (dtos.Portfolio, helpers.ErrorType, 
 
 // Update implements IPortfolioService.
 func (p *PortfolioService) Update(dto dtos.Portfolio) (helpers.ErrorType, error) {
+	oldPortfolioModel, err := p.portifolioRepository.GetById(dto.Id)
+	if err != nil {
+		return helpers.INTERNAL, err
+	}
 	portfolioModel := helpers.MapperDtoToModel(dto)
-	err := portfolioModel.IsValid()
+	err = portfolioModel.IsValid()
 	if err != nil {
 		return helpers.VALIDATION, err
 	}
@@ -118,7 +123,7 @@ func (p *PortfolioService) Update(dto dtos.Portfolio) (helpers.ErrorType, error)
 		portfolioModel.Amount,
 		models.GetAssetName(portfolioModel.Asset_id),
 		portfolioModel.IsDone,
-		messaging.ActionUpdate)
+		messaging.ActionUpdate, portfolioModel.User_id, oldPortfolioModel.Amount)
 	if err != nil {
 		return helpers.INTERNAL, err
 	}
@@ -137,17 +142,19 @@ func (p *PortfolioService) sendMessagingToBroker(month time.Month,
 	amount types.Money,
 	movementType string,
 	isConfirmed bool,
-	action messaging.ActionType) error {
+	action messaging.ActionType, userId int, amountOld types.Money) error {
 	ms, err := messaging.NewMessagingDto(
 		month,
 		year,
 		amount,
+		amountOld,
 		messaging.TypeInvestment,
 		movementType,
 		"",
 		false,
 		isConfirmed,
 		action,
+		userId,
 	)
 
 	if err != nil {
