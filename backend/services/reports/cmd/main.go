@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/GeuberLucas/Gofre/backend/pkg/config"
 	"github.com/GeuberLucas/Gofre/backend/pkg/db"
@@ -31,19 +33,38 @@ func main() {
 		log.Println(err)
 		return
 	}
+
 	aggregatedRepository := repository.NewAggregatedRepository(dbConn)
-	//eventTrackRepository := repository.NewEventTrackRepository(dbConn)
+	eventTrackRepository := repository.NewEventTrackRepository(dbConn)
 	expenseRepository := repository.NewExpensesRepository(dbConn)
 	investmentsRepository := repository.NewInvestmentsRepository(dbConn)
 	revenueRepository := repository.NewRevenueRepository(dbConn)
 	aggregatedService := service.NewService(aggregatedRepository, revenueRepository, investmentsRepository)
 	expenseService := service.NewExpenseService(expenseRepository)
-	// // handlerService := handler.NewHandlerService()
-	messagingService.SubscribeToSubject("finance.>", func(msg *nats.Msg) {
+	eventTrackService := service.NewEventTrackService(eventTrackRepository)
+	consumerName := "Reports"
+	messagingService.SubscribeToSubject(consumerName, "finance.>", func(msg *nats.Msg) {
+		eventID := msg.Header.Get(nats.MsgIdHdr)
+
+		if eventID == "" {
+			log.Println("Aviso: Mensagem sem Nats-Msg-Id, descartando")
+			msg.Term()
+			return
+		}
+
+		exists, _ := eventTrackService.IsEventProcessed(context.Background(), eventID, consumerName)
+		if exists {
+			log.Printf("Evento %s já processado. Ignorando.", eventID)
+			msg.Ack()
+			return
+		}
 		var dto messaging.MessagingDto
-		err := json.Unmarshal(msg.Data, &dto)
+		err = json.Unmarshal(msg.Data, &dto)
 		if err != nil {
-			log.Fatalln("decode error mesage")
+			errorMsg := fmt.Errorf("decode error mesage %s", eventID)
+			log.Println(errorMsg)
+			msg.Term()
+			return
 		}
 
 		switch dto.Movement {
@@ -52,6 +73,13 @@ func main() {
 			err = aggregatedService.RegisterEventExpense(dto)
 		}
 
+		if err != nil {
+			msg.NakWithDelay(5 * time.Second)
+			return
+		}
+
+		eventTrackService.MarkEventAsProcessed(context.Background(), eventID, dto.UserId, consumerName)
+		msg.Ack()
 	})
 	// routers := router.SetupRoutes(handlerService)
 	var portApi string = ":50728"

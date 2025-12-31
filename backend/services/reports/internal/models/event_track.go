@@ -3,8 +3,8 @@ package models
 import "time"
 
 type EventTrack struct {
-	EventID       string    `json:"event_id"`
-	AggregateID   int       `json:"aggregate_id"`
-	ConsumerGroup string    `json:"consumer_group"`
-	ProcessedAt   time.Time `json:"processed_at"`
+	EventID       string    `json:"event_id"`       //id event
+	AggregateID   int       `json:"aggregate_id"`   // user owner
+	ConsumerGroup string    `json:"consumer_group"` // consumer
+	ProcessedAt   time.Time `json:"processed_at"`   // time processed
 }

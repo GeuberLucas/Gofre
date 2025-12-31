@@ -10,7 +10,7 @@ import (
 
 type IEventTrackRepository interface {
 	Save(ctx context.Context, track *models.EventTrack) error
-	Exists(ctx context.Context, eventID string) (bool, error)
+	Exists(ctx context.Context, eventID string, consumer string) (bool, error)
 }
 
 type EventTrackRepository struct {
@@ -43,11 +43,11 @@ func (r *EventTrackRepository) Save(ctx context.Context, track *models.EventTrac
 	return nil
 }
 
-func (r *EventTrackRepository) Exists(ctx context.Context, eventID string) (bool, error) {
+func (r *EventTrackRepository) Exists(ctx context.Context, eventID string, consumer string) (bool, error) {
 	var exists bool
-	query := `SELECT EXISTS(SELECT 1 FROM public.event_track WHERE event_id = $1)`
+	query := `SELECT EXISTS(SELECT 1 FROM public.event_track WHERE event_id = $1 and consumer_group= $2)`
 
-	err := r.db.QueryRowContext(ctx, query, eventID).Scan(&exists)
+	err := r.db.QueryRowContext(ctx, query, eventID, consumer).Scan(&exists)
 	if err != nil {
 		return false, fmt.Errorf("erro ao verificar existência do evento: %w", err)
 	}

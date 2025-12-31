@@ -4,12 +4,13 @@ import (
 	"log"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/nats-io/nats.go"
 )
 
 type IMessaging interface {
 	PublishMessage(subject string, message []byte) error
-	SubscribeToSubject(subject string, handler nats.MsgHandler) (*nats.Subscription, error)
+	SubscribeToSubject(consumerName string, subject string, handler nats.MsgHandler) (*nats.Subscription, error)
 	CloseConnection() error
 }
 
@@ -57,12 +58,15 @@ func NewNATSMessaging() (IMessaging, error) {
 }
 
 func (n *NATSMessaging) PublishMessage(subject string, message []byte) error {
-	_, err := n.js.Publish(subject, message)
+	msgId := uuid.New().String()
+
+	_, err := n.js.Publish(subject, message, nats.MsgId(msgId))
 	return err
 }
 
-func (n *NATSMessaging) SubscribeToSubject(subject string, handler nats.MsgHandler) (*nats.Subscription, error) {
-	return n.js.Subscribe(subject, handler)
+func (n *NATSMessaging) SubscribeToSubject(consumerName string, subject string, handler nats.MsgHandler) (*nats.Subscription, error) {
+
+	return n.js.Subscribe(subject, handler, nats.Durable(consumerName), nats.ManualAck())
 }
 
 func (n *NATSMessaging) CloseConnection() error {
