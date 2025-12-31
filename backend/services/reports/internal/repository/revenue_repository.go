@@ -16,7 +16,7 @@ func NewRevenueRepository(conn *sql.DB) interfaces.IReportsRepository[models.Rev
 	return &RevenueRepository{db: conn}
 }
 
-func (inv *RevenueRepository) InsertOrUpdate(model *models.Revenue) (helpers.ErrorType, error) {
+func (inv *RevenueRepository) InsertOrUpdate(tx *sql.Tx, model *models.Revenue) (helpers.ErrorType, error) {
 	sqlCommand := `INSERT INTO reports.revenue (month, year, user_id, planned, actual, pending) 
     VALUES ($1, $2, $3, $4, $5, $6) 
     ON CONFLICT (month, year, user_id) 

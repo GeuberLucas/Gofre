@@ -16,7 +16,7 @@ func NewInvestmentsRepository(conn *sql.DB) interfaces.IReportsRepository[models
 	return &InvestmentsRepository{db: conn}
 }
 
-func (inv *InvestmentsRepository) InsertOrUpdate(model *models.Investment) (helpers.ErrorType, error) {
+func (inv *InvestmentsRepository) InsertOrUpdate(tx *sql.Tx, model *models.Investment) (helpers.ErrorType, error) {
 	sqlCommand := `INSERT INTO reports.investments (month, year, user_id, planned, actual, pending) 
     VALUES ($1, $2, $3, $4, $5, $6) 
     ON CONFLICT (month, year, user_id) 

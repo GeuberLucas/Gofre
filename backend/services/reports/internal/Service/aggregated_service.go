@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/GeuberLucas/Gofre/backend/pkg/helpers"
 	"github.com/GeuberLucas/Gofre/backend/pkg/messaging"
 	"github.com/GeuberLucas/Gofre/backend/pkg/types"
 	"github.com/GeuberLucas/Gofre/backend/services/reports/internal/interfaces"
@@ -11,7 +12,7 @@ import (
 )
 
 type IAggregatedService interface {
-	RegisterEventExpense(subscriberDTO messaging.MessagingDto) error
+	RegisterEventExpense(tx *sql.Tx, subscriberDTO messaging.MessagingDto) error
 	InsertOrUpdateRevenue(model models.Expense) error
 	InsertOrUpdateInvestment(model models.Expense) error
 }
@@ -43,7 +44,7 @@ func NewService(ag interfaces.IReportsRepository[models.Aggregated], rv interfac
 	}
 }
 
-func (s *AggregatedService) RegisterEventExpense(subscriberDTO messaging.MessagingDto) error {
+func (s *AggregatedService) RegisterEventExpense(tx *sql.Tx, subscriberDTO messaging.MessagingDto) error {
 
 	model, _, err := s.aggregatedRepository.GetByMonthAndYear(subscriberDTO.UserId, int(subscriberDTO.Month), int(subscriberDTO.Year))
 	if err != nil {
@@ -62,24 +63,24 @@ func (s *AggregatedService) RegisterEventExpense(subscriberDTO messaging.Messagi
 	delta := calculateValueForModel(subscriberDTO)
 	model.Expense += delta
 	switch subscriberDTO.MovementType {
-	case "Mensal":
+	case string(helpers.ExpenseTypeMensal):
 		if subscriberDTO.WithCredit {
 			model.MonthlyWithCredit += delta
 		} else {
 			model.MonthlyWithoutCredit += delta
 		}
-	case "Variavel":
+	case string(helpers.ExpenseTypeVariavel):
 		if subscriberDTO.WithCredit {
 			model.VariableWithCredit += delta
 		} else {
 			model.VariableWithoutCredit += delta
 		}
-	case "Fatura":
+	case string(helpers.ExpenseTypeFatura):
 		model.Invoice += delta
 	}
 
 	model.Result = model.Revenue - model.Expense - model.Investments
-	_, err = s.aggregatedRepository.InsertOrUpdate(&model)
+	_, err = s.aggregatedRepository.InsertOrUpdate(tx, &model)
 	if err != nil {
 		return err
 	}

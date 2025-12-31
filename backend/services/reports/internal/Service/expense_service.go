@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/GeuberLucas/Gofre/backend/pkg/helpers"
 	"github.com/GeuberLucas/Gofre/backend/pkg/messaging"
 	"github.com/GeuberLucas/Gofre/backend/pkg/types"
 	"github.com/GeuberLucas/Gofre/backend/services/reports/internal/interfaces"
@@ -11,7 +12,7 @@ import (
 )
 
 type IExpenseService interface {
-	RegisterEvent(subscriberDTO messaging.MessagingDto) error
+	RegisterEvent(tx *sql.Tx, subscriberDTO messaging.MessagingDto) error
 }
 
 type ExpenseService struct {
@@ -24,7 +25,7 @@ func NewExpenseService(repo interfaces.IReportsRepository[models.Expense]) IExpe
 	}
 }
 
-func (s *ExpenseService) InsertExpense(subscriberDTO messaging.MessagingDto) error {
+func (s *ExpenseService) InsertExpense(tx *sql.Tx, subscriberDTO messaging.MessagingDto) error {
 
 	model, _, err := s.expenseRepository.GetByMonthAndYear(subscriberDTO.UserId, int(subscriberDTO.Month), int(subscriberDTO.Year))
 	if err != nil {
@@ -46,13 +47,13 @@ func (s *ExpenseService) InsertExpense(subscriberDTO messaging.MessagingDto) err
 	if err != nil {
 		return err
 	}
-	_, err = s.expenseRepository.InsertOrUpdate(&model)
+	_, err = s.expenseRepository.InsertOrUpdate(tx, &model)
 	if err != nil {
 		return err
 	}
 	return nil
 }
-func (s *ExpenseService) UpdateExpense(subscriberDTO messaging.MessagingDto) error {
+func (s *ExpenseService) UpdateExpense(tx *sql.Tx, subscriberDTO messaging.MessagingDto) error {
 	var model models.Expense
 	model.Month = int(subscriberDTO.Month)
 	model.Year = int(subscriberDTO.Year)
@@ -67,13 +68,13 @@ func (s *ExpenseService) UpdateExpense(subscriberDTO messaging.MessagingDto) err
 	if err != nil {
 		return err
 	}
-	_, err = s.expenseRepository.InsertOrUpdate(&model)
+	_, err = s.expenseRepository.InsertOrUpdate(tx, &model)
 	if err != nil {
 		return err
 	}
 	return nil
 }
-func (s *ExpenseService) DeleteExpense(subscriberDTO messaging.MessagingDto) error {
+func (s *ExpenseService) DeleteExpense(tx *sql.Tx, subscriberDTO messaging.MessagingDto) error {
 	var model models.Expense
 	model.Month = int(subscriberDTO.Month)
 	model.Year = int(subscriberDTO.Year)
@@ -88,7 +89,7 @@ func (s *ExpenseService) DeleteExpense(subscriberDTO messaging.MessagingDto) err
 	if err != nil {
 		return err
 	}
-	_, err = s.expenseRepository.InsertOrUpdate(&model)
+	_, err = s.expenseRepository.InsertOrUpdate(tx, &model)
 	if err != nil {
 		return err
 	}
@@ -97,11 +98,11 @@ func (s *ExpenseService) DeleteExpense(subscriberDTO messaging.MessagingDto) err
 func calculateValuesExpense(dto messaging.MessagingDto, model *models.Expense, amount types.Money) error {
 	//tipo de gasto
 	switch dto.MovementType {
-	case "Fatura":
+	case string(helpers.ExpenseTypeFatura):
 		model.Invoice += amount
-	case "Mensal":
+	case string(helpers.ExpenseTypeMensal):
 		model.Monthly += amount
-	case "Variavel":
+	case string(helpers.ExpenseTypeVariavel):
 		model.Variable += amount
 	default:
 		return errors.New("Type of movement not reconized")
@@ -119,16 +120,16 @@ func calculateValuesExpense(dto messaging.MessagingDto, model *models.Expense, a
 	return nil
 }
 
-func (s *ExpenseService) RegisterEvent(subscriberDTO messaging.MessagingDto) error {
+func (s *ExpenseService) RegisterEvent(tx *sql.Tx, subscriberDTO messaging.MessagingDto) error {
 	switch subscriberDTO.Action {
 	case messaging.ActionInsert:
-		err := s.InsertExpense(subscriberDTO)
+		err := s.InsertExpense(tx, subscriberDTO)
 		return err
 	case messaging.ActionUpdate:
-		err := s.UpdateExpense(subscriberDTO)
+		err := s.UpdateExpense(tx, subscriberDTO)
 		return err
 	case messaging.ActionDelete:
-		err := s.DeleteExpense(subscriberDTO)
+		err := s.DeleteExpense(tx, subscriberDTO)
 		return err
 	}
 	return nil

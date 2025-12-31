@@ -3,13 +3,14 @@ module github.com/GeuberLucas/Gofre/backend/services/transaction
 go 1.25.4
 
 require (
-	github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251208195914-07ce8edcb177
+	github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251231120620-28966cb8983b
 	github.com/gorilla/mux v1.8.1
-	github.com/joho/godotenv v1.5.1
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/google/uuid v1.6.0 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/nats-io/nats.go v1.47.0 // indirect
 	github.com/nats-io/nkeys v0.4.12 // indirect
@@ -21,7 +22,6 @@ require (
 )
 
 require (
-	github.com/golang-jwt/jwt/v5 v5.3.0 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/stretchr/testify v1.11.1
 )

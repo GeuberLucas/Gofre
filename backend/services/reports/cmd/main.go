@@ -28,11 +28,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//_, err = messagingService.SubscribeToSubject("finance.INVESTMENT.CREATE", HandlerInvestmentInsert)
-	if err != nil {
-		log.Println(err)
-		return
-	}
 
 	aggregatedRepository := repository.NewAggregatedRepository(dbConn)
 	eventTrackRepository := repository.NewEventTrackRepository(dbConn)
@@ -44,15 +39,16 @@ func main() {
 	eventTrackService := service.NewEventTrackService(eventTrackRepository)
 	consumerName := "Reports"
 	messagingService.SubscribeToSubject(consumerName, "finance.>", func(msg *nats.Msg) {
+		ctx := context.Background()
 		eventID := msg.Header.Get(nats.MsgIdHdr)
-
+		transac, _ := dbConn.Begin()
 		if eventID == "" {
 			log.Println("Aviso: Mensagem sem Nats-Msg-Id, descartando")
 			msg.Term()
 			return
 		}
 
-		exists, _ := eventTrackService.IsEventProcessed(context.Background(), eventID, consumerName)
+		exists, _ := eventTrackService.IsEventProcessed(ctx, eventID, consumerName)
 		if exists {
 			log.Printf("Evento %s já processado. Ignorando.", eventID)
 			msg.Ack()
@@ -69,16 +65,27 @@ func main() {
 
 		switch dto.Movement {
 		case messaging.TypeExpense:
-			err = expenseService.RegisterEvent(dto)
-			err = aggregatedService.RegisterEventExpense(dto)
+			err = expenseService.RegisterEvent(transac, dto)
+			if err != nil {
+				transac.Rollback()
+				msg.NakWithDelay(5 * time.Second)
+				errorMsg := fmt.Errorf("processing error mesage %s %v", eventID, err)
+				log.Println(errorMsg)
+				return
+			}
+			err = aggregatedService.RegisterEventExpense(transac, dto)
 		}
 
 		if err != nil {
+			transac.Rollback()
 			msg.NakWithDelay(5 * time.Second)
+			errorMsg := fmt.Errorf("processing error mesage %s %v", eventID, err)
+			log.Println(errorMsg)
 			return
 		}
 
 		eventTrackService.MarkEventAsProcessed(context.Background(), eventID, dto.UserId, consumerName)
+		transac.Commit()
 		msg.Ack()
 	})
 	// routers := router.SetupRoutes(handlerService)

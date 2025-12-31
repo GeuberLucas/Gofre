@@ -16,7 +16,7 @@ func NewAggregatedRepository(conn *sql.DB) interfaces.IReportsRepository[models.
 	return &AggregatedRepository{db: conn}
 }
 
-func (agr *AggregatedRepository) InsertOrUpdate(model *models.Aggregated) (helpers.ErrorType, error) {
+func (agr *AggregatedRepository) InsertOrUpdate(tx *sql.Tx, model *models.Aggregated) (helpers.ErrorType, error) {
 	sqlCommand := `INSERT INTO reports.aggregated (
 	  "month", 
 	  "year", 
