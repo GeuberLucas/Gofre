@@ -1,5 +1,7 @@
 github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251231120620-28966cb8983b h1:TrU0Oz8v7IoaRDm4Cpx/SaMesMmNgirKjx1tYRhQerQ=
 github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251231120620-28966cb8983b/go.mod h1:zPdg+TsWt1+hTFfN6CsInT7E+WPTXVOXyitb525iOL8=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251231125632-6886569aad31 h1:qA6ukFl7WVRrKOLy7RV1s28uUeDCNZ3lacUaue74Ins=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251231125632-6886569aad31/go.mod h1:zPdg+TsWt1+hTFfN6CsInT7E+WPTXVOXyitb525iOL8=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=

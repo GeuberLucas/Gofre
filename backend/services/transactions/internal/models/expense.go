@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/GeuberLucas/Gofre/backend/pkg/helpers"
 	"github.com/GeuberLucas/Gofre/backend/pkg/types"
 )
 
@@ -12,9 +13,9 @@ type Expense struct {
 	UserId        int64
 	Description   string
 	Target        string
-	Category      string
-	Type          string
-	PaymentMethod string
+	Category      helpers.ExpenseCategory
+	Type          helpers.ExpenseType
+	PaymentMethod helpers.PaymentMethod
 	PaymentDate   time.Time
 	Amount        types.Money
 	IsPaid        bool

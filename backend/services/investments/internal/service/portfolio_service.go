@@ -3,10 +3,8 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/GeuberLucas/Gofre/backend/pkg/messaging"
-	"github.com/GeuberLucas/Gofre/backend/pkg/types"
 	dtos "github.com/GeuberLucas/Gofre/backend/services/investments/internal/DTOs"
 	"github.com/GeuberLucas/Gofre/backend/services/investments/internal/helpers"
 	"github.com/GeuberLucas/Gofre/backend/services/investments/internal/models"
@@ -38,13 +36,7 @@ func (p *PortfolioService) Add(dto dtos.Portfolio) (helpers.ErrorType, error) {
 	if err != nil {
 		return helpers.INTERNAL, err
 	}
-	err = p.sendMessagingToBroker(dto.DepositDate.Month(),
-		uint(dto.DepositDate.Year()),
-		types.FloatToMoney(dto.Amount),
-
-		models.GetAssetName(dto.AssetID),
-		dto.IsDone,
-		messaging.ActionInsert, portfolioModel.User_id, 0)
+	err = p.sendMessagingToBroker(&portfolioModel, nil, messaging.ActionInsert)
 	if err != nil {
 		return helpers.INTERNAL, err
 	}
@@ -62,12 +54,8 @@ func (p *PortfolioService) Delete(id int64, userId int64) (helpers.ErrorType, er
 	if err != nil {
 		return helpers.INTERNAL, err
 	}
-	err = p.sendMessagingToBroker(portfolioModel.Deposit_date.Month(),
-		uint(portfolioModel.Deposit_date.Year()),
-		portfolioModel.Amount,
-		models.GetAssetName(portfolioModel.Asset_id),
-		portfolioModel.IsDone,
-		messaging.ActionDelete, portfolioModel.User_id, 0)
+	err = p.sendMessagingToBroker(&portfolioModel, nil, messaging.ActionDelete)
+
 	if err != nil {
 		return helpers.INTERNAL, err
 	}
@@ -118,12 +106,7 @@ func (p *PortfolioService) Update(dto dtos.Portfolio) (helpers.ErrorType, error)
 	if err != nil {
 		return helpers.INTERNAL, err
 	}
-	err = p.sendMessagingToBroker(portfolioModel.Deposit_date.Month(),
-		uint(portfolioModel.Deposit_date.Year()),
-		portfolioModel.Amount,
-		models.GetAssetName(portfolioModel.Asset_id),
-		portfolioModel.IsDone,
-		messaging.ActionUpdate, portfolioModel.User_id, oldPortfolioModel.Amount)
+	err = p.sendMessagingToBroker(&portfolioModel, &oldPortfolioModel, messaging.ActionUpdate)
 	if err != nil {
 		return helpers.INTERNAL, err
 	}
@@ -137,27 +120,32 @@ func NewPortfolioService(repo repository.IPortfolioRepository, broker messaging.
 	}
 }
 
-func (p *PortfolioService) sendMessagingToBroker(month time.Month,
-	year uint,
-	amount types.Money,
-	movementType string,
-	isConfirmed bool,
-	action messaging.ActionType, userId int, amountOld types.Money) error {
-	ms, err := messaging.NewMessagingDto(
-		month,
-		year,
-		amount,
-		amountOld,
-		messaging.TypeInvestment,
-		movementType,
-		"",
-		false,
-		isConfirmed,
-		action,
-		userId,
-	)
+func (p *PortfolioService) sendMessagingToBroker(model *models.Portfolio, modelOld *models.Portfolio, action messaging.ActionType) error {
 
-	if err != nil {
+	ms := messaging.MessagingDto{
+		Month:            model.Deposit_date.Month(),
+		Year:             uint(model.Deposit_date.Local().Year()),
+		Amount:           model.Amount,
+		Movement:         messaging.TypeInvestment,
+		MovementType:     models.GetAssetName(model.Asset_id),
+		MovementCategory: "",
+		WithCredit:       false,
+		IsConfirmed:      model.IsDone,
+		Action:           action,
+		UserId:           model.User_id,
+	}
+
+	if action == messaging.ActionUpdate {
+		ms.AmountOld = modelOld.Amount
+		ms.MonthOld = modelOld.Deposit_date.Month()
+		ms.YearOld = uint(modelOld.Deposit_date.Year())
+		ms.MovementCategoryOld = ""
+		ms.MovementTypeOld = models.GetAssetName(modelOld.Asset_id)
+		ms.WithCreditOld = false
+		ms.IsConfirmedOld = modelOld.IsDone
+	}
+
+	if err := ms.IsValid(); err != nil {
 		return err
 	}
 

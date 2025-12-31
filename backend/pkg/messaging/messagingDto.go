@@ -36,17 +36,23 @@ func (act ActionType) IsValid() bool {
 }
 
 type MessagingDto struct {
-	Month            time.Month  `json:"month"`
-	Year             uint        `json:"year"`
-	Amount           types.Money `json:"amount"`
-	AmountOld        types.Money `json:"old_amount"`
-	Movement         Movement    `json:"movement"`
-	MovementType     string      `json:"movement_type"`
-	MovementCategory string      `json:"movement_category"`
-	WithCredit       bool        `json:"with_credit"`
-	IsConfirmed      bool        `json:"is_confirmed"`
-	Action           ActionType  `json:"action"`
-	UserId           int         `json:"user_id"`
+	Month               time.Month  `json:"month"`
+	MonthOld            time.Month  `json:"month_old"`
+	YearOld             uint        `json:"year_old"`
+	Year                uint        `json:"year"`
+	Amount              types.Money `json:"amount"`
+	AmountOld           types.Money `json:"old_amount"`
+	Movement            Movement    `json:"movement"`
+	MovementTypeOld     string      `json:"movement_type_old"`
+	MovementType        string      `json:"movement_type"`
+	MovementCategoryOld string      `json:"movement_category_old"`
+	MovementCategory    string      `json:"movement_category"`
+	WithCredit          bool        `json:"with_credit"`
+	WithCreditOld       bool        `json:"with_credit_old"`
+	IsConfirmedOld      bool        `json:"is_confirmed_old"`
+	IsConfirmed         bool        `json:"is_confirmed"`
+	Action              ActionType  `json:"action"`
+	UserId              int         `json:"user_id"`
 }
 
 func (md *MessagingDto) IsValid() error {
@@ -72,35 +78,4 @@ func (md *MessagingDto) IsValid() error {
 		return errors.New("Messaging: validate struct: Amount Old is required for update")
 	}
 	return nil
-}
-
-func NewMessagingDto(month time.Month,
-	year uint,
-	amount types.Money,
-	amountOld types.Money,
-	movement Movement,
-	movementType string,
-	movementCategory string,
-	withCredit bool,
-	isConfirmed bool,
-	action ActionType,
-	userId int) (MessagingDto, error) {
-	messagingDto := MessagingDto{
-		Month:            month,
-		Year:             year,
-		Amount:           amount,
-		Movement:         movement,
-		MovementType:     movementType,
-		MovementCategory: movementCategory,
-		WithCredit:       withCredit,
-		IsConfirmed:      isConfirmed,
-		Action:           action,
-		UserId:           userId,
-		AmountOld:        amountOld,
-	}
-	if err := messagingDto.IsValid(); err != nil {
-		return MessagingDto{}, err
-	}
-	return messagingDto, nil
-
 }

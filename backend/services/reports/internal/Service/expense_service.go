@@ -41,9 +41,8 @@ func (s *ExpenseService) InsertExpense(tx *sql.Tx, subscriberDTO messaging.Messa
 			return err
 		}
 	}
-	var amount = subscriberDTO.Amount
 
-	err = calculateValuesExpense(subscriberDTO, &model, amount)
+	err = calculateValuesExpense(subscriberDTO, &model, subscriberDTO.Amount, 1)
 	if err != nil {
 		return err
 	}
@@ -53,27 +52,55 @@ func (s *ExpenseService) InsertExpense(tx *sql.Tx, subscriberDTO messaging.Messa
 	}
 	return nil
 }
-func (s *ExpenseService) UpdateExpense(tx *sql.Tx, subscriberDTO messaging.MessagingDto) error {
-	var model models.Expense
-	model.Month = int(subscriberDTO.Month)
-	model.Year = int(subscriberDTO.Year)
-	model.UserId = subscriberDTO.UserId
-	model, _, err := s.expenseRepository.GetByMonthAndYear(subscriberDTO.UserId, model.Month, model.Year)
-	if err != nil {
-		return err
-	}
-	var amount = subscriberDTO.Amount - subscriberDTO.AmountOld
+func (s *ExpenseService) UpdateExpense(tx *sql.Tx, dto messaging.MessagingDto) error {
 
-	err = calculateValuesExpense(subscriberDTO, &model, amount)
+	oldStateDto := messaging.MessagingDto{
+		MovementType:     dto.MovementTypeOld,
+		MovementCategory: dto.MovementCategoryOld,
+		IsConfirmed:      dto.IsConfirmedOld,
+		WithCredit:       dto.WithCreditOld,
+	}
+
+	err := s.processExpenseChange(tx, dto.UserId, int(dto.MonthOld), int(dto.YearOld), oldStateDto, dto.AmountOld, -1)
 	if err != nil {
 		return err
 	}
-	_, err = s.expenseRepository.InsertOrUpdate(tx, &model)
+
+	err = s.processExpenseChange(tx, dto.UserId, int(dto.Month), int(dto.Year), dto, dto.Amount, 1)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
+
+func (s *ExpenseService) processExpenseChange(tx *sql.Tx, userId int, month int, year int, dto messaging.MessagingDto, amount types.Money, multiplier int) error {
+
+	model, _, err := s.expenseRepository.GetByMonthAndYear(userId, month, year)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+
+			model = models.Expense{
+				UserId: userId,
+				Month:  month,
+				Year:   year,
+			}
+		} else {
+			return err
+		}
+	}
+
+	if err := calculateValuesExpense(dto, &model, amount, multiplier); err != nil {
+		return err
+	}
+
+	if _, err := s.expenseRepository.InsertOrUpdate(tx, &model); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *ExpenseService) DeleteExpense(tx *sql.Tx, subscriberDTO messaging.MessagingDto) error {
 	var model models.Expense
 	model.Month = int(subscriberDTO.Month)
@@ -83,9 +110,8 @@ func (s *ExpenseService) DeleteExpense(tx *sql.Tx, subscriberDTO messaging.Messa
 	if err != nil {
 		return err
 	}
-	var amount = -subscriberDTO.Amount
 
-	err = calculateValuesExpense(subscriberDTO, &model, amount)
+	err = calculateValuesExpense(subscriberDTO, &model, subscriberDTO.Amount, -1)
 	if err != nil {
 		return err
 	}
@@ -95,28 +121,32 @@ func (s *ExpenseService) DeleteExpense(tx *sql.Tx, subscriberDTO messaging.Messa
 	}
 	return nil
 }
-func calculateValuesExpense(dto messaging.MessagingDto, model *models.Expense, amount types.Money) error {
-	//tipo de gasto
+
+func calculateValuesExpense(dto messaging.MessagingDto, model *models.Expense, amount types.Money, multiplier int) error {
+
+	finalAmount := amount * types.Money(multiplier)
+
 	switch dto.MovementType {
 	case string(helpers.ExpenseTypeFatura):
-		model.Invoice += amount
+		model.Invoice += finalAmount
 	case string(helpers.ExpenseTypeMensal):
-		model.Monthly += amount
+		model.Monthly += finalAmount
 	case string(helpers.ExpenseTypeVariavel):
-		model.Variable += amount
+		model.Variable += finalAmount
 	default:
-		return errors.New("Type of movement not reconized")
+		return errors.New("Type of movement not recognized")
 	}
 
-	//meio de pagamento e pago ou nao
 	if !dto.WithCredit {
-		model.Planned += amount
+		model.Planned += finalAmount
+
 		if dto.IsConfirmed {
-			model.Actual += amount
+			model.Actual += finalAmount
 		} else {
-			model.Pending += amount
+			model.Pending += finalAmount
 		}
 	}
+
 	return nil
 }
 

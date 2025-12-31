@@ -3,11 +3,9 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/GeuberLucas/Gofre/backend/pkg/helpers"
 	"github.com/GeuberLucas/Gofre/backend/pkg/messaging"
-	"github.com/GeuberLucas/Gofre/backend/pkg/types"
 	dtos "github.com/GeuberLucas/Gofre/backend/services/transaction/internal/Dtos"
 	"github.com/GeuberLucas/Gofre/backend/services/transaction/internal/models"
 	"github.com/GeuberLucas/Gofre/backend/services/transaction/internal/repository"
@@ -34,15 +32,7 @@ func (ts *TransactionService) AddExpense(dto dtos.ExpenseDto) (string, error) {
 	if err != nil {
 		return "Internal", err
 	}
-	err = ts.sendMessagingToBroker(model.PaymentDate.Month(),
-		uint(model.PaymentDate.Year()),
-		model.Amount,
-		model.Type,
-		messaging.TypeExpense,
-		model.Category,
-		model.PaymentMethod == string(dtos.PaymentMethodCredito),
-		model.IsPaid,
-		messaging.ActionInsert, int(model.UserId), 0)
+	err = ts.sendExpenseToBroker(&model, nil, messaging.ActionInsert)
 	if err != nil {
 		return helpers.INTERNAL.String(), err
 	}
@@ -60,15 +50,7 @@ func (ts *TransactionService) AddRevenue(dto dtos.RevenueDto) (string, error) {
 	if err != nil {
 		return "Internal", err
 	}
-	err = ts.sendMessagingToBroker(model.ReceiveDate.Month(),
-		uint(model.ReceiveDate.Year()),
-		model.Amount,
-		model.Type,
-		messaging.TypeIncome,
-		"",
-		false,
-		model.IsRecieved,
-		messaging.ActionInsert, int(model.UserId), 0)
+	err = ts.sendRevenueToBroker(&model, nil, messaging.ActionInsert)
 	if err != nil {
 		return helpers.INTERNAL.String(), err
 	}
@@ -133,15 +115,7 @@ func (ts *TransactionService) UpdateExpense(id int64, dto dtos.ExpenseDto) (erro
 	if err != nil {
 		return err, "Internal"
 	}
-	err = ts.sendMessagingToBroker(model.PaymentDate.Month(),
-		uint(model.PaymentDate.Year()),
-		model.Amount,
-		model.Type,
-		messaging.TypeExpense,
-		model.Category,
-		model.PaymentMethod == string(dtos.PaymentMethodCredito),
-		model.IsPaid,
-		messaging.ActionUpdate, int(model.UserId), oldModel.Amount)
+	err = ts.sendExpenseToBroker(&model, &oldModel, messaging.ActionUpdate)
 	if err != nil {
 		return err, helpers.INTERNAL.String()
 	}
@@ -162,15 +136,7 @@ func (ts *TransactionService) UpdateRevenue(id int64, dto dtos.RevenueDto) (erro
 	if err != nil {
 		return err, "Internal"
 	}
-	err = ts.sendMessagingToBroker(model.ReceiveDate.Month(),
-		uint(model.ReceiveDate.Year()),
-		model.Amount,
-		model.Type,
-		messaging.TypeIncome,
-		"",
-		false,
-		model.IsRecieved,
-		messaging.ActionUpdate, int(model.UserId), oldModel.Amount)
+	err = ts.sendRevenueToBroker(&model, &oldModel, messaging.ActionUpdate)
 	if err != nil {
 		return err, helpers.INTERNAL.String()
 	}
@@ -186,15 +152,7 @@ func (ts *TransactionService) DeleteExpense(id int64, userId int64) (error, stri
 	if err != nil {
 		return err, "Internal"
 	}
-	err = ts.sendMessagingToBroker(model.PaymentDate.Month(),
-		uint(model.PaymentDate.Year()),
-		model.Amount,
-		model.Type,
-		messaging.TypeExpense,
-		model.Category,
-		model.PaymentMethod == string(dtos.PaymentMethodCredito),
-		model.IsPaid,
-		messaging.ActionDelete, int(model.UserId), 0)
+	err = ts.sendExpenseToBroker(&model, nil, messaging.ActionDelete)
 	if err != nil {
 		return err, helpers.INTERNAL.String()
 	}
@@ -210,15 +168,7 @@ func (ts *TransactionService) DeleteRevenue(id int64, userId int64) (error, stri
 		return err, "Internal"
 	}
 
-	err = ts.sendMessagingToBroker(model.ReceiveDate.Month(),
-		uint(model.ReceiveDate.Year()),
-		model.Amount,
-		model.Type,
-		messaging.TypeIncome,
-		"",
-		false,
-		model.IsRecieved,
-		messaging.ActionDelete, int(model.UserId), 0)
+	err = ts.sendRevenueToBroker(&model, nil, messaging.ActionDelete)
 	if err != nil {
 		return err, helpers.INTERNAL.String()
 	}
@@ -252,36 +202,75 @@ func revenueDtoFromModel(re models.Revenue) dtos.RevenueDto {
 		Amount:      re.Amount.ToFloat(),
 	}
 }
+func (ts *TransactionService) sendRevenueToBroker(model *models.Revenue, modelOld *models.Revenue, action messaging.ActionType) error {
 
-func (ts *TransactionService) sendMessagingToBroker(month time.Month,
-	year uint,
-	amount types.Money,
-	movementType string,
-	movement messaging.Movement,
-	movementCategory string,
-	creditCard bool,
-	isConfirmed bool,
+	ms := messaging.MessagingDto{
+		Month:            model.ReceiveDate.Month(),
+		Year:             uint(model.ReceiveDate.Local().Year()),
+		Amount:           model.Amount,
+		Movement:         messaging.TypeIncome,
+		MovementType:     model.Type,
+		MovementCategory: "",
+		WithCredit:       false,
+		IsConfirmed:      model.IsRecieved,
+		Action:           action,
+		UserId:           int(model.UserId),
+	}
 
-	action messaging.ActionType, userId int, amoutOld types.Money) error {
-	ms, err := messaging.NewMessagingDto(
-		month,
-		year,
-		amount,
-		amoutOld,
-		movement,
-		movementType,
-		movementCategory,
-		creditCard,
-		isConfirmed,
-		action,
-		userId,
-	)
+	if action == messaging.ActionUpdate {
+		ms.AmountOld = modelOld.Amount
+		ms.MonthOld = modelOld.ReceiveDate.Month()
+		ms.YearOld = uint(modelOld.ReceiveDate.Year())
+		ms.MovementCategoryOld = ""
+		ms.MovementTypeOld = modelOld.Type
+		ms.WithCreditOld = false
+		ms.IsConfirmedOld = modelOld.IsRecieved
+	}
 
-	if err != nil {
+	if err := ms.IsValid(); err != nil {
 		return err
 	}
 
-	eventName := fmt.Sprintf("finance.%s.%s", ms.Movement, action)
+	eventName := fmt.Sprintf("finance.%s.%s", messaging.TypeInvestment, action)
+	json, err := json.Marshal(ms)
+	if err != nil {
+		return err
+	}
+	ts.broker.PublishMessage(eventName, json)
+
+	return nil
+
+}
+func (ts *TransactionService) sendExpenseToBroker(model *models.Expense, modelOld *models.Expense, action messaging.ActionType) error {
+
+	ms := messaging.MessagingDto{
+		Month:            model.PaymentDate.Month(),
+		Year:             uint(model.PaymentDate.Local().Year()),
+		Amount:           model.Amount,
+		Movement:         messaging.TypeExpense,
+		MovementType:     string(model.Type),
+		MovementCategory: string(model.Category),
+		WithCredit:       model.PaymentMethod == helpers.PaymentMethodCredito,
+		IsConfirmed:      model.IsPaid,
+		Action:           action,
+		UserId:           int(model.UserId),
+	}
+
+	if action == messaging.ActionUpdate {
+		ms.AmountOld = modelOld.Amount
+		ms.MonthOld = modelOld.PaymentDate.Month()
+		ms.YearOld = uint(modelOld.PaymentDate.Year())
+		ms.MovementCategoryOld = string(modelOld.Category)
+		ms.MovementTypeOld = string(modelOld.Type)
+		ms.WithCreditOld = modelOld.PaymentMethod == helpers.PaymentMethodCredito
+		ms.IsConfirmedOld = modelOld.IsPaid
+	}
+
+	if err := ms.IsValid(); err != nil {
+		return err
+	}
+
+	eventName := fmt.Sprintf("finance.%s.%s", messaging.TypeInvestment, action)
 	json, err := json.Marshal(ms)
 	if err != nil {
 		return err
