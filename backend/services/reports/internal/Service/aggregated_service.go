@@ -46,21 +46,89 @@ func NewService(ag interfaces.IReportsRepository[models.Aggregated], rv interfac
 
 func (s *AggregatedService) RegisterEventExpense(tx *sql.Tx, subscriberDTO messaging.MessagingDto) error {
 
-	model, _, err := s.aggregatedRepository.GetByMonthAndYear(subscriberDTO.UserId, int(subscriberDTO.Month), int(subscriberDTO.Year))
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			err = nil
-
-			model = models.Aggregated{
-				UserId: subscriberDTO.UserId,
-				Month:  int(subscriberDTO.Month),
-				Year:   int(subscriberDTO.Year),
-			}
-		} else {
+	model := models.Aggregated{
+		UserId: subscriberDTO.UserId,
+		Month:  int(subscriberDTO.Month),
+		Year:   int(subscriberDTO.Year),
+	}
+	switch subscriberDTO.Action {
+	case messaging.ActionInsert:
+		if subscriberDTO.IsConfirmed {
+			err := s.processExpense(tx, &subscriberDTO, &model, 1)
 			return err
 		}
+	case messaging.ActionDelete:
+		if subscriberDTO.IsConfirmed {
+			return s.processExpense(tx, &subscriberDTO, &model, -1)
+		}
+	case messaging.ActionUpdate:
+		existsDiff := s.DetermineDiff(subscriberDTO)
+		if existsDiff {
+			oldModel, oldSub := s.createOldStructs(subscriberDTO)
+			if subscriberDTO.IsConfirmedOld {
+				err := s.processExpense(tx, &oldSub, &oldModel, -1)
+				if err != nil {
+					return err
+				}
+			}
+			if subscriberDTO.IsConfirmed {
+				err := s.processExpense(tx, &subscriberDTO, &model, 1)
+				if err != nil {
+					return err
+				}
+			}
+			return nil
+		}
 	}
-	delta := calculateValueForModel(subscriberDTO)
+
+	return nil
+}
+func (s *AggregatedService) DetermineDiff(subscriberDTO messaging.MessagingDto) bool {
+	diffAmount := subscriberDTO.AmountOld != subscriberDTO.Amount
+	diffType := subscriberDTO.MovementTypeOld != subscriberDTO.MovementType
+	diffMonth := subscriberDTO.Month != subscriberDTO.MonthOld
+	diffYear := subscriberDTO.YearOld != subscriberDTO.Year
+	diffCredit := subscriberDTO.WithCredit != subscriberDTO.WithCreditOld
+	diffConfirmed := subscriberDTO.IsConfirmed != subscriberDTO.IsConfirmedOld
+	return diffAmount || diffType || diffMonth || diffYear || diffCredit || diffConfirmed
+}
+func (s *AggregatedService) createOldStructs(subscriberDTO messaging.MessagingDto) (models.Aggregated, messaging.MessagingDto) {
+	oldModel := models.Aggregated{
+		UserId: subscriberDTO.UserId,
+		Month:  int(subscriberDTO.MonthOld),
+		Year:   int(subscriberDTO.YearOld),
+	}
+	oldSub := messaging.MessagingDto{
+		Amount:         subscriberDTO.AmountOld,
+		MovementType:   subscriberDTO.MovementTypeOld,
+		IsConfirmed:    subscriberDTO.IsConfirmedOld,
+		Month:          subscriberDTO.MonthOld,
+		Year:           subscriberDTO.YearOld,
+		WithCredit:     subscriberDTO.WithCreditOld,
+		IsConfirmedOld: subscriberDTO.IsConfirmedOld,
+	}
+	return oldModel, oldSub
+}
+func (s *AggregatedService) processExpense(tx *sql.Tx, dto *messaging.MessagingDto, model *models.Aggregated, multiplier int) error {
+	existingRecord, _, err := s.aggregatedRepository.GetByMonthAndYear(dto.UserId, int(dto.Month), int(dto.Year))
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	if err == nil {
+
+		*model = existingRecord
+	}
+	calculateValueForModel(dto, model, multiplier)
+	model.Result = model.Revenue - model.Expense - model.Investments
+	_, err = s.aggregatedRepository.InsertOrUpdate(tx, model)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func calculateValueForModel(subscriberDTO *messaging.MessagingDto, model *models.Aggregated, multiplier int) {
+	delta := subscriberDTO.Amount * types.Money(multiplier)
 	model.Expense += delta
 	switch subscriberDTO.MovementType {
 	case string(helpers.ExpenseTypeMensal):
@@ -78,22 +146,4 @@ func (s *AggregatedService) RegisterEventExpense(tx *sql.Tx, subscriberDTO messa
 	case string(helpers.ExpenseTypeFatura):
 		model.Invoice += delta
 	}
-
-	model.Result = model.Revenue - model.Expense - model.Investments
-	_, err = s.aggregatedRepository.InsertOrUpdate(tx, &model)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func calculateValueForModel(subscriberDTO messaging.MessagingDto) types.Money {
-	switch subscriberDTO.Action {
-	case messaging.ActionUpdate:
-		return subscriberDTO.Amount - subscriberDTO.AmountOld
-	case messaging.ActionDelete:
-		return -subscriberDTO.Amount
-	case messaging.ActionInsert:
-		return subscriberDTO.Amount
-	}
-	return types.Money(0)
 }
