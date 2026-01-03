@@ -31,11 +31,11 @@ func main() {
 
 	aggregatedRepository := repository.NewAggregatedRepository(dbConn)
 	eventTrackRepository := repository.NewEventTrackRepository(dbConn)
-	expenseRepository := repository.NewExpensesRepository(dbConn)
+	//expenseRepository := repository.NewExpensesRepository(dbConn)
 	investmentsRepository := repository.NewInvestmentsRepository(dbConn)
 	revenueRepository := repository.NewRevenueRepository(dbConn)
 	aggregatedService := service.NewService(aggregatedRepository, revenueRepository, investmentsRepository)
-	expenseService := service.NewExpenseService(expenseRepository)
+	//expenseService := service.NewExpenseService(expenseRepository)
 	eventTrackService := service.NewEventTrackService(eventTrackRepository)
 	consumerName := "Reports"
 	messagingService.SubscribeToSubject(consumerName, "finance.>", func(msg *nats.Msg) {
@@ -65,15 +65,11 @@ func main() {
 
 		switch dto.Movement {
 		case messaging.TypeExpense:
-			err = expenseService.RegisterEvent(transac, dto)
-			if err != nil {
-				transac.Rollback()
-				msg.NakWithDelay(5 * time.Second)
-				errorMsg := fmt.Errorf("processing error mesage %s %v", eventID, err)
-				log.Println(errorMsg)
-				return
-			}
 			err = aggregatedService.RegisterEventExpense(transac, dto)
+		case messaging.TypeIncome:
+			err = aggregatedService.RegisterEventRevenue(transac, dto)
+		case messaging.TypeInvestment:
+			err = aggregatedService.RegisterEventInvestment(transac, dto)
 		}
 
 		if err != nil {
@@ -84,7 +80,7 @@ func main() {
 			return
 		}
 
-		eventTrackService.MarkEventAsProcessed(context.Background(), eventID, dto.UserId, consumerName)
+		eventTrackService.MarkEventAsProcessed(ctx, eventID, dto.UserId, consumerName)
 		transac.Commit()
 		msg.Ack()
 	})
