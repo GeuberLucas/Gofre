@@ -12,7 +12,7 @@ type AggregatedRepository struct {
 	db *sql.DB
 }
 
-func NewAggregatedRepository(conn *sql.DB) interfaces.IReportsRepository[models.Aggregated] {
+func NewAggregatedRepository(conn *sql.DB) interfaces.IAggregatedRepository {
 	return &AggregatedRepository{db: conn}
 }
 

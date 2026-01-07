@@ -18,31 +18,35 @@ type IAggregatedService interface {
 }
 
 type AggregatedService struct {
-	aggregatedRepository interfaces.IReportsRepository[models.Aggregated]
+	aggregatedRepository interfaces.IAggregatedRepository
 
-	revenueRepository    interfaces.IReportsRepository[models.Revenue]
-	investmentRepository interfaces.IReportsRepository[models.Investment]
+	// revenueRepository    interfaces.IReportsRepository[models.Revenue]
+	// investmentRepository interfaces.IReportsRepository[models.Investment]
 }
 
 func (s *AggregatedService) RegisterEventRevenue(
 	tx *sql.Tx,
 	subscriberDTO messaging.MessagingDto,
 ) error {
-	return s.registerEvent(tx, subscriberDTO, s.HasBasicChanges)
+	return s.RegisterEvent(tx, subscriberDTO, s.HasBasicChanges)
 }
 
 func (s *AggregatedService) RegisterEventInvestment(
 	tx *sql.Tx,
 	subscriberDTO messaging.MessagingDto,
 ) error {
-	return s.registerEvent(tx, subscriberDTO, s.HasBasicChanges)
+
+	return s.RegisterEvent(tx, subscriberDTO, s.HasBasicChanges)
 }
 
-func (s *AggregatedService) registerEvent(
+func (s *AggregatedService) RegisterEvent(
 	tx *sql.Tx,
 	subscriberDTO messaging.MessagingDto,
 	hasDiff func(messaging.MessagingDto) bool,
 ) error {
+	if err := subscriberDTO.IsValid(); err != nil {
+		return err
+	}
 	model := models.Aggregated{
 		UserId: subscriberDTO.UserId,
 		Month:  int(subscriberDTO.Month),
@@ -78,11 +82,15 @@ func (s *AggregatedService) registerEvent(
 	return nil
 }
 
-func NewService(ag interfaces.IReportsRepository[models.Aggregated], rv interfaces.IReportsRepository[models.Revenue], ivt interfaces.IReportsRepository[models.Investment]) IAggregatedService {
+func NewService(ag interfaces.IReportsRepository[models.Aggregated],
+
+// rv interfaces.IReportsRepository[models.Revenue],
+// ivt interfaces.IReportsRepository[models.Investment],
+) *AggregatedService {
 	return &AggregatedService{
 		aggregatedRepository: ag,
-		revenueRepository:    rv,
-		investmentRepository: ivt,
+		// revenueRepository:    rv,
+		// investmentRepository: ivt,
 	}
 }
 
@@ -90,7 +98,7 @@ func (s *AggregatedService) RegisterEventExpense(
 	tx *sql.Tx,
 	subscriberDTO messaging.MessagingDto,
 ) error {
-	return s.registerEvent(tx, subscriberDTO, s.HasDetailedChanges)
+	return s.RegisterEvent(tx, subscriberDTO, s.HasDetailedChanges)
 }
 
 func (s *AggregatedService) HasDetailedChanges(subscriberDTO messaging.MessagingDto) bool {

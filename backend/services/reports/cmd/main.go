@@ -32,9 +32,9 @@ func main() {
 	aggregatedRepository := repository.NewAggregatedRepository(dbConn)
 	eventTrackRepository := repository.NewEventTrackRepository(dbConn)
 	//expenseRepository := repository.NewExpensesRepository(dbConn)
-	investmentsRepository := repository.NewInvestmentsRepository(dbConn)
-	revenueRepository := repository.NewRevenueRepository(dbConn)
-	aggregatedService := service.NewService(aggregatedRepository, revenueRepository, investmentsRepository)
+	//investmentsRepository := repository.NewInvestmentsRepository(dbConn)
+	//revenueRepository := repository.NewRevenueRepository(dbConn)
+	aggregatedService := service.NewService(aggregatedRepository)
 	//expenseService := service.NewExpenseService(expenseRepository)
 	eventTrackService := service.NewEventTrackService(eventTrackRepository)
 	consumerName := "Reports"
