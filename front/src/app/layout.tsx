@@ -1,6 +1,5 @@
 import { Navbar } from "@/components/Navbar";
-import { Geist, Poppins, Roboto, Roboto_Mono } from "next/font/google";
-import { HeroUIProvider } from "@heroui/react";
+import { Poppins, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 
 const poppinsFont = Poppins({
@@ -21,12 +20,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${robotoFont.variable} ${poppinsFont.variable} antialiased `}
+        className={`${robotoFont.variable} ${poppinsFont.variable} antialiased`}
       >
-        <main className="z-1 min-h-screen min-w-screen bg-black text-white pt-10">
+        <main className="z-1 h-screen w-screen max-w-screen dark:text-white bg-site-bg">
           {children}
         </main>
-        <Navbar />
+        {/* <Navbar /> */}
       </body>
     </html>
   );

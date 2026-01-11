@@ -1,13 +1,40 @@
 @import "tailwindcss";
-@plugin './hero.ts';
 
-@source '../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
-
-@theme inline {
+@theme {
   --font-display: var(--font-poppins);
   --font-number: var(--font-roboto);
+
+  /* principal color pages */
+  --color-revenue: #10b981; /* Emerald Green: Fresco e positivo */
+  --color-expense: #ef4444; /* Standard Red: Alerta claro sem ser agressivo */
+  --color-investment: #2563eb; /* Royal Blue: Confiança e estabilidade */
+  --color-site-bg: #f3f4f6;
+  /* button actions */
+  --color-action-primary: #3b82f6; /* Azul vibrante para chamadas de ação */
+  --color-action-danger: #dc2626; /* Vermelho mais escuro para ações destrutivas */
+  --color-action-realized: #7c3aed; /* Roxo nítido para status finalizado */
+  --color-action-pending: #f59e0b; /* Amber/Laranja: Melhor leitura que o amarelo original no branco */
+
+  /* background colors - INVERTIDO A LÓGICA */
+  --color-grey-dark: #f3f4f6;
+  /* --grey-light agora é a superfície dos cartões (branco puro) */
+  --color-grey-light: #ffffff;
 }
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-revenue: #2b6051ff;
+    --color-expense: #c34040;
+    --color-investment: #03045e;
+    --color-site-bg: #131313;
+    /* button actions */
+    --color-action-primary: #4a6fa5;
+    --color-action-danger: #6f1d1d;
+    --color-action-realized: #5c0099;
+    --color-action-pending: #f5bd1f;
+
+    /* background colors */
+    --color-grey-dark: #131313;
+    --color-grey-light: #1f1f1f;
+  }
 }
