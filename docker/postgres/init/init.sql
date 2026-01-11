@@ -222,3 +222,7 @@ CREATE TABLE public."event_track" (
 );
 
 COMMIT;
+
+Begin;
+alter table auth.users add column initial_balance bigint;
+commit;
