@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Expense } from "./expense";
+import { Expense } from "./model/expense";
 import DropDownActions from "@/components/actions-dropdown";
 import { TransactionType } from "@/enums/TypeTransactions";
 

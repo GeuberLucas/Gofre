@@ -24,7 +24,11 @@ import { Controller, useForm } from "react-hook-form";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Calendar } from "@/components/ui/calendar";
 import { Switch } from "@/components/ui/switch";
-import { Expense } from "./expense";
+import { Expense } from "../model/expense";
+import { CategoryExpenseEnum } from "../enums/category-expense-enum";
+import { TypeExpenseEnum } from "../enums/type-expense-enum";
+import { PaymentMethodEnum } from "../enums/payment-method-enum";
+import { enumToFormattedOptions } from "../../enum-to-option";
 interface DetailProps {
   open: boolean;
   onClose: () => void;
@@ -47,8 +51,13 @@ function getInicialValueForm(id): Expense | null {
   }
   //TODO:IMPLEMENTS GET DATA FOR EDIT
 }
+
 export default function DetailExpense(props: Readonly<DetailProps>) {
   const action = props.id > 0 ? "Editar" : "Adicionar";
+  const initialValues = getInicialValueForm(props.id);
+  const categorys = enumToFormattedOptions(CategoryExpenseEnum);
+  const typeExpense = enumToFormattedOptions(TypeExpenseEnum);
+  const paymentMethods = enumToFormattedOptions(PaymentMethodEnum);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -62,7 +71,6 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
       isPaid: false,
     },
   });
-  const initialValues = getInicialValueForm(props.id);
   if (initialValues) {
     form.setValue("description", initialValues.description);
     form.setValue("target", initialValues.target);
@@ -126,16 +134,16 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Trabalho">Trabalho</SelectItem>
-                        <SelectItem value="Extra">Extra</SelectItem>
-                        <SelectItem value="Investimento">
-                          Investimento
-                        </SelectItem>
-                        <SelectItem value="Aposentadoria">
-                          Aposentadoria
-                        </SelectItem>
-                        <SelectItem value="Resgate">Resgate</SelectItem>
-                        <SelectItem value="Outros">Outros</SelectItem>
+                        {categorys.map((category) => {
+                          return (
+                            <SelectItem
+                              value={category.valor.toString()}
+                              key={category.valor}
+                            >
+                              {category.texto}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   </Field>
@@ -159,16 +167,16 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Trabalho">Trabalho</SelectItem>
-                        <SelectItem value="Extra">Extra</SelectItem>
-                        <SelectItem value="Investimento">
-                          Investimento
-                        </SelectItem>
-                        <SelectItem value="Aposentadoria">
-                          Aposentadoria
-                        </SelectItem>
-                        <SelectItem value="Resgate">Resgate</SelectItem>
-                        <SelectItem value="Outros">Outros</SelectItem>
+                        {typeExpense.map((type) => {
+                          return (
+                            <SelectItem
+                              value={type.valor.toString()}
+                              key={type.valor}
+                            >
+                              {type.texto}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   </Field>
@@ -192,16 +200,16 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Trabalho">Trabalho</SelectItem>
-                        <SelectItem value="Extra">Extra</SelectItem>
-                        <SelectItem value="Investimento">
-                          Investimento
-                        </SelectItem>
-                        <SelectItem value="Aposentadoria">
-                          Aposentadoria
-                        </SelectItem>
-                        <SelectItem value="Resgate">Resgate</SelectItem>
-                        <SelectItem value="Outros">Outros</SelectItem>
+                        {paymentMethods.map((paymentMethod) => {
+                          return (
+                            <SelectItem
+                              value={paymentMethod.valor.toString()}
+                              key={paymentMethod.valor}
+                            >
+                              {paymentMethod.texto}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   </Field>

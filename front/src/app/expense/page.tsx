@@ -1,89 +1,93 @@
 "use client";
-import { DataTable } from "./data-table";
-import { columns } from "./columns";
-import { InfoComponent } from "./info-component";
-import { Expense } from "./expense";
-import { FinancialSummaryProps } from "../financialSummaryProps";
-import Detail from "./detail-dialog";
-import { useState } from "react";
-import DetailExpense from "./detail-dialog";
+import { useEffect, useState } from "react";
+import DetailExpense from "./_components/detail-dialog";
+import { DataTable } from "./_components/data-table";
+import { InfoComponent } from "./_components/info-component";
+import { columns } from "./_components/columns";
+import { getExpense } from "./services/expense-service";
+import { Expense } from "./model/expense";
+import { PaymentMethodEnum } from "./enums/payment-method-enum";
+import { TypeExpenseEnum } from "./enums/type-expense-enum";
 
-const props: FinancialSummaryProps = {
-  expectedAmount: 0,
-  actualAmount: 0,
-  pendingAmount: 0,
-  currentBalance: 0,
-  invoiceAmount: 0,
-  variableAmount: 0,
-  monthlyAmount: 0,
-};
-const rows: Expense[] = [
-  {
-    id: 1,
-    userId: 101,
-    description: "Aluguel Apartamento",
-    target: "Imobiliária Silva",
-    category: "Moradia",
-    type: "Fixo",
-    paymentMethod: "Boleto",
-    paymentDate: new Date("2026-01-01T00:00:00Z"),
-    isPaid: false,
-    amount: 1500,
-  },
-  {
-    id: 2,
-    userId: 101,
-    description: "Supermercado Mensal",
-    target: "Carrefour",
-    category: "Alimentação",
-    type: "Variável",
-    paymentMethod: "Cartão de Crédito",
-    paymentDate: new Date("2026-01-25T00:00:00Z"), // Já foi pago
-    isPaid: true,
-    amount: 850.4,
-  },
-  {
-    id: 3,
-    userId: 101,
-    description: "Conta de Luz",
-    target: "Cemig",
-    category: "Utilidades",
-    type: "Fixo",
-    paymentMethod: "Pix",
-    paymentDate: new Date("2026-02-01T00:00:00Z"), // Vence Hoje (considerando 01/02/2026))
-    isPaid: false,
-    amount: 125.3,
-  },
-  {
-    id: 4,
-    userId: 101,
-    description: "Assinatura Netflix",
-    target: "Netflix",
-    category: "Lazer",
-    type: "Fixo",
-    paymentMethod: "Cartão de Crédito",
-    paymentDate: new Date("2026-02-15T00:00:00Z"), // Futur)o
-    isPaid: false,
-    amount: 55.9,
-  },
-  {
-    id: 5,
-    userId: 101,
-    description: "Manutenção Carro",
-    target: "Oficina do João",
-    category: "Transporte",
-    type: "Eventual",
-    paymentMethod: "Débito",
-    paymentDate: new Date("2026-01-20T00:00:00Z"), // Atrasado, mas está pag)o
-    isPaid: true,
-    amount: 450.0,
-  },
-];
+function getSummary(expenses: Expense[]) {
+  const today = new Date();
+  const actualMonth = today.getMonth();
+  const actualYear = today.getFullYear();
+  const expensesThisMonth = expenses.filter((expense) => {
+    console.log(expense);
+    const dateObj = new Date(expense.paymentDate);
+
+    if (Number.isNaN(dateObj.getTime())) return false;
+
+    return (
+      dateObj.getMonth() === actualMonth && dateObj.getFullYear() === actualYear
+    );
+  });
+  const notCredit = expensesThisMonth.filter(
+    (exp) => exp.paymentMethod.toLocaleUpperCase() != PaymentMethodEnum.CREDITO,
+  );
+  const expectedAmount = notCredit.reduce((accumulator, expense) => {
+    return accumulator + expense.amount;
+  }, 0);
+  const actualAmount = notCredit
+    .filter((exp) => exp.isPaid)
+    .reduce((accumulator, expense) => {
+      return accumulator + expense.amount;
+    }, 0);
+  const pendingAmount = notCredit
+    .filter((exp) => !exp.isPaid)
+    .reduce((accumulator, expense) => {
+      return accumulator + expense.amount;
+    }, 0);
+  const invoiceAmount = expensesThisMonth
+    .filter((exp) => exp.type.toUpperCase() == TypeExpenseEnum.FATURA)
+    .reduce((accumulator, expense) => {
+      return accumulator + expense.amount;
+    }, 0);
+  const variableAmount = expensesThisMonth
+    .filter((exp) => exp.type.toUpperCase() == TypeExpenseEnum.VARIAVEL)
+    .reduce((accumulator, expense) => {
+      return accumulator + expense.amount;
+    }, 0);
+  const monthlyAmount = expensesThisMonth
+    .filter((exp) => exp.type.toUpperCase() == TypeExpenseEnum.MENSAL)
+    .reduce((accumulator, expense) => {
+      return accumulator + expense.amount;
+    }, 0);
+  return {
+    expectedAmount: expectedAmount,
+    actualAmount: actualAmount,
+    pendingAmount: pendingAmount,
+    currentBalance: 0,
+    invoiceAmount: invoiceAmount,
+    variableAmount: variableAmount,
+    monthlyAmount: monthlyAmount,
+  };
+}
 
 export default function Revenues() {
   const [isOpenDialog, setIsOpenDialog] = useState(false);
+  const [data, setData] = useState([]);
+  const [financialSummary, setfinancialSummary] = useState({
+    expectedAmount: 0,
+    actualAmount: 0,
+    pendingAmount: 0,
+    currentBalance: 0,
+    invoiceAmount: 0,
+    variableAmount: 0,
+    monthlyAmount: 0,
+  });
   const handleCloseDialog = () => setIsOpenDialog(false);
   const handleOpenDialog = () => setIsOpenDialog(true);
+
+  //fetch data
+  useEffect(() => {
+    getExpense().then((data: Expense[]) => {
+      setData(data);
+      setfinancialSummary(getSummary(data));
+    });
+  }, []);
+
   return (
     <div className="flex h-screen w-full overflow-hidden">
       <div className="flex-1 flex flex-col overflow-y-auto p-4 md:p-6 gap-6">
@@ -97,7 +101,7 @@ export default function Revenues() {
         </div>
 
         <div className="w-full rounded-xl border bg-card shadow-sm">
-          <DataTable columns={columns} data={rows} />
+          <DataTable columns={columns} data={data} />
         </div>
       </div>
       <aside className="w-96 hidden xl:flex flex-col border-l bg-muted/10 h-full p-6 overflow-y-auto">
@@ -107,13 +111,13 @@ export default function Revenues() {
           </h2>
 
           <InfoComponent
-            expectedAmount={props.expectedAmount}
-            pendingAmount={props.pendingAmount}
-            actualAmount={props.actualAmount}
-            currentBalance={props.currentBalance}
-            invoiceAmount={props.invoiceAmount}
-            monthlyAmount={props.monthlyAmount}
-            variableAmount={props.variableAmount}
+            expectedAmount={financialSummary.expectedAmount}
+            pendingAmount={financialSummary.pendingAmount}
+            actualAmount={financialSummary.actualAmount}
+            currentBalance={financialSummary.currentBalance}
+            invoiceAmount={financialSummary.invoiceAmount}
+            monthlyAmount={financialSummary.monthlyAmount}
+            variableAmount={financialSummary.variableAmount}
           />
         </div>
       </aside>

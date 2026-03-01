@@ -1,0 +1,25 @@
+{
+  "categoryExpense": {
+    "MERCADO": "Mercado geral",
+    "DELIVERY": "Delivery",
+    "RESTAURANTE": "Restaurante e bares",
+    "VESTUARIO": "Vestuário",
+    "MORADIA": "Moradia",
+    "UTILIDADES": "Utilidades",
+    "DECORACAO": "Decoração",
+    "EDUCACAO": "Educação",
+    "DEPENDENTES": "Dependentes",
+    "SAUDE": "Saúde",
+    "ENTRETENIMENTO": "Entretenimento",
+    "SERVICOS": "Serviços",
+    "IMPOSTOS": "Impostos",
+    "TRANSPORTE": "Transporte",
+    "PRESENTES": "Presentes",
+    "PETS": "Pets",
+    "VIAGENS": "Viagens",
+    "DOACOES": "Doações",
+    "APOSTAS": "Apostas",
+    "LIVRE": "Livre",
+    "OUTROS": "Outros"
+  }
+}
