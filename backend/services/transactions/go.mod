@@ -5,7 +5,7 @@ go 1.25.4
 require (
 	github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251231125632-6886569aad31
 	github.com/gorilla/mux v1.8.1
-)
+)	
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

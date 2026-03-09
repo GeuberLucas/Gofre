@@ -16,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
   SelectContent,
-  SelectGroup,
   SelectItem,
   Select,
 } from "@/components/ui/select";
@@ -29,6 +28,10 @@ import { CategoryExpenseEnum } from "../enums/category-expense-enum";
 import { TypeExpenseEnum } from "../enums/type-expense-enum";
 import { PaymentMethodEnum } from "../enums/payment-method-enum";
 import { enumToFormattedOptions } from "../../enum-to-option";
+import { getExpense, sendExpense } from "../services/expense-service";
+import { useEffect, useState } from "react";
+import { NumericFormat } from "react-number-format";
+
 interface DetailProps {
   open: boolean;
   onClose: () => void;
@@ -41,20 +44,15 @@ const formSchema = z.object({
   category: z.string().optional(),
   type: z.string().optional(),
   paymentMethod: z.string().optional(),
-  paymentDate: z.date().optional(),
+  paymentDate: z.any().optional(),
   amount: z.number().optional(),
   isPaid: z.boolean().optional(),
 });
-function getInicialValueForm(id): Expense | null {
-  if (id == 0) {
-    return null;
-  }
-  //TODO:IMPLEMENTS GET DATA FOR EDIT
-}
 
 export default function DetailExpense(props: Readonly<DetailProps>) {
   const action = props.id > 0 ? "Editar" : "Adicionar";
-  const initialValues = getInicialValueForm(props.id);
+  const [month, setMonth] = useState<Date | undefined>(undefined);
+
   const categorys = enumToFormattedOptions(CategoryExpenseEnum);
   const typeExpense = enumToFormattedOptions(TypeExpenseEnum);
   const paymentMethods = enumToFormattedOptions(PaymentMethodEnum);
@@ -66,25 +64,55 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
       category: "",
       type: "",
       paymentMethod: "",
-      paymentDate: new Date(),
-      amount: 0,
+      amount: undefined,
+      paymentDate: undefined,
       isPaid: false,
     },
   });
-  if (initialValues) {
-    form.setValue("description", initialValues.description);
-    form.setValue("target", initialValues.target);
-    form.setValue("category", initialValues.category);
-    form.setValue("type", initialValues.type);
-    form.setValue("paymentMethod", initialValues.target);
-    form.setValue("paymentDate", initialValues.paymentDate);
-    form.setValue("amount", initialValues.amount);
-    form.setValue("isPaid", initialValues.isPaid);
+
+  useEffect(() => {
+    if (props.id > 0) {
+      getExpense(props.id).then((data: Expense) => {
+        form.reset({
+          description: data.description,
+          target: data.target,
+          category: data.category.toUpperCase(),
+          type: data.type.toUpperCase(),
+          paymentMethod: data.paymentMethod.toUpperCase(),
+          paymentDate: data.paymentDate,
+          amount: data.amount,
+          isPaid: data.isPaid,
+        });
+        setMonth(new Date(data.paymentDate));
+      });
+    }
+  }, [props.id, form]);
+
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    if (Object.keys(form.formState.dirtyFields).length === 0) {
+      props.onClose();
+      return;
+    }
+    const expense: Expense = {
+      id: props.id,
+      userId: 0,
+      description: data.description,
+      target: data.target,
+      category: data.category.toLowerCase(),
+      type: data.type.toLowerCase(),
+      paymentMethod: data.paymentMethod.toLowerCase(),
+      paymentDate: data.paymentDate,
+      amount: data.amount,
+      isPaid: data.isPaid,
+    };
+    console.log(JSON.stringify(expense));
+    sendExpense(expense).then((response) => {
+      if (response.ok) {
+        form.reset();
+      }
+    });
   }
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(data);
-  }
   return (
     <Dialog open={props.open} onOpenChange={props.onClose}>
       <DialogContent>
@@ -225,8 +253,10 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
                     <FieldLabel htmlFor={field.name}>Data</FieldLabel>
                     <Calendar
                       mode="single"
-                      selected={field.value}
+                      selected={field.value || undefined}
                       onSelect={field.onChange}
+                      month={month}
+                      onMonthChange={setMonth}
                       className="rounded-lg border"
                       captionLayout="dropdown"
                     />
@@ -240,10 +270,19 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid} className="p-2">
                       <FieldLabel htmlFor={field.name}>Valor Total</FieldLabel>
-                      <Input
+                      <NumericFormat
+                        value={field.value}
+                        thousandSeparator="."
+                        decimalSeparator=","
+                        decimalScale={2}
+                        fixedDecimalScale
+                        prefix="R$ "
+                        className="w-full"
+                        customInput={Input}
                         placeholder="Valor Total"
-                        {...field}
-                        id={field.name}
+                        onValueChange={(values) => {
+                          field.onChange(values.floatValue);
+                        }}
                       />
                     </Field>
                   )}

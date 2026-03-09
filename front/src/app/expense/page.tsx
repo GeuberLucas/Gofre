@@ -14,7 +14,6 @@ function getSummary(expenses: Expense[]) {
   const actualMonth = today.getMonth();
   const actualYear = today.getFullYear();
   const expensesThisMonth = expenses.filter((expense) => {
-    console.log(expense);
     const dateObj = new Date(expense.paymentDate);
 
     if (Number.isNaN(dateObj.getTime())) return false;

@@ -4,68 +4,46 @@ import { columns } from "./columns";
 import { InfoComponent } from "./info-component";
 import { FinancialSummaryProps } from "../financialSummaryProps";
 import { Portfolio } from "./portfolio";
-import { useState } from "react";
-import Detail from "./detail-dialog";
+import { useEffect, useState } from "react";
 import DetailInvestment from "./detail-dialog";
+import { getPortfolio } from "./services/investment-service";
 
-const props: FinancialSummaryProps = {
-  expectedAmount: 0,
-  actualAmount: 0,
-  pendingAmount: 0,
-  currentBalance: 0,
-};
-const rows: Portfolio[] = [
-  {
-    id: 1,
-    user_id: 101,
-    asset_id: 5001,
-    deposit_date: new Date("2023-11-15T14:30:00Z"),
-    broker: "XP Investimentos",
-    amount: 5000.0,
-    is_done: true,
-    description: "Aporte inicial em FIIs",
-  },
-  {
-    id: 2,
-    user_id: 101,
-    asset_id: 3005,
-    deposit_date: new Date("2024-01-10T09:15:00Z"),
-    broker: "Binance",
-    amount: 1250.5,
-    is_done: true,
-    description: "Compra fracionada de Bitcoin",
-  },
-  {
-    id: 3,
-    user_id: 102,
-    asset_id: 1022,
-    deposit_date: new Date("2024-02-01T10:00:00Z"),
-    broker: "NuInvest",
-    amount: 300.0,
-    is_done: false, // Transação pendente
-    description: "Reinvestimento de dividendos",
-  },
-  {
-    id: 4,
-    user_id: 103,
-    asset_id: 4004,
-    deposit_date: new Date("2024-02-28T16:45:00Z"),
-    broker: "BTG Pactual",
-    amount: 15000.0,
-    is_done: true,
-    description: "Tesouro Direto IPCA+ 2035",
-  },
-  {
-    id: 5,
-    user_id: 101,
-    asset_id: 5001,
-    deposit_date: new Date("2024-03-05T11:20:00Z"),
-    broker: "Rico",
-    amount: 75.9,
-    is_done: true,
-    description: "Sobra de caixa",
-  },
-];
+function getSummary(expenses: Portfolio[]) {
+  const today = new Date();
+  const actualMonth = today.getMonth();
+  const actualYear = today.getFullYear();
+  const investmentThisMonth = expenses.filter((expense) => {
+    console.log(expense);
+    const dateObj = new Date(expense.deposit_date);
+
+    if (Number.isNaN(dateObj.getTime())) return false;
+
+    return (
+      dateObj.getMonth() === actualMonth && dateObj.getFullYear() === actualYear
+    );
+  });
+
+  const expectedAmount = investmentThisMonth.reduce((accumulator, expense) => {
+    return accumulator + expense.amount;
+  }, 0);
+  const actualAmount = investmentThisMonth
+    .filter((exp) => exp.is_done)
+    .reduce((accumulator, expense) => {
+      return accumulator + expense.amount;
+    }, 0);
+  const pendingAmount = investmentThisMonth
+    .filter((exp) => !exp.is_done)
+    .reduce((accumulator, expense) => {
+      return accumulator + expense.amount;
+    }, 0);
+
+  return {
+    expectedAmount: expectedAmount,
+    actualAmount: actualAmount,
+    pendingAmount: pendingAmount,
+    currentBalance: 0,
+  };
+}
 
 const ToggleState = (rowState: boolean) => {
   let stateRevenue = "bg-action-pending";
@@ -80,9 +58,22 @@ const ToggleState = (rowState: boolean) => {
 };
 export default function Revenues() {
   const [isOpenDialog, setIsOpenDialog] = useState(false);
+  const [data, setData] = useState([]);
+  const [financialSummary, setfinancialSummary] = useState({
+    expectedAmount: 0,
+    actualAmount: 0,
+    pendingAmount: 0,
+    currentBalance: 0,
+  });
   const handleCloseDialog = () => setIsOpenDialog(false);
   const handleOpenDialog = () => setIsOpenDialog(true);
 
+  useEffect(() => {
+    getPortfolio().then((data: Portfolio[]) => {
+      setData(data);
+      setfinancialSummary(getSummary(data));
+    });
+  }, []);
   return (
     <div className="flex h-screen w-full overflow-hidden">
       <div className="flex-1 flex flex-col overflow-y-auto p-4 md:p-6 gap-6">
@@ -96,7 +87,7 @@ export default function Revenues() {
         </div>
 
         <div className="w-full rounded-xl border bg-card shadow-sm">
-          <DataTable columns={columns} data={rows} />
+          <DataTable columns={columns} data={data} />
         </div>
       </div>
       <aside className="w-96 hidden xl:flex flex-col border-l bg-muted/10 h-full p-6 overflow-y-auto">
@@ -106,10 +97,10 @@ export default function Revenues() {
           </h2>
 
           <InfoComponent
-            expectedAmount={props.expectedAmount}
-            pendingAmount={props.pendingAmount}
-            actualAmount={props.actualAmount}
-            currentBalance={props.currentBalance}
+            expectedAmount={financialSummary.expectedAmount}
+            pendingAmount={financialSummary.pendingAmount}
+            actualAmount={financialSummary.actualAmount}
+            currentBalance={financialSummary.currentBalance}
           />
         </div>
       </aside>

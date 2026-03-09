@@ -1,5 +1,5 @@
 export enum TypeExpenseEnum {
   MENSAL = "MENSAL",
-  VARIAVEL = "VARIAVEL",
+  VARIAVEL = "VARIÁVEL",
   FATURA = "FATURA",
 }

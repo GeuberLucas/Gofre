@@ -25,6 +25,9 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Calendar } from "@/components/ui/calendar";
 import { Switch } from "@/components/ui/switch";
 import { Portfolio } from "./portfolio";
+import { useEffect, useState } from "react";
+import { getPortfolio, sendPortfolio } from "./services/investment-service";
+import { NumericFormat } from "react-number-format";
 interface DetailProps {
   open: boolean;
   onClose: () => void;
@@ -39,16 +42,12 @@ const formSchema = z.object({
   is_done: z.boolean().optional(),
   asset_id: z.string().optional(),
 });
-function getInicialValueForm(id): Portfolio | null {
-  if (id == 0) {
-    return null;
-  }
-  //TODO:IMPLEMENTS GET DATA FOR EDIT
-}
+
 //TODO:IMPLEMENTS SERVER ACTION GET ASSETS TYPE
 
 export default function DetailInvestment(props: Readonly<DetailProps>) {
   const action = props.id > 0 ? "Editar" : "Adicionar";
+  const [month, setMonth] = useState<Date | undefined>(undefined);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -60,18 +59,43 @@ export default function DetailInvestment(props: Readonly<DetailProps>) {
       asset_id: "0",
     },
   });
-  const initialValues = getInicialValueForm(props.id);
-  if (initialValues) {
-    form.setValue("amount", initialValues.amount);
-    form.setValue("is_done", initialValues.is_done);
-    form.setValue("description", initialValues.description);
-    form.setValue("broker", initialValues.broker);
-    form.setValue("asset_id", initialValues.asset_id.toString());
-    form.setValue("deposit_date", initialValues.deposit_date);
-  }
+
+  useEffect(() => {
+    if (props.id > 0) {
+      getPortfolio(props.id).then((initialValues: Portfolio) => {
+        form.reset(
+          {
+            description: initialValues.description,
+            broker: initialValues.broker,
+            deposit_date: initialValues.deposit_date,
+            amount: initialValues.amount,
+            is_done: initialValues.is_done,
+            asset_id: initialValues.asset_id.toString(),
+          },
+          { keepDirty: true, keepDirtyValues: true },
+        );
+        setMonth(new Date(initialValues.deposit_date));
+      });
+    }
+  }, [props.id, form]);
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(data);
+    if (!form.formState.isDirty) {
+      props.onClose();
+      return;
+    }
+    const investment: Portfolio = {
+      id: props.id,
+      user_id: 0,
+      description: data.description,
+      broker: data.broker,
+      deposit_date: data.deposit_date,
+      amount: data.amount,
+      is_done: data.is_done,
+      asset_id: Number(data.asset_id),
+    };
+
+    sendPortfolio(investment).then();
   }
   return (
     <Dialog open={props.open} onOpenChange={props.onClose}>
@@ -118,8 +142,10 @@ export default function DetailInvestment(props: Readonly<DetailProps>) {
                     <FieldLabel htmlFor={field.name}>Data</FieldLabel>
                     <Calendar
                       mode="single"
-                      selected={field.value}
+                      selected={field.value || undefined}
                       onSelect={field.onChange}
+                      month={month}
+                      onMonthChange={setMonth}
                       className="rounded-lg border"
                       captionLayout="dropdown"
                     />
@@ -167,10 +193,20 @@ export default function DetailInvestment(props: Readonly<DetailProps>) {
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid} className="p-2">
                       <FieldLabel htmlFor={field.name}>Valor Total</FieldLabel>
-                      <Input
-                        placeholder="Valor Total"
-                        {...field}
+                      <NumericFormat
                         id={field.name}
+                        value={field.value}
+                        thousandSeparator="."
+                        decimalSeparator=","
+                        decimalScale={2}
+                        fixedDecimalScale
+                        prefix="R$ "
+                        className="w-full"
+                        customInput={Input}
+                        placeholder="Valor Total"
+                        onValueChange={(values) => {
+                          field.onChange(values.floatValue);
+                        }}
                       />
                     </Field>
                   )}

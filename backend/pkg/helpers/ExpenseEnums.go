@@ -4,36 +4,36 @@ package helpers
 type ExpenseCategory string
 
 const (
-	ExpenseCategoryMercadoGeral     ExpenseCategory = "Mercado geral"
-	ExpenseCategoryDelivery         ExpenseCategory = "Delivery"
-	ExpenseCategoryRestauranteBares ExpenseCategory = "Restaurante e bares"
-	ExpenseCategoryVestuario        ExpenseCategory = "Vestuário"
-	ExpenseCategoryMoradia          ExpenseCategory = "Moradia"
-	ExpenseCategoryUtilidades       ExpenseCategory = "Utilidades"
-	ExpenseCategoryDecoracao        ExpenseCategory = "Decoração"
-	ExpenseCategoryEducacao         ExpenseCategory = "Educação"
-	ExpenseCategoryDependentes      ExpenseCategory = "Dependentes"
-	ExpenseCategorySaude            ExpenseCategory = "Saúde"
-	ExpenseCategoryEntretenimento   ExpenseCategory = "Entretenimento"
-	ExpenseCategoryServicos         ExpenseCategory = "Serviços"
-	ExpenseCategoryImpostos         ExpenseCategory = "Impostos"
-	ExpenseCategoryTransporte       ExpenseCategory = "Transporte"
-	ExpenseCategoryPresentes        ExpenseCategory = "Presentes"
-	ExpenseCategoryPets             ExpenseCategory = "Pets"
-	ExpenseCategoryViagens          ExpenseCategory = "Viagens"
-	ExpenseCategoryDoacoes          ExpenseCategory = "Doações"
-	ExpenseCategoryApostas          ExpenseCategory = "Apostas"
-	ExpenseCategoryLivre            ExpenseCategory = "Livre"
-	ExpenseCategoryOutros           ExpenseCategory = "Outros"
+	ExpenseCategoryMercadoGeral     ExpenseCategory = "mercado geral"
+	ExpenseCategoryDelivery         ExpenseCategory = "delivery"
+	ExpenseCategoryRestauranteBares ExpenseCategory = "restaurante e bares"
+	ExpenseCategoryVestuario        ExpenseCategory = "vestuário"
+	ExpenseCategoryMoradia          ExpenseCategory = "moradia"
+	ExpenseCategoryUtilidades       ExpenseCategory = "utilidades"
+	ExpenseCategoryDecoracao        ExpenseCategory = "decoração"
+	ExpenseCategoryEducacao         ExpenseCategory = "educação"
+	ExpenseCategoryDependentes      ExpenseCategory = "dependentes"
+	ExpenseCategorySaude            ExpenseCategory = "saúde"
+	ExpenseCategoryEntretenimento   ExpenseCategory = "entretenimento"
+	ExpenseCategoryServicos         ExpenseCategory = "serviços"
+	ExpenseCategoryImpostos         ExpenseCategory = "impostos"
+	ExpenseCategoryTransporte       ExpenseCategory = "transporte"
+	ExpenseCategoryPresentes        ExpenseCategory = "presentes"
+	ExpenseCategoryPets             ExpenseCategory = "pets"
+	ExpenseCategoryViagens          ExpenseCategory = "viagens"
+	ExpenseCategoryDoacoes          ExpenseCategory = "doações"
+	ExpenseCategoryApostas          ExpenseCategory = "apostas"
+	ExpenseCategoryLivre            ExpenseCategory = "livre"
+	ExpenseCategoryOutros           ExpenseCategory = "outros"
 )
 
 // ExpenseType define a recorrência ou tipo da despesa
 type ExpenseType string
 
 const (
-	ExpenseTypeMensal   ExpenseType = "Mensal"
-	ExpenseTypeVariavel ExpenseType = "Variável"
-	ExpenseTypeFatura   ExpenseType = "Fatura"
+	ExpenseTypeMensal   ExpenseType = "mensal"
+	ExpenseTypeVariavel ExpenseType = "variável"
+	ExpenseTypeFatura   ExpenseType = "fatura"
 )
 
 // PaymentMethod define os meios de pagamento
