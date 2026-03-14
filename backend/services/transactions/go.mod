@@ -3,25 +3,25 @@ module github.com/GeuberLucas/Gofre/backend/services/transaction
 go 1.25.4
 
 require (
-	github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20251231125632-6886569aad31
+	github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20260309104732-6d6a6b4e0ed1
 	github.com/gorilla/mux v1.8.1
-)	
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
-	github.com/klauspost/compress v1.18.2 // indirect
-	github.com/nats-io/nats.go v1.47.0 // indirect
-	github.com/nats-io/nkeys v0.4.12 // indirect
+	github.com/klauspost/compress v1.18.4 // indirect
+	github.com/nats-io/nats.go v1.49.0 // indirect
+	github.com/nats-io/nkeys v0.4.15 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/crypto v0.46.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/crypto v0.48.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require (
-	github.com/lib/pq v1.10.9 // indirect
+	github.com/lib/pq v1.11.2 // indirect
 	github.com/stretchr/testify v1.11.1
 )
