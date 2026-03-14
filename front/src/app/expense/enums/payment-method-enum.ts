@@ -1,9 +1,9 @@
 export enum PaymentMethodEnum {
-  PIX = "PIX",
-  DEBITO = "DEBITO",
-  CREDITO = "CREDITO",
-  BOLETO = "BOLETO",
-  DINHEIRO = "DINHEIRO",
-  TED = "TED",
-  CHEQUE = "CHEQUE",
+  PIX = "pix",
+  DEBITO = "debito",
+  CREDITO = "credito",
+  BOLETO = "boleto",
+  DINHEIRO = "dinheiro",
+  TED = "ted",
+  CHEQUE = "cheque",
 }
