@@ -72,7 +72,7 @@ func TestCalculateValuesModel(t *testing.T) {
 			dto: messaging.MessagingDto{
 				Amount:       10,
 				Movement:     messaging.TypeExpense,
-				MovementType: string(helpers.ExpenseTypeVariavel),
+				MovementType: int(helpers.ExpenseTypeVariavel),
 				WithCredit:   false,
 			},
 			model:      models.Aggregated{},
@@ -88,7 +88,7 @@ func TestCalculateValuesModel(t *testing.T) {
 			dto: messaging.MessagingDto{
 				Amount:       10,
 				Movement:     messaging.TypeExpense,
-				MovementType: string(helpers.ExpenseTypeVariavel),
+				MovementType: int(helpers.ExpenseTypeVariavel),
 				WithCredit:   true,
 			},
 			model:      models.Aggregated{},
@@ -104,7 +104,7 @@ func TestCalculateValuesModel(t *testing.T) {
 			dto: messaging.MessagingDto{
 				Amount:       10,
 				Movement:     messaging.TypeExpense,
-				MovementType: string(helpers.ExpenseTypeMensal),
+				MovementType: int(helpers.ExpenseTypeMensal),
 				WithCredit:   false,
 			},
 			model:      models.Aggregated{},
@@ -120,7 +120,7 @@ func TestCalculateValuesModel(t *testing.T) {
 			dto: messaging.MessagingDto{
 				Amount:       10,
 				Movement:     messaging.TypeExpense,
-				MovementType: string(helpers.ExpenseTypeMensal),
+				MovementType: int(helpers.ExpenseTypeMensal),
 				WithCredit:   true,
 			},
 			model:      models.Aggregated{},
@@ -136,7 +136,7 @@ func TestCalculateValuesModel(t *testing.T) {
 			dto: messaging.MessagingDto{
 				Amount:       10,
 				Movement:     messaging.TypeExpense,
-				MovementType: string(helpers.ExpenseTypeFatura),
+				MovementType: int(helpers.ExpenseTypeFatura),
 			},
 			model:      models.Aggregated{},
 			multiplier: 1,

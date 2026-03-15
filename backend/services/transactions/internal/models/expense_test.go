@@ -34,7 +34,8 @@ func TestValidationExpense(t *testing.T) {
 	t.Run("test validation expense model", func(t *testing.T) {
 		tests := []testCase{
 
-			{modify: func(e *Expense) {}, wantValid: true, wantErr: nil},
+			{modify: func(e *Expense) { //non modify
+			}, wantValid: true, wantErr: nil},
 			{modify: func(e *Expense) { e.UserId = 0 }, wantValid: false, wantErr: errors.New("expense:validate:UserId required")},
 			{modify: func(e *Expense) { e.Target = "" }, wantValid: false, wantErr: errors.New("expense:validate:Target required")},
 			{modify: func(e *Expense) { e.Category = -1 }, wantValid: false, wantErr: errors.New("expense:validate:Category required")},

@@ -1,5 +1,7 @@
 package helpers
 
+import "strings"
+
 // ExpenseType define a recorrência ou tipo da despesa
 type ExpenseType int
 
@@ -20,8 +22,19 @@ func (t ExpenseType) ToDBString() string {
 	}
 	return dbValues[t]
 }
+func ParseExpenseType(s string) ExpenseType {
+	switch s {
+	case "Mensal":
+		return ExpenseTypeMensal
+	case "Variável":
+		return ExpenseTypeVariavel
+	case "Fatura":
+		return ExpenseTypeFatura
+	default:
+		return -1
+	}
+}
 
-// 1. ExpenseCategory
 type ExpenseCategory int
 
 const (
@@ -48,7 +61,6 @@ const (
 	ExpenseCategoryOutros
 )
 
-// ToDBString converte o inteiro da categoria para a string esperada pelo banco
 func (e ExpenseCategory) ToDBString() string {
 	dbValues := []string{
 		"Mercado geral",
@@ -79,6 +91,54 @@ func (e ExpenseCategory) ToDBString() string {
 	}
 
 	return dbValues[e]
+}
+func ParseExpenseCategory(s string) ExpenseCategory {
+	switch s {
+	case "Mercado geral":
+		return ExpenseCategoryMercadoGeral
+	case "Delivery":
+		return ExpenseCategoryDelivery
+	case "Restaurante e bares":
+		return ExpenseCategoryRestauranteBares
+	case "Vestuário":
+		return ExpenseCategoryVestuario
+	case "Moradia":
+		return ExpenseCategoryMoradia
+	case "Utilidades":
+		return ExpenseCategoryUtilidades
+	case "Decoração":
+		return ExpenseCategoryDecoracao
+	case "Educação":
+		return ExpenseCategoryEducacao
+	case "Dependentes":
+		return ExpenseCategoryDependentes
+	case "Saúde":
+		return ExpenseCategorySaude
+	case "Entretenimento":
+		return ExpenseCategoryEntretenimento
+	case "Serviços":
+		return ExpenseCategoryServicos
+	case "Impostos":
+		return ExpenseCategoryImpostos
+	case "Transporte":
+		return ExpenseCategoryTransporte
+	case "Presentes":
+		return ExpenseCategoryPresentes
+	case "Pets":
+		return ExpenseCategoryPets
+	case "Viagens":
+		return ExpenseCategoryViagens
+	case "Doações":
+		return ExpenseCategoryDoacoes
+	case "Apostas":
+		return ExpenseCategoryApostas
+	case "Livre":
+		return ExpenseCategoryLivre
+	case "Outros":
+		return ExpenseCategoryOutros
+	default:
+		return ExpenseCategoryOutros
+	}
 }
 
 // 2. PaymentMethod
@@ -111,4 +171,25 @@ func (p PaymentMethod) ToDBString() string {
 	}
 
 	return dbValues[p]
+}
+func ParsePaymentMethod(s string) PaymentMethod {
+	// Usamos strings.ToLower para garantir que "PIX", "Pix" ou "pix" funcionem
+	switch strings.ToLower(s) {
+	case "pix":
+		return PaymentMethodPix
+	case "debito", "débito":
+		return PaymentMethodDebito
+	case "credito", "crédito":
+		return PaymentMethodCredito
+	case "boleto":
+		return PaymentMethodBoleto
+	case "dinheiro":
+		return PaymentMethodDinheiro
+	case "ted":
+		return PaymentMethodTED
+	case "cheque":
+		return PaymentMethodCheque
+	default:
+		return -1 // Valor inválido
+	}
 }

@@ -43,8 +43,8 @@ type MessagingDto struct {
 	Amount              types.Money `json:"amount"`
 	AmountOld           types.Money `json:"old_amount"`
 	Movement            Movement    `json:"movement"`
-	MovementTypeOld     string      `json:"movement_type_old"`
-	MovementType        string      `json:"movement_type"`
+	MovementTypeOld     int         `json:"movement_type_old"`
+	MovementType        int         `json:"movement_type"`
 	MovementCategoryOld string      `json:"movement_category_old"`
 	MovementCategory    string      `json:"movement_category"`
 	WithCredit          bool        `json:"with_credit"`
@@ -68,7 +68,7 @@ func (md *MessagingDto) IsValid() error {
 	if !md.Action.IsValid() {
 		return errors.New("Messaging: validate struct: Invalid Action")
 	}
-	if len(md.MovementType) == 0 {
+	if md.MovementType <= -1 {
 		return errors.New("Messaging: validate struct: Invalid Movement")
 	}
 	if md.Movement == TypeExpense && len(md.MovementCategory) == 0 {

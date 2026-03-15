@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/GeuberLucas/Gofre/backend/pkg/helpers"
 	"github.com/GeuberLucas/Gofre/backend/pkg/types"
 )
 
@@ -12,7 +13,7 @@ type Revenue struct {
 	UserId      int64
 	Description string
 	Origin      string
-	Type        string
+	Type        helpers.IncomeType
 	ReceiveDate time.Time
 	Amount      types.Money
 	IsRecieved  bool
@@ -27,8 +28,8 @@ func (re Revenue) Isvalid() error {
 		return errors.New("revenue:validate:Origin required")
 	}
 
-	if re.Type == "" {
-		return errors.New("revenue:validate:Type required")
+	if re.Type < 0 || re.Type > helpers.IncomeTypeOutros {
+		return errors.New("revenue:validate:Type invalid")
 	}
 	if re.ReceiveDate.IsZero() {
 		return errors.New("revenue:validate:ReceiveDate required")

@@ -127,7 +127,7 @@ func (p *PortfolioService) sendMessagingToBroker(model *models.Portfolio, modelO
 		Year:             uint(model.Deposit_date.Local().Year()),
 		Amount:           model.Amount,
 		Movement:         messaging.TypeInvestment,
-		MovementType:     models.GetAssetName(model.Asset_id),
+		MovementType:     int(model.Asset_id),
 		MovementCategory: "",
 		WithCredit:       false,
 		IsConfirmed:      model.IsDone,
@@ -140,7 +140,7 @@ func (p *PortfolioService) sendMessagingToBroker(model *models.Portfolio, modelO
 		ms.MonthOld = modelOld.Deposit_date.Month()
 		ms.YearOld = uint(modelOld.Deposit_date.Year())
 		ms.MovementCategoryOld = ""
-		ms.MovementTypeOld = models.GetAssetName(modelOld.Asset_id)
+		ms.MovementTypeOld = int(modelOld.Asset_id)
 		ms.WithCreditOld = false
 		ms.IsConfirmedOld = modelOld.IsDone
 	}

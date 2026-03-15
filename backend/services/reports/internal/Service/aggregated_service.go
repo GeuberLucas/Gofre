@@ -166,20 +166,20 @@ func calculateValuesModel(dto *messaging.MessagingDto, model *models.Aggregated,
 func calculateValueForExpense(subscriberDTO *messaging.MessagingDto, model *models.Aggregated, multiplier int) {
 	delta := subscriberDTO.Amount * types.Money(multiplier)
 	model.Expense += delta
-	switch subscriberDTO.MovementType {
-	case string(helpers.ExpenseTypeMensal):
+	switch helpers.ExpenseType(subscriberDTO.MovementType) {
+	case helpers.ExpenseTypeMensal:
 		if subscriberDTO.WithCredit {
 			model.MonthlyWithCredit += delta
 		} else {
 			model.MonthlyWithoutCredit += delta
 		}
-	case string(helpers.ExpenseTypeVariavel):
+	case helpers.ExpenseTypeVariavel:
 		if subscriberDTO.WithCredit {
 			model.VariableWithCredit += delta
 		} else {
 			model.VariableWithoutCredit += delta
 		}
-	case string(helpers.ExpenseTypeFatura):
+	case helpers.ExpenseTypeFatura:
 		model.Invoice += delta
 	}
 }

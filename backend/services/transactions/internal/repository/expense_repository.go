@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 
+	"github.com/GeuberLucas/Gofre/backend/pkg/helpers"
 	"github.com/GeuberLucas/Gofre/backend/services/transaction/internal/models"
 )
 
@@ -30,12 +31,22 @@ func (r ExpenseRepository) Create(model models.Expense) error {
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8,$9);`
 
 	statement, err := r.db.Prepare(sqlCommand)
-	defer statement.Close()
 	if err != nil {
 		return err
 	}
+	defer statement.Close()
 
-	_, err = statement.Exec(model.UserId, model.Description, model.Target, model.Category, model.Amount, model.Type, model.PaymentMethod, model.PaymentDate, model.IsPaid)
+	_, err = statement.Exec(
+		model.UserId,
+		model.Description,
+		model.Target,
+		model.Category.ToDBString(),
+		model.Amount,
+		model.Type.ToDBString(),
+		model.PaymentMethod.ToDBString(),
+		model.PaymentDate,
+		model.IsPaid,
+	)
 	if err != nil {
 		return err
 	}
@@ -56,25 +67,55 @@ func (r ExpenseRepository) GetAll() ([]models.Expense, error) {
 	var expenses []models.Expense
 	for rows.Next() {
 		var expense models.Expense
-		err := rows.Scan(&expense.ID, &expense.UserId, &expense.Description, &expense.Target, &expense.Category, &expense.Amount, &expense.Type, &expense.PaymentMethod, &expense.PaymentDate, &expense.IsPaid)
+		var categoryStr, typeStr, paymentMethodStr string
+		err := rows.Scan(
+			&expense.ID,
+			&expense.UserId,
+			&expense.Description,
+			&expense.Target,
+			&categoryStr,
+			&expense.Amount,
+			&typeStr,
+			&paymentMethodStr,
+			&expense.PaymentDate,
+			&expense.IsPaid,
+		)
 		if err != nil {
 			return nil, err
 		}
+		expense.Category = helpers.ParseExpenseCategory(categoryStr)
+		expense.Type = helpers.ParseExpenseType(typeStr)
+		expense.PaymentMethod = helpers.ParsePaymentMethod(paymentMethodStr)
 		expenses = append(expenses, expense)
 	}
 	return expenses, nil
 }
 func (r ExpenseRepository) GetById(id int64) (models.Expense, error) {
 	var expense models.Expense
+	var categoryStr, typeStr, paymentMethodStr string
 	var sqlCommand string = `SELECT id, user_id, description, target, category,amount, type, payment_method, payment_date, is_paid
 	FROM transactions.expenses
 	WHERE id=$1;`
 
 	row := r.db.QueryRow(sqlCommand, id)
-	err := row.Scan(&expense.ID, &expense.UserId, &expense.Description, &expense.Target, &expense.Category, &expense.Amount, &expense.Type, &expense.PaymentMethod, &expense.PaymentDate, &expense.IsPaid)
+	err := row.Scan(
+		&expense.ID,
+		&expense.UserId,
+		&expense.Description,
+		&expense.Target,
+		&categoryStr,
+		&expense.Amount,
+		&typeStr,
+		&paymentMethodStr,
+		&expense.PaymentDate,
+		&expense.IsPaid,
+	)
 	if err != nil {
 		return expense, err
 	}
+	expense.Category = helpers.ParseExpenseCategory(categoryStr)
+	expense.Type = helpers.ParseExpenseType(typeStr)
+	expense.PaymentMethod = helpers.ParsePaymentMethod(paymentMethodStr)
 	return expense, nil
 }
 func (r ExpenseRepository) GetByUserId(userId int64) ([]models.Expense, error) {
@@ -91,10 +132,25 @@ func (r ExpenseRepository) GetByUserId(userId int64) ([]models.Expense, error) {
 	var expenses []models.Expense
 	for rows.Next() {
 		var expense models.Expense
-		err := rows.Scan(&expense.ID, &expense.UserId, &expense.Description, &expense.Target, &expense.Category, &expense.Amount, &expense.Type, &expense.PaymentMethod, &expense.PaymentDate, &expense.IsPaid)
+		var categoryStr, typeStr, paymentMethodStr string
+		err := rows.Scan(
+			&expense.ID,
+			&expense.UserId,
+			&expense.Description,
+			&expense.Target,
+			&categoryStr,
+			&expense.Amount,
+			&typeStr,
+			&paymentMethodStr,
+			&expense.PaymentDate,
+			&expense.IsPaid,
+		)
 		if err != nil {
 			return nil, err
 		}
+		expense.Category = helpers.ParseExpenseCategory(categoryStr)
+		expense.Type = helpers.ParseExpenseType(typeStr)
+		expense.PaymentMethod = helpers.ParsePaymentMethod(paymentMethodStr)
 		expenses = append(expenses, expense)
 	}
 	return expenses, nil
@@ -109,11 +165,20 @@ func (r ExpenseRepository) Update(model models.Expense) error {
 		return err
 	}
 	defer statement.Close()
-	_, err = statement.Exec(model.UserId, model.Description, model.Target, model.Category, model.Amount, model.Type, model.PaymentMethod, model.PaymentDate, model.IsPaid)
+	_, err = statement.Exec(
+		model.Description,
+		model.Target,
+		model.Category.ToDBString(),
+		model.Amount,
+		model.Type.ToDBString(),
+		model.PaymentMethod.ToDBString(),
+		model.PaymentDate,
+		model.IsPaid,
+		model.ID,
+	)
 	if err != nil {
 		return err
 	}
-	log.Println("User updated successfully")
 	return nil
 
 }

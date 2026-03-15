@@ -209,7 +209,7 @@ func (ts *TransactionService) sendRevenueToBroker(model *models.Revenue, modelOl
 		Year:             uint(model.ReceiveDate.Local().Year()),
 		Amount:           model.Amount,
 		Movement:         messaging.TypeIncome,
-		MovementType:     model.Type,
+		MovementType:     int(model.Type),
 		MovementCategory: "",
 		WithCredit:       false,
 		IsConfirmed:      model.IsRecieved,
@@ -222,7 +222,7 @@ func (ts *TransactionService) sendRevenueToBroker(model *models.Revenue, modelOl
 		ms.MonthOld = modelOld.ReceiveDate.Month()
 		ms.YearOld = uint(modelOld.ReceiveDate.Year())
 		ms.MovementCategoryOld = ""
-		ms.MovementTypeOld = modelOld.Type
+		ms.MovementTypeOld = int(modelOld.Type)
 		ms.WithCreditOld = false
 		ms.IsConfirmedOld = modelOld.IsRecieved
 	}
@@ -248,7 +248,7 @@ func (ts *TransactionService) sendExpenseToBroker(model *models.Expense, modelOl
 		Year:             uint(model.PaymentDate.Local().Year()),
 		Amount:           model.Amount,
 		Movement:         messaging.TypeExpense,
-		MovementType:     string(model.Type),
+		MovementType:     int(model.Type),
 		MovementCategory: string(model.Category),
 		WithCredit:       model.PaymentMethod == helpers.PaymentMethodCredito,
 		IsConfirmed:      model.IsPaid,
@@ -261,7 +261,7 @@ func (ts *TransactionService) sendExpenseToBroker(model *models.Expense, modelOl
 		ms.MonthOld = modelOld.PaymentDate.Month()
 		ms.YearOld = uint(modelOld.PaymentDate.Year())
 		ms.MovementCategoryOld = string(modelOld.Category)
-		ms.MovementTypeOld = string(modelOld.Type)
+		ms.MovementTypeOld = int(modelOld.Type)
 		ms.WithCreditOld = modelOld.PaymentMethod == helpers.PaymentMethodCredito
 		ms.IsConfirmedOld = modelOld.IsPaid
 	}

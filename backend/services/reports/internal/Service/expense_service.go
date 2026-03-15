@@ -126,12 +126,12 @@ func calculateValuesExpense(dto messaging.MessagingDto, model *models.Expense, a
 
 	finalAmount := amount * types.Money(multiplier)
 
-	switch dto.MovementType {
-	case string(helpers.ExpenseTypeFatura):
+	switch helpers.ExpenseType(dto.MovementType) {
+	case helpers.ExpenseTypeFatura:
 		model.Invoice += finalAmount
-	case string(helpers.ExpenseTypeMensal):
+	case helpers.ExpenseTypeMensal:
 		model.Monthly += finalAmount
-	case string(helpers.ExpenseTypeVariavel):
+	case helpers.ExpenseTypeVariavel:
 		model.Variable += finalAmount
 	default:
 		return errors.New("Type of movement not recognized")

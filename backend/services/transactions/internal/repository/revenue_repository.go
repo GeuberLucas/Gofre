@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/GeuberLucas/Gofre/backend/pkg/helpers"
 	"github.com/GeuberLucas/Gofre/backend/services/transaction/internal/models"
 )
 
@@ -28,14 +29,22 @@ func NewRevenueRepository(db *sql.DB) *RevenueRepository {
 func (r RevenueRepository) Create(model models.Revenue) error {
 	sqlCommand := `INSERT INTO transactions.revenue(
 	user_id, description, origin, type, received_date, is_recieved,amount)
-	VALUES ($1, $2, $3, $4, $5, $6,$9);`
+	VALUES ($1, $2, $3, $4, $5, $6,$7);`
 
 	statement, err := r.db.Prepare(sqlCommand)
-	defer statement.Close()
 	if err != nil {
 		return err
 	}
-	_, err = statement.Exec(model.UserId, model.Description, model.Origin, model.Type, model.ReceiveDate, model.IsRecieved, model.Amount)
+	defer statement.Close()
+	_, err = statement.Exec(
+		model.UserId,
+		model.Description,
+		model.Origin,
+		model.Type.ToDBString(),
+		model.ReceiveDate,
+		model.IsRecieved,
+		model.Amount,
+	)
 	if err != nil {
 		return err
 	}
@@ -55,10 +64,21 @@ func (r RevenueRepository) GetAll() ([]models.Revenue, error) {
 	var revenues []models.Revenue
 	for rows.Next() {
 		var revenue models.Revenue
-		err := rows.Scan(&revenue.ID, &revenue.UserId, &revenue.Description, &revenue.Origin, &revenue.Type, &revenue.ReceiveDate, &revenue.IsRecieved, &revenue.Amount)
+		var typeStr string
+		err := rows.Scan(
+			&revenue.ID,
+			&revenue.UserId,
+			&revenue.Description,
+			&revenue.Origin,
+			&typeStr,
+			&revenue.ReceiveDate,
+			&revenue.IsRecieved,
+			&revenue.Amount,
+		)
 		if err != nil {
 			return nil, err
 		}
+		revenue.Type = helpers.ParseIncomeType(typeStr)
 		revenues = append(revenues, revenue)
 	}
 	return revenues, nil
@@ -66,15 +86,26 @@ func (r RevenueRepository) GetAll() ([]models.Revenue, error) {
 }
 func (r RevenueRepository) GetById(id int64) (models.Revenue, error) {
 	var revenue models.Revenue
+	var typeStr string
 	var sqlCommand string = `SELECT id, user_id, description, origin, type, received_date, is_recieved,amount
 	FROM transactions.revenue
 	WHERE id=$1;`
 
 	row := r.db.QueryRow(sqlCommand, id)
-	err := row.Scan(&revenue.ID, &revenue.UserId, &revenue.Description, &revenue.Origin, &revenue.Type, &revenue.ReceiveDate, &revenue.IsRecieved, &revenue.Amount)
+	err := row.Scan(
+		&revenue.ID,
+		&revenue.UserId,
+		&revenue.Description,
+		&revenue.Origin,
+		&typeStr,
+		&revenue.ReceiveDate,
+		&revenue.IsRecieved,
+		&revenue.Amount,
+	)
 	if err != nil {
 		return revenue, err
 	}
+	revenue.Type = helpers.ParseIncomeType(typeStr)
 	return revenue, nil
 }
 func (r RevenueRepository) GetByUserId(userId int64) ([]models.Revenue, error) {
@@ -92,10 +123,24 @@ func (r RevenueRepository) GetByUserId(userId int64) ([]models.Revenue, error) {
 	var revenues []models.Revenue
 	for rows.Next() {
 		var revenue models.Revenue
-		err := rows.Scan(&revenue.ID, &revenue.UserId, &revenue.Description, &revenue.Origin, &revenue.Type, &revenue.ReceiveDate, &revenue.IsRecieved, &revenue.Amount)
+		var typeStr string
+
+		err := rows.Scan(
+			&revenue.ID,
+			&revenue.UserId,
+			&revenue.Description,
+			&revenue.Origin,
+			&typeStr,
+			&revenue.ReceiveDate,
+			&revenue.IsRecieved,
+			&revenue.Amount,
+		)
 		if err != nil {
 			return nil, fmt.Errorf("repository:revenue:scan rows: %s", err)
 		}
+
+		// Conversão string -> Enum
+		revenue.Type = helpers.ParseIncomeType(typeStr)
 		revenues = append(revenues, revenue)
 	}
 	return revenues, nil
@@ -103,24 +148,32 @@ func (r RevenueRepository) GetByUserId(userId int64) ([]models.Revenue, error) {
 func (r RevenueRepository) Update(model models.Revenue) error {
 	var sqlCommand string = `UPDATE transactions.revenue
 	SET
-	description=$2, 
-	origin=$3,
-	type=$4,
-	received_date=$5,
-	is_recieved=$6,
-	amount=$7
-	WHERE id=$8;`
+	description=$1, 
+	origin=$2,
+	type=$3,
+	received_date=$4,
+	is_recieved=$5,
+	amount=$6
+	WHERE id=$7;`
 
 	statement, err := r.db.Prepare(sqlCommand)
 	if err != nil {
 		return err
 	}
 	defer statement.Close()
-	_, err = statement.Exec(model.Description, model.Origin, model.Type, model.ReceiveDate, model.IsRecieved, model.Amount, model.ID)
+	_, err = statement.Exec(
+		model.Description,
+		model.Origin,
+		model.Type.ToDBString(),
+		model.ReceiveDate,
+		model.IsRecieved,
+		model.Amount,
+		model.ID,
+	)
 	if err != nil {
 		return err
 	}
-	log.Println("User updated successfully")
+
 	return nil
 }
 func (r RevenueRepository) Delete(id int64, userId int64) error {
