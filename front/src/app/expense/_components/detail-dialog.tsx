@@ -41,9 +41,9 @@ interface DetailProps {
 const formSchema = z.object({
   description: z.string().optional(),
   target: z.string().optional(),
-  category: z.string().optional(),
-  type: z.string().optional(),
-  paymentMethod: z.string().optional(),
+  category: z.enum(CategoryExpenseEnum).optional(),
+  type: z.enum(TypeExpenseEnum).optional(),
+  paymentMethod: z.enum(PaymentMethodEnum).optional(),
   paymentDate: z.any().optional(),
   amount: z.number().optional(),
   isPaid: z.boolean().optional(),
@@ -61,9 +61,9 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
     defaultValues: {
       description: "",
       target: "",
-      category: "",
-      type: "",
-      paymentMethod: "",
+      category: CategoryExpenseEnum.Outros,
+      type: TypeExpenseEnum.Variável,
+      paymentMethod: PaymentMethodEnum.dinheiro,
       amount: undefined,
       paymentDate: undefined,
       isPaid: false,
@@ -76,9 +76,9 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
         form.reset({
           description: data.description,
           target: data.target,
-          category: data.category.toUpperCase(),
-          type: data.type.toUpperCase(),
-          paymentMethod: data.paymentMethod.toUpperCase(),
+          category: data.category,
+          type: data.type,
+          paymentMethod: data.paymentMethod,
           paymentDate: data.paymentDate,
           amount: data.amount,
           isPaid: data.isPaid,
@@ -98,9 +98,9 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
       userId: 0,
       description: data.description,
       target: data.target,
-      category: data.category.toLowerCase(),
-      type: data.type.toLowerCase(),
-      paymentMethod: data.paymentMethod.toLowerCase(),
+      category: data.category,
+      type: data.type,
+      paymentMethod: data.paymentMethod,
       paymentDate: data.paymentDate,
       amount: data.amount,
       isPaid: data.isPaid,
@@ -152,7 +152,7 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
                     <FieldLabel htmlFor={field.name}>Categoria</FieldLabel>
                     <Select
                       name={field.name}
-                      value={field.value}
+                      value={field.value.toString()}
                       onValueChange={field.onChange}
                     >
                       <SelectTrigger
@@ -185,7 +185,7 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
                     <FieldLabel htmlFor={field.name}>Tipo de Saída</FieldLabel>
                     <Select
                       name={field.name}
-                      value={field.value}
+                      value={field.value.toString()}
                       onValueChange={field.onChange}
                     >
                       <SelectTrigger
@@ -218,7 +218,7 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
                     <FieldLabel htmlFor={field.name}>Pagamento</FieldLabel>
                     <Select
                       name={field.name}
-                      value={field.value}
+                      value={field.value.toString()}
                       onValueChange={field.onChange}
                     >
                       <SelectTrigger

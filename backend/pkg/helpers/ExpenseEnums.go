@@ -1,50 +1,114 @@
 package helpers
 
-// ExpenseCategory representa as categorias de despesas
-type ExpenseCategory string
-
-const (
-	ExpenseCategoryMercadoGeral     ExpenseCategory = "Mercado geral"
-	ExpenseCategoryDelivery         ExpenseCategory = "Delivery"
-	ExpenseCategoryRestauranteBares ExpenseCategory = "Restaurante e bares"
-	ExpenseCategoryVestuario        ExpenseCategory = "Vestuário"
-	ExpenseCategoryMoradia          ExpenseCategory = "Moradia"
-	ExpenseCategoryUtilidades       ExpenseCategory = "Utilidades"
-	ExpenseCategoryDecoracao        ExpenseCategory = "Decoração"
-	ExpenseCategoryEducacao         ExpenseCategory = "Educação"
-	ExpenseCategoryDependentes      ExpenseCategory = "Dependentes"
-	ExpenseCategorySaude            ExpenseCategory = "Saúde"
-	ExpenseCategoryEntretenimento   ExpenseCategory = "Entretenimento"
-	ExpenseCategoryServicos         ExpenseCategory = "Serviços"
-	ExpenseCategoryImpostos         ExpenseCategory = "Impostos"
-	ExpenseCategoryTransporte       ExpenseCategory = "Transporte"
-	ExpenseCategoryPresentes        ExpenseCategory = "Presentes"
-	ExpenseCategoryPets             ExpenseCategory = "Pets"
-	ExpenseCategoryViagens          ExpenseCategory = "Viagens"
-	ExpenseCategoryDoacoes          ExpenseCategory = "Doaçõess"
-	ExpenseCategoryApostas          ExpenseCategory = "Apostas"
-	ExpenseCategoryLivre            ExpenseCategory = "Livre"
-	ExpenseCategoryOutros           ExpenseCategory = "Outros"
-)
-
 // ExpenseType define a recorrência ou tipo da despesa
-type ExpenseType string
+type ExpenseType int
 
 const (
-	ExpenseTypeMensal   ExpenseType = "Mensal"
-	ExpenseTypeVariavel ExpenseType = "Variável"
-	ExpenseTypeFatura   ExpenseType = "Fatura"
+	ExpenseTypeMensal ExpenseType = iota
+	ExpenseTypeVariavel
+	ExpenseTypeFatura
 )
 
-// PaymentMethod define os meios de pagamento
-type PaymentMethod string
+func (t ExpenseType) ToDBString() string {
+	dbValues := []string{
+		"Mensal",
+		"Variável",
+		"Fatura",
+	}
+	if t < 0 || int(t) >= len(dbValues) {
+		return "Outros"
+	}
+	return dbValues[t]
+}
+
+// 1. ExpenseCategory
+type ExpenseCategory int
 
 const (
-	PaymentMethodPix      PaymentMethod = "pix"
-	PaymentMethodDebito   PaymentMethod = "debito"
-	PaymentMethodCredito  PaymentMethod = "credito"
-	PaymentMethodBoleto   PaymentMethod = "boleto"
-	PaymentMethodDinheiro PaymentMethod = "dinheiro"
-	PaymentMethodTED      PaymentMethod = "ted"
-	PaymentMethodCheque   PaymentMethod = "cheque"
+	ExpenseCategoryMercadoGeral ExpenseCategory = iota // 0
+	ExpenseCategoryDelivery
+	ExpenseCategoryRestauranteBares
+	ExpenseCategoryVestuario
+	ExpenseCategoryMoradia
+	ExpenseCategoryUtilidades
+	ExpenseCategoryDecoracao
+	ExpenseCategoryEducacao
+	ExpenseCategoryDependentes
+	ExpenseCategorySaude
+	ExpenseCategoryEntretenimento
+	ExpenseCategoryServicos
+	ExpenseCategoryImpostos
+	ExpenseCategoryTransporte
+	ExpenseCategoryPresentes
+	ExpenseCategoryPets
+	ExpenseCategoryViagens
+	ExpenseCategoryDoacoes
+	ExpenseCategoryApostas
+	ExpenseCategoryLivre
+	ExpenseCategoryOutros
 )
+
+// ToDBString converte o inteiro da categoria para a string esperada pelo banco
+func (e ExpenseCategory) ToDBString() string {
+	dbValues := []string{
+		"Mercado geral",
+		"Delivery",
+		"Restaurante e bares",
+		"Vestuário",
+		"Moradia",
+		"Utilidades",
+		"Decoração",
+		"Educação",
+		"Dependentes",
+		"Saúde",
+		"Entretenimento",
+		"Serviços",
+		"Impostos",
+		"Transporte",
+		"Presentes",
+		"Pets",
+		"Viagens",
+		"Doações",
+		"Apostas",
+		"Livre",
+		"Outros",
+	}
+
+	if e < 0 || int(e) >= len(dbValues) {
+		return "Outros"
+	}
+
+	return dbValues[e]
+}
+
+// 2. PaymentMethod
+type PaymentMethod int
+
+const (
+	PaymentMethodPix PaymentMethod = iota
+	PaymentMethodDebito
+	PaymentMethodCredito
+	PaymentMethodBoleto
+	PaymentMethodDinheiro
+	PaymentMethodTED
+	PaymentMethodCheque
+)
+
+// ToDBString converte o inteiro do método de pagamento para a string esperada pelo banco
+func (p PaymentMethod) ToDBString() string {
+	dbValues := []string{
+		"pix",
+		"debito",
+		"credito",
+		"boleto",
+		"dinheiro",
+		"ted",
+		"cheque",
+	}
+
+	if p < 0 || int(p) >= len(dbValues) {
+		return ""
+	}
+
+	return dbValues[p]
+}

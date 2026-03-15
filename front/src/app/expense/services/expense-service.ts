@@ -26,6 +26,7 @@ export async function getExpense(id?: number): Promise<Expense[] | Expense> {
 }
 
 export async function sendExpense(expense: Expense) {
+  console.log(expense);
   const id = expense.id;
   const url = buildUrl(id);
   const method = id && id > 0 ? "PUT" : "POST";

@@ -29,16 +29,16 @@ func (ex *Expense) Isvalid() error {
 	if ex.Target == "" {
 		return errors.New("expense:validate:Target required")
 	}
-	if ex.Category == "" {
-		return errors.New("expense:validate:Category required")
+	if ex.Category < 0 || int(ex.Category) > 20 {
+		return errors.New("expense:validate:Category invalid")
 	}
 
-	if ex.Type == "" {
-		return errors.New("expense:validate:Type required")
+	if ex.Type < 0 || int(ex.Type) > 2 {
+		return errors.New("expense:validate:Type invalid")
 	}
 
-	if ex.PaymentMethod == "" {
-		return errors.New("expense:validate:PaymentMethod required")
+	if ex.PaymentMethod < 0 || int(ex.PaymentMethod) > 6 {
+		return errors.New("expense:validate:PaymentMethod invalid")
 	}
 
 	if ex.PaymentDate.IsZero() {

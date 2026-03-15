@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     API_URL: "http://localhost:8080/api/",
     //TODO:IMPLEMENTS LOGIN AND MIDDLEWARE REQUEST
     TOKEN:
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE3NzMwNTQ2MjgsInVzZXJJZCI6NX0.BQ8EVK3xb-37a601GlmPvxzdKeVyx8xUQeodfcUFhvM",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE3NzM1MTg1NTYsInVzZXJJZCI6NX0.wR1HbWYu-kVtnix7-IAEsL51L5G4hoLIReyLhliog4s",
   },
 };
 
