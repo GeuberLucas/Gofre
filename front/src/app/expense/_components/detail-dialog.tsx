@@ -153,7 +153,7 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
                     <Select
                       name={field.name}
                       value={field.value.toString()}
-                      onValueChange={field.onChange}
+                      onValueChange={(value) => field.onChange(Number(value))}
                     >
                       <SelectTrigger
                         className="w-full"
@@ -186,7 +186,7 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
                     <Select
                       name={field.name}
                       value={field.value.toString()}
-                      onValueChange={field.onChange}
+                      onValueChange={(value) => field.onChange(Number(value))}
                     >
                       <SelectTrigger
                         className="w-full"
@@ -219,7 +219,7 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
                     <Select
                       name={field.name}
                       value={field.value.toString()}
-                      onValueChange={field.onChange}
+                      onValueChange={(value) => field.onChange(Number(value))}
                     >
                       <SelectTrigger
                         className="w-full"
