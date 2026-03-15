@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 )
 
 type ReverseProxy struct {
@@ -84,7 +85,7 @@ func (rp *ReverseProxy) forwardRequest(target *url.URL, userID string, w http.Re
 	if userID != "" {
 		r.Header.Set("user_id", userID)
 	}
-
+	proxy.ErrorHandler = ErrHandler
 	proxy.ServeHTTP(w, r)
 
 	// Restaura estado original
@@ -92,6 +93,9 @@ func (rp *ReverseProxy) forwardRequest(target *url.URL, userID string, w http.Re
 	r.URL.Path = originalPath
 }
 
+func ErrHandler(res http.ResponseWriter, req *http.Request, err error) {
+	log.Err(err)
+}
 func (rp *ReverseProxy) selectMicroService(path string) (string, error) {
 
 	parts := strings.Split(strings.TrimPrefix(path, "/"), "/")

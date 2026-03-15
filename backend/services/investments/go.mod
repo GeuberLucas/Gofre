@@ -7,7 +7,7 @@ require github.com/gorilla/mux v1.8.1
 require github.com/google/uuid v1.6.0 // indirect
 
 require (
-	github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20260309104732-6d6a6b4e0ed1
+	github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20260315112905-42d07dd85205
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/klauspost/compress v1.18.4 // indirect
 	github.com/lib/pq v1.11.2 // indirect
