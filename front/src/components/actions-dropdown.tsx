@@ -15,9 +15,9 @@ import {
 import { useState } from "react";
 
 import { TransactionType } from "@/enums/TypeTransactions";
-import DetailRevenue from "@/app/revenue/detail-dialog";
+import DetailRevenue from "@/app/revenue/_components/detail-dialog";
 import DetailExpense from "@/app/expense/_components/detail-dialog";
-import DetailInvestment from "@/app/investments/detail-dialog";
+import DetailInvestment from "@/app/investments/_components/detail-dialog";
 
 //TODO:IMPLEMENT LOGIC ALTER STATUS
 //TODO:ALTER DELETE LOGIC

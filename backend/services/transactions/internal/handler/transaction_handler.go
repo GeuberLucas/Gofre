@@ -104,11 +104,11 @@ func UpdateExpenseHandler(s *service.TransactionService) http.HandlerFunc {
 			return
 		}
 		var expenseDto dtos.ExpenseDto
-		expenseDto.UserId = userIdInt
 		if err = json.Unmarshal(bodyRequest, &expenseDto); err != nil {
 			checkErroType(w, err, "validation")
 			return
 		}
+		expenseDto.UserId = userIdInt
 		err, typeError := s.UpdateExpense(id, expenseDto)
 		if err != nil {
 			checkErroType(w, err, typeError)

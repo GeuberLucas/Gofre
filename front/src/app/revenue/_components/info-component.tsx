@@ -1,4 +1,4 @@
-import { FinancialSummaryProps } from "../financialSummaryProps";
+import { FinancialSummaryProps } from "../../financialSummaryProps";
 
 const formatCurrency = (value: number) =>
   Intl.NumberFormat("pt-BR", {

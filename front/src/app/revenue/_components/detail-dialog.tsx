@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Revenue } from "./revenue";
+import { Revenue } from "../model/revenue";
 import { Input } from "@/components/ui/input";
 import {
   SelectTrigger,

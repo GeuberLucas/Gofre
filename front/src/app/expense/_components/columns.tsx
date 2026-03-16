@@ -1,10 +1,17 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Expense } from "./model/expense";
 import DropDownActions from "@/components/actions-dropdown";
 import { TransactionType } from "@/enums/TypeTransactions";
+import { enumToFormattedOptions } from "@/app/enum-to-option";
+import { CategoryExpenseEnum } from "../enums/category-expense-enum";
+import { PaymentMethodEnum } from "../enums/payment-method-enum";
+import { TypeExpenseEnum } from "../enums/type-expense-enum";
+import { Expense } from "../model/expense";
 
+const categorys = enumToFormattedOptions(CategoryExpenseEnum);
+const typeExpense = enumToFormattedOptions(TypeExpenseEnum);
+const paymentMethods = enumToFormattedOptions(PaymentMethodEnum);
 export const columns: ColumnDef<Expense>[] = [
   {
     accessorKey: "description",
@@ -17,14 +24,31 @@ export const columns: ColumnDef<Expense>[] = [
   {
     accessorKey: "category",
     header: "Categoria",
+    cell: ({ row }) => {
+      const dateValue = row.getValue("category");
+      const category = categorys.findLast((key) => key.valor == dateValue);
+      return category.texto;
+    },
   },
   {
     accessorKey: "type",
     header: "Tipo",
+    cell: ({ row }) => {
+      const dateValue = row.getValue("type");
+      const type = typeExpense.findLast((key) => key.valor == dateValue);
+      return type.texto;
+    },
   },
   {
     accessorKey: "paymentMethod",
     header: "Pagamento",
+    cell: ({ row }) => {
+      const dateValue = row.getValue("paymentMethod");
+      const paymentMethod = paymentMethods.findLast(
+        (key) => key.valor == dateValue,
+      );
+      return paymentMethod.texto;
+    },
   },
   {
     accessorKey: "paymentDate",

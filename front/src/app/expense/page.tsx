@@ -23,7 +23,7 @@ function getSummary(expenses: Expense[]) {
     );
   });
   const notCredit = expensesThisMonth.filter(
-    (exp) => exp.paymentMethod.toLocaleUpperCase() != PaymentMethodEnum.CREDITO,
+    (exp) => exp.paymentMethod != PaymentMethodEnum.credito,
   );
   const expectedAmount = notCredit.reduce((accumulator, expense) => {
     return accumulator + expense.amount;
@@ -39,17 +39,17 @@ function getSummary(expenses: Expense[]) {
       return accumulator + expense.amount;
     }, 0);
   const invoiceAmount = expensesThisMonth
-    .filter((exp) => exp.type.toUpperCase() == TypeExpenseEnum.FATURA)
+    .filter((exp) => exp.type == TypeExpenseEnum.Fatura)
     .reduce((accumulator, expense) => {
       return accumulator + expense.amount;
     }, 0);
   const variableAmount = expensesThisMonth
-    .filter((exp) => exp.type.toUpperCase() == TypeExpenseEnum.VARIAVEL)
+    .filter((exp) => exp.type == TypeExpenseEnum.Variável)
     .reduce((accumulator, expense) => {
       return accumulator + expense.amount;
     }, 0);
   const monthlyAmount = expensesThisMonth
-    .filter((exp) => exp.type.toUpperCase() == TypeExpenseEnum.MENSAL)
+    .filter((exp) => exp.type == TypeExpenseEnum.Mensal)
     .reduce((accumulator, expense) => {
       return accumulator + expense.amount;
     }, 0);

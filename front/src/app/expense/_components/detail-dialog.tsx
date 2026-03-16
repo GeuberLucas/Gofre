@@ -106,9 +106,10 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
       isPaid: data.isPaid,
     };
     console.log(JSON.stringify(expense));
-    sendExpense(expense).then((response) => {
-      if (response.ok) {
+    sendExpense(expense).then((sucess) => {
+      if (sucess) {
         form.reset();
+        setInterval(() => props.onClose(), 100);
       }
     });
   }

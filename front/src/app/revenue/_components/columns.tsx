@@ -1,29 +1,28 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-
-import { Portfolio } from "./portfolio";
+import { Revenue } from "../model/revenue";
+import DropDownActions from "../../../components/actions-dropdown";
 import { TransactionType } from "@/enums/TypeTransactions";
-import DropDownActions from "@/components/actions-dropdown";
 
-export const columns: ColumnDef<Portfolio>[] = [
+export const columns: ColumnDef<Revenue>[] = [
   {
     accessorKey: "description",
     header: "Descrição",
   },
   {
-    accessorKey: "broker",
-    header: "Corretora/Banco",
+    accessorKey: "origin",
+    header: "Origem",
   },
   {
-    accessorKey: "asset_id",
-    header: "Ativo",
+    accessorKey: "type",
+    header: "Tipo",
   },
   {
-    accessorKey: "deposit_date",
+    accessorKey: "date",
     header: "Data",
     cell: ({ row }) => {
-      const unixDate = Date.parse(row.getValue("deposit_date"));
+      const unixDate = Date.parse(row.getValue("date"));
       const date = new Date(unixDate);
       return date.toLocaleDateString("pt-BR");
     },
@@ -42,10 +41,10 @@ export const columns: ColumnDef<Portfolio>[] = [
     },
   },
   {
-    accessorKey: "is_done",
-    header: "Feito ?",
+    accessorKey: "recieved",
+    header: "Recebido ?",
     cell: ({ row }) => {
-      const recieved = Boolean(row.getValue("is_done"));
+      const recieved = Boolean(row.getValue("recieved"));
 
       return recieved ? "Sim" : "Não";
     },
@@ -54,13 +53,13 @@ export const columns: ColumnDef<Portfolio>[] = [
     id: "Actions",
     header: "Ações",
     cell: ({ row }) => {
-      const investment = row.original;
+      const revenue = row.original;
 
       return (
         <DropDownActions
-          idTransaction={investment.id}
-          transactionType={TransactionType.Investment}
-          executedTransaction={investment.is_done}
+          idTransaction={revenue.id}
+          transactionType={TransactionType.Revenue}
+          executedTransaction={revenue.recieved}
         />
       );
     },

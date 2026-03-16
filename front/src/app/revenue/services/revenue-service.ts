@@ -1,6 +1,6 @@
 "use server";
 
-import { Revenue } from "../revenue";
+import { Revenue } from "../model/revenue";
 
 const defaultHeaders = {
   "Content-Type": "application/json",

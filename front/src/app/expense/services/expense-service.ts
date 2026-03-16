@@ -43,5 +43,5 @@ export async function sendExpense(expense: Expense) {
     return;
   }
 
-  return res;
+  return res.ok;
 }

@@ -1,28 +1,29 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Revenue } from "./revenue";
-import DropDownActions from "../../components/actions-dropdown";
-import { TransactionType } from "@/enums/TypeTransactions";
 
-export const columns: ColumnDef<Revenue>[] = [
+import { TransactionType } from "@/enums/TypeTransactions";
+import DropDownActions from "@/components/actions-dropdown";
+import { Portfolio } from "../model/portfolio";
+
+export const columns: ColumnDef<Portfolio>[] = [
   {
     accessorKey: "description",
     header: "Descrição",
   },
   {
-    accessorKey: "origin",
-    header: "Origem",
+    accessorKey: "broker",
+    header: "Corretora/Banco",
   },
   {
-    accessorKey: "type",
-    header: "Tipo",
+    accessorKey: "asset_id",
+    header: "Ativo",
   },
   {
-    accessorKey: "date",
+    accessorKey: "deposit_date",
     header: "Data",
     cell: ({ row }) => {
-      const unixDate = Date.parse(row.getValue("date"));
+      const unixDate = Date.parse(row.getValue("deposit_date"));
       const date = new Date(unixDate);
       return date.toLocaleDateString("pt-BR");
     },
@@ -41,10 +42,10 @@ export const columns: ColumnDef<Revenue>[] = [
     },
   },
   {
-    accessorKey: "recieved",
-    header: "Recebido ?",
+    accessorKey: "is_done",
+    header: "Feito ?",
     cell: ({ row }) => {
-      const recieved = Boolean(row.getValue("recieved"));
+      const recieved = Boolean(row.getValue("is_done"));
 
       return recieved ? "Sim" : "Não";
     },
@@ -53,13 +54,13 @@ export const columns: ColumnDef<Revenue>[] = [
     id: "Actions",
     header: "Ações",
     cell: ({ row }) => {
-      const revenue = row.original;
+      const investment = row.original;
 
       return (
         <DropDownActions
-          idTransaction={revenue.id}
-          transactionType={TransactionType.Revenue}
-          executedTransaction={revenue.recieved}
+          idTransaction={investment.id}
+          transactionType={TransactionType.Investment}
+          executedTransaction={investment.is_done}
         />
       );
     },

@@ -1,5 +1,9 @@
 github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20260309104732-6d6a6b4e0ed1 h1:+mCbZ+ajcqM70MlZSkG60Zi18UlvjbcALFiXZoAJESw=
 github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20260309104732-6d6a6b4e0ed1/go.mod h1:zPdg+TsWt1+hTFfN6CsInT7E+WPTXVOXyitb525iOL8=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20260315112905-42d07dd85205 h1:mEo2p/loF+p/eqxXEegqCaT6ifV2CkoHmbE7ZzGEnQs=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20260315112905-42d07dd85205/go.mod h1:zPdg+TsWt1+hTFfN6CsInT7E+WPTXVOXyitb525iOL8=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20260315141001-9cc89c5c2eb1 h1:J13VThJICAqtWNtAaApF6RVStdoN5fUwPdskIjlcLQ8=
+github.com/GeuberLucas/Gofre/backend/pkg v0.0.0-20260315141001-9cc89c5c2eb1/go.mod h1:zPdg+TsWt1+hTFfN6CsInT7E+WPTXVOXyitb525iOL8=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
@@ -24,6 +28,8 @@ github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 golang.org/x/crypto v0.48.0 h1:/VRzVqiRSggnhY7gNRxPauEQ5Drw9haKdM0jqfcCFts=
 golang.org/x/crypto v0.48.0/go.mod h1:r0kV5h3qnFPlQnBSrULhlsRfryS2pmewsg+XfMgkVos=
+golang.org/x/crypto v0.49.0 h1:+Ng2ULVvLHnJ/ZFEq4KdcDd/cfjrrjjNSXNzxg0Y4U4=
+golang.org/x/crypto v0.49.0/go.mod h1:ErX4dUh2UM+CFYiXZRTcMpEcN8b/1gxEuv3nODoYtCA=
 golang.org/x/sys v0.42.0 h1:omrd2nAlyT5ESRdCLYdm3+fMfNFE/+Rf4bDIQImRJeo=
 golang.org/x/sys v0.42.0/go.mod h1:4GL1E5IUh+htKOUEOaiffhrAeqysfVGipDYzABqnCmw=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=

@@ -24,10 +24,10 @@ import { Controller, useForm } from "react-hook-form";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Calendar } from "@/components/ui/calendar";
 import { Switch } from "@/components/ui/switch";
-import { Portfolio } from "./portfolio";
 import { useEffect, useState } from "react";
-import { getPortfolio, sendPortfolio } from "./services/investment-service";
 import { NumericFormat } from "react-number-format";
+import { Portfolio } from "../model/portfolio";
+import { getPortfolio, sendPortfolio } from "../services/investment-service";
 interface DetailProps {
   open: boolean;
   onClose: () => void;

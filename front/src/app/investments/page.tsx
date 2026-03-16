@@ -1,23 +1,20 @@
 "use client";
-import { DataTable } from "./data-table";
-import { columns } from "./columns";
-import { InfoComponent } from "./info-component";
+import { DataTable } from "./_components/data-table";
 import { FinancialSummaryProps } from "../financialSummaryProps";
-import { Portfolio } from "./portfolio";
+import { Portfolio } from "./model/portfolio";
 import { useEffect, useState } from "react";
-import DetailInvestment from "./detail-dialog";
 import { getPortfolio } from "./services/investment-service";
+import { InfoComponent } from "./_components/info-component";
+import DetailInvestment from "./_components/detail-dialog";
+import { columns } from "../revenue/_components/columns";
 
 function getSummary(expenses: Portfolio[]) {
   const today = new Date();
   const actualMonth = today.getMonth();
   const actualYear = today.getFullYear();
   const investmentThisMonth = expenses.filter((expense) => {
-    console.log(expense);
     const dateObj = new Date(expense.deposit_date);
-
     if (Number.isNaN(dateObj.getTime())) return false;
-
     return (
       dateObj.getMonth() === actualMonth && dateObj.getFullYear() === actualYear
     );

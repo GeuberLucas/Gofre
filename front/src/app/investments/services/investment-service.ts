@@ -1,6 +1,6 @@
 "use server";
 
-import { Portfolio } from "../portfolio";
+import { Portfolio } from "../model/portfolio";
 
 const defaultHeaders = {
   "Content-Type": "application/json",
