@@ -12,7 +12,7 @@ function getSummary(expenses: Revenue[]) {
   const actualMonth = today.getMonth();
   const actualYear = today.getFullYear();
   const investmentThisMonth = expenses.filter((expense) => {
-    const dateObj = new Date(expense.date);
+    const dateObj = new Date(expense.receiveDate);
     if (Number.isNaN(dateObj.getTime())) return false;
     return (
       dateObj.getMonth() === actualMonth && dateObj.getFullYear() === actualYear

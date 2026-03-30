@@ -145,6 +145,12 @@ func DeleteExpenseHandler(s *service.TransactionService) http.HandlerFunc {
 }
 func AddRevenueHandler(s *service.TransactionService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		userIdToken := r.Header.Get("user_id")
+		userIdInt, err := strconv.ParseInt(userIdToken, 10, 64)
+		if err != nil {
+			response.ErrorResponse(w, http.StatusBadRequest, err)
+			return
+		}
 		bodyRequest, err := io.ReadAll(r.Body)
 		if err != nil {
 			response.ErrorResponse(w, http.StatusUnprocessableEntity, err)
@@ -155,7 +161,7 @@ func AddRevenueHandler(s *service.TransactionService) http.HandlerFunc {
 			checkErroType(w, err, "validation")
 			return
 		}
-
+		revenueDto.UserId = userIdInt
 		stringTypeError, err := s.AddRevenue(revenueDto)
 		if err != nil {
 			checkErroType(w, err, stringTypeError)
@@ -167,6 +173,7 @@ func AddRevenueHandler(s *service.TransactionService) http.HandlerFunc {
 func GetByIdRevenueHandler(s *service.TransactionService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
+
 		id, err := strconv.ParseInt(params["idTransaction"], 10, 64)
 		if err != nil {
 			checkErroType(w, err, "Validation")

@@ -77,7 +77,7 @@ export default function DetailInvestment(props: Readonly<DetailProps>) {
         setMonth(new Date(initialValues.deposit_date));
       });
     }
-  }, [props.id, form]);
+  }, [props.id, props.open, form]);
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     if (!form.formState.isDirty) {

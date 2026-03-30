@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { getPortfolio } from "./services/investment-service";
 import { InfoComponent } from "./_components/info-component";
 import DetailInvestment from "./_components/detail-dialog";
-import { columns } from "../revenue/_components/columns";
+import { columns } from "./_components/columns";
 
 function getSummary(expenses: Portfolio[]) {
   const today = new Date();
@@ -53,7 +53,7 @@ const ToggleState = (rowState: boolean) => {
     </button>
   );
 };
-export default function Revenues() {
+export default function Portfolios() {
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [data, setData] = useState([]);
   const [financialSummary, setfinancialSummary] = useState({

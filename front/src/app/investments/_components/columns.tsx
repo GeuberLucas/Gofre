@@ -23,8 +23,7 @@ export const columns: ColumnDef<Portfolio>[] = [
     accessorKey: "deposit_date",
     header: "Data",
     cell: ({ row }) => {
-      const unixDate = Date.parse(row.getValue("deposit_date"));
-      const date = new Date(unixDate);
+      const date = new Date(row.getValue("deposit_date"));
       return date.toLocaleDateString("pt-BR");
     },
   },

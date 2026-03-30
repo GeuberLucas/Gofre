@@ -7,8 +7,6 @@ const nextConfig: NextConfig = {
   env: {
     APP_VERSION: version,
     API_URL: "http://localhost:8080/api/",
-    //TODO:IMPLEMENTS LOGIN AND MIDDLEWARE REQUEST
-    TOKEN: "",
   },
 };
 

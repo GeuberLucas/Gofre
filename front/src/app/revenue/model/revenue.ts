@@ -3,7 +3,7 @@ export interface Revenue {
   description: string;
   origin: string;
   type: string;
-  date: Date;
+  receiveDate: Date;
   amount: number;
   recieved: boolean;
 }

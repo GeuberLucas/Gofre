@@ -105,7 +105,7 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
       amount: data.amount,
       isPaid: data.isPaid,
     };
-    console.log(JSON.stringify(expense));
+
     sendExpense(expense).then((sucess) => {
       if (sucess) {
         form.reset();

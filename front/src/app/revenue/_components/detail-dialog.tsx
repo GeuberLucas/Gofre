@@ -64,12 +64,10 @@ export default function DetailRevenue(props: Readonly<DetailProps>) {
     form.setValue("description", initialValues.description);
     form.setValue("origin", initialValues.origin);
     form.setValue("type", initialValues.type);
-    form.setValue("date", initialValues.date);
+    form.setValue("date", initialValues.receiveDate);
   }
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(data);
-  }
+  function onSubmit(data: z.infer<typeof formSchema>) {}
   return (
     <Dialog open={props.open} onOpenChange={props.onClose}>
       <DialogContent>

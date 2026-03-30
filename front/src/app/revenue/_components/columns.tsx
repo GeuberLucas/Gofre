@@ -19,11 +19,10 @@ export const columns: ColumnDef<Revenue>[] = [
     header: "Tipo",
   },
   {
-    accessorKey: "date",
+    accessorKey: "receiveDate",
     header: "Data",
     cell: ({ row }) => {
-      const unixDate = Date.parse(row.getValue("date"));
-      const date = new Date(unixDate);
+      const date = new Date(row.getValue("receiveDate"));
       return date.toLocaleDateString("pt-BR");
     },
   },

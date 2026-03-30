@@ -78,7 +78,9 @@ func (p *PortfolioRepository) GetAll(userId int) ([]models.Portfolio, error) {
 	var portfolioDtos []models.Portfolio
 	for rows.Next() {
 		var portfolioModel models.Portfolio
-		err := rows.Scan(portfolioModel)
+		err := rows.Scan(&portfolioModel.Id,
+			&portfolioModel.User_id, &portfolioModel.Asset_id,
+			&portfolioModel.Deposit_date, &portfolioModel.Broker, &portfolioModel.Amount, &portfolioModel.Description, &portfolioModel.IsDone)
 		if err != nil {
 			return nil, err
 		}

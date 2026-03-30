@@ -1,47 +1,40 @@
 "use server";
 
+import { ApiClient } from "@/lib/httpClient";
 import { Expense } from "../model/expense";
 
-const defaultHeaders = {
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${process.env.TOKEN}`,
-};
-
-const baseUrl = `${process.env.API_URL}transaction/expense`;
+const baseUrl = `transaction/expense`;
 
 function buildUrl(id?: number) {
   return id && id > 0 ? `${baseUrl}/${id}` : baseUrl;
 }
 
 export async function getExpense(id?: number): Promise<Expense[] | Expense> {
-  const url = buildUrl(id);
-  const res = await fetch(url, { headers: defaultHeaders });
-  if (!res.ok) {
-    const errorBody = await res.text();
-    console.error({ status: res.status, msg: errorBody });
-    return;
-  }
-  const expenses: Expense[] | Expense = await res.json();
-  return expenses;
+  return ApiClient.request<Expense[] | Expense>(buildUrl(id), {
+    method: "GET",
+  }).then((res) => {
+    if (res == undefined) {
+      return;
+    }
+
+    const expenses: Expense[] | Expense = res.data;
+    return expenses;
+  });
 }
 
 export async function sendExpense(expense: Expense) {
-  console.log(expense);
   const id = expense.id;
   const url = buildUrl(id);
   const method = id && id > 0 ? "PUT" : "POST";
-  console.log(method);
   const json = JSON.stringify(expense);
-  const res = await fetch(url, {
-    headers: defaultHeaders,
+  const res = await ApiClient.request<{ token: string }>(url, {
     method: method,
     body: json,
   });
-  if (!res.ok) {
-    const errorBody = await res.json();
-    console.error({ status: res.status, msg: errorBody });
+  if (!res.success) {
+    const errorBody = res.data;
+    console.error({ status: res.statusCode, msg: errorBody });
     return;
   }
-
-  return res.ok;
+  return res.success;
 }
