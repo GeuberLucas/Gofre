@@ -27,7 +27,7 @@ import { Expense } from "../model/expense";
 import { CategoryExpenseEnum } from "../enums/category-expense-enum";
 import { TypeExpenseEnum } from "../enums/type-expense-enum";
 import { PaymentMethodEnum } from "../enums/payment-method-enum";
-import { enumToFormattedOptions } from "../../enum-to-option";
+import { enumToFormattedOptions } from "../../../lib/enum-to-option";
 import { getExpense, sendExpense } from "../services/expense-service";
 import { useEffect, useState } from "react";
 import { NumericFormat } from "react-number-format";

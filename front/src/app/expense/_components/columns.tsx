@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import DropDownActions from "@/components/actions-dropdown";
 import { TransactionType } from "@/enums/TypeTransactions";
-import { enumToFormattedOptions } from "@/app/enum-to-option";
+import { enumToFormattedOptions } from "@/lib/enum-to-option";
 import { CategoryExpenseEnum } from "../enums/category-expense-enum";
 import { PaymentMethodEnum } from "../enums/payment-method-enum";
 import { TypeExpenseEnum } from "../enums/type-expense-enum";

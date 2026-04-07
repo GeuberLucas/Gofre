@@ -3,7 +3,7 @@ import { Revenue } from "./model/revenue";
 import { DataTable } from "./_components/data-table";
 import { columns } from "./_components/columns";
 import { InfoComponent } from "./_components/info-component";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import DetailRevenue from "./_components/detail-dialog";
 import { getRevenue } from "./services/revenue-service";
 
@@ -43,6 +43,10 @@ function getSummary(expenses: Revenue[]) {
 export default function Revenues() {
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const handleCloseDialog = () => setIsOpenDialog(false);
+  const handleRefresh = () => {
+    loadData();
+    handleCloseDialog();
+  };
   const handleOpenDialog = () => setIsOpenDialog(true);
   const [data, setData] = useState([]);
   const [financialSummary, setfinancialSummary] = useState({
@@ -57,6 +61,16 @@ export default function Revenues() {
       setfinancialSummary(getSummary(data));
     });
   }, []);
+  const loadData = useCallback(async () => {
+    getRevenue().then((data: Revenue[]) => {
+      setData(data);
+      setfinancialSummary(getSummary(data));
+    });
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
   return (
     <div className="flex h-screen w-full overflow-hidden">
       <div className="flex-1 flex flex-col overflow-y-auto p-4 md:p-6 gap-6">
@@ -88,7 +102,12 @@ export default function Revenues() {
         </div>
       </aside>
 
-      <DetailRevenue onClose={handleCloseDialog} open={isOpenDialog} id={0} />
+      <DetailRevenue
+        onClose={handleCloseDialog}
+        open={isOpenDialog}
+        id={0}
+        onSuccess={handleRefresh}
+      />
     </div>
   );
 }

@@ -24,50 +24,85 @@ import { Controller, useForm } from "react-hook-form";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Calendar } from "@/components/ui/calendar";
 import { Switch } from "@/components/ui/switch";
+import { useEffect, useState } from "react";
+import { getRevenue, sendRevenue } from "../services/revenue-service";
+import { IncomeType } from "../enums/income-type";
+import { enumToFormattedOptions } from "@/lib/enum-to-option";
+import { GofreSelect } from "@/components/gofre-select";
 interface DetailProps {
   open: boolean;
   onClose: () => void;
+  onSuccess: () => void;
   id: number;
 }
 
 const formSchema = z.object({
   description: z.string().optional(),
   origin: z.string().optional(),
-  type: z.string().optional(),
-  date: z.date().optional(),
+  type: z.enum(IncomeType).optional(),
+  receiveDate: z.date().optional(),
   amount: z.number().optional(),
   recieved: z.boolean().optional(),
 });
-function getInicialValueForm(id): Revenue | null {
-  if (id == 0) {
-    return null;
-  }
-  //TODO:IMPLEMENTS GET DATA FOR EDIT
-}
+
 export default function DetailRevenue(props: Readonly<DetailProps>) {
   const action = props.id > 0 ? "Editar" : "Adicionar";
+  const [month, setMonth] = useState<Date | undefined>(undefined);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       description: "",
       origin: "",
-      type: "",
-      date: new Date(),
+      type: IncomeType.Outros,
+      receiveDate: undefined,
       amount: 0,
       recieved: false,
     },
   });
-  const initialValues = getInicialValueForm(props.id);
-  if (initialValues) {
-    form.setValue("amount", initialValues.amount);
-    form.setValue("recieved", initialValues.recieved);
-    form.setValue("description", initialValues.description);
-    form.setValue("origin", initialValues.origin);
-    form.setValue("type", initialValues.type);
-    form.setValue("date", initialValues.receiveDate);
-  }
+  useEffect(() => {
+    if (props.id > 0) {
+      getRevenue(props.id).then((data: Revenue) => {
+        const parsedDate = data.receiveDate
+          ? new Date(data.receiveDate)
+          : undefined;
+        form.reset({
+          description: data.description,
+          amount: data.amount,
+          recieved: data.recieved,
+          origin: data.origin,
+          type: data.type,
+          receiveDate: parsedDate,
+        });
 
-  function onSubmit(data: z.infer<typeof formSchema>) {}
+        setMonth(new Date(parsedDate));
+      });
+    }
+  }, [props.id, form, props.open]);
+
+  function onSubmit(data: z.infer<typeof formSchema>) {
+    console.log(Object.keys(form.formState.dirtyFields).length);
+    if (Object.keys(form.formState.dirtyFields).length === 0) {
+      props.onClose();
+      return;
+    }
+    const expense: Revenue = {
+      id: props.id,
+      description: data.description,
+      amount: data.amount,
+      recieved: data.recieved,
+      origin: data.origin,
+      type: data.type,
+      receiveDate: data.receiveDate,
+    };
+
+    sendRevenue(expense).then((sucess) => {
+      if (sucess) {
+        form.reset();
+        setTimeout(() => props.onSuccess(), 100);
+      }
+    });
+  }
   return (
     <Dialog open={props.open} onOpenChange={props.onClose}>
       <DialogContent>
@@ -100,15 +135,17 @@ export default function DetailRevenue(props: Readonly<DetailProps>) {
             </div>
             <div className="flex gap-3">
               <Controller
-                name="date"
+                name="receiveDate"
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>Data</FieldLabel>
                     <Calendar
                       mode="single"
-                      selected={field.value}
+                      selected={field.value || undefined}
                       onSelect={field.onChange}
+                      month={month}
+                      onMonthChange={setMonth}
                       className="rounded-lg border"
                       captionLayout="dropdown"
                     />
@@ -122,30 +159,11 @@ export default function DetailRevenue(props: Readonly<DetailProps>) {
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid} className="p-2">
                       <FieldLabel htmlFor={field.name}>Tipo</FieldLabel>
-                      <Select
-                        name={field.name}
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger
-                          className="w-full"
-                          aria-invalid={fieldState.invalid}
-                        >
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Trabalho">Trabalho</SelectItem>
-                          <SelectItem value="Extra">Extra</SelectItem>
-                          <SelectItem value="Investimento">
-                            Investimento
-                          </SelectItem>
-                          <SelectItem value="Aposentadoria">
-                            Aposentadoria
-                          </SelectItem>
-                          <SelectItem value="Resgate">Resgate</SelectItem>
-                          <SelectItem value="Outros">Outros</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <GofreSelect
+                        enumObj={IncomeType}
+                        field={field}
+                        fieldState={fieldState}
+                      />
                     </Field>
                   )}
                 />
