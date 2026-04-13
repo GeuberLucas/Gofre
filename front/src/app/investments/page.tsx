@@ -3,15 +3,14 @@ import { DataTable } from "./_components/data-table";
 import { FinancialSummaryProps } from "../financialSummaryProps";
 import { Portfolio } from "./model/portfolio";
 import { useEffect, useState } from "react";
-import { getPortfolio } from "./services/investment-service";
+import { getAssetClasses, getPortfolio } from "./services/investment-service";
 import { InfoComponent } from "./_components/info-component";
 import DetailInvestment from "./_components/detail-dialog";
-import { columns } from "./_components/columns";
+import { getColumns } from "./_components/columns";
 
 function getSummary(expenses: Portfolio[]) {
-  const today = new Date();
-  const actualMonth = today.getMonth();
-  const actualYear = today.getFullYear();
+  const actualMonth = new Date().getMonth();
+  const actualYear = new Date().getFullYear();
   const investmentThisMonth = expenses.filter((expense) => {
     const dateObj = new Date(expense.deposit_date);
     if (Number.isNaN(dateObj.getTime())) return false;
@@ -42,20 +41,10 @@ function getSummary(expenses: Portfolio[]) {
   };
 }
 
-const ToggleState = (rowState: boolean) => {
-  let stateRevenue = "bg-action-pending";
-  if (rowState) {
-    stateRevenue = "bg-action-realized";
-  }
-  return (
-    <button className={`p-2 mr-2 rounded-2xl ${stateRevenue}`}>
-      Toggle Recebido
-    </button>
-  );
-};
 export default function Portfolios() {
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [data, setData] = useState([]);
+  const [classes, setClasses] = useState([]);
   const [financialSummary, setfinancialSummary] = useState({
     expectedAmount: 0,
     actualAmount: 0,
@@ -70,7 +59,9 @@ export default function Portfolios() {
       setData(data);
       setfinancialSummary(getSummary(data));
     });
+    getAssetClasses().then((result) => setClasses(result));
   }, []);
+  const columns = getColumns(classes);
   return (
     <div className="flex h-screen w-full overflow-hidden">
       <div className="flex-1 flex flex-col overflow-y-auto p-4 md:p-6 gap-6">

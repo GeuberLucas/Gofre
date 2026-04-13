@@ -2,6 +2,7 @@
 
 import { ApiClient } from "@/lib/httpClient";
 import { Portfolio } from "../model/portfolio";
+import { AssetClass } from "../model/asset-class";
 
 const defaultHeaders = {
   "Content-Type": "application/json",
@@ -45,4 +46,30 @@ export async function sendPortfolio(expense: Portfolio) {
     return;
   }
   return res.success;
+}
+
+export async function getAssetClasses() {
+  //const url = "investments/assets";
+  // const res = await ApiClient.request<AssetClass[]>(url, {
+  //   method: "GET",
+  // });
+  // if (!res.success) {
+  //   const errorBody = res.data;
+  //   console.error({ status: res.statusCode, msg: errorBody });
+  //   return;
+  // }
+  return [
+    { id: 1, name: "Títulos privados" },
+    { id: 2, name: "Títulos públicos" },
+    { id: 3, name: "Ações" },
+    { id: 4, name: "ETFs" },
+    { id: 5, name: "FIIs" },
+    { id: 6, name: "Fundos" },
+    { id: 7, name: "Commodities" },
+    { id: 8, name: "Derivativos" },
+    { id: 9, name: "Criptomoeda" },
+    { id: 10, name: "Exterior" },
+    { id: 11, name: "Poupança" },
+    { id: 12, name: "Outros" },
+  ];
 }

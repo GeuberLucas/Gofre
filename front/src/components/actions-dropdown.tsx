@@ -44,11 +44,13 @@ const DetailDialog = (
   handleCloseDialog: () => void,
   isOpenDialog: boolean,
   idTransaction: number,
+  handleSucces?: () => void,
 ) => {
   switch (type) {
     case TransactionType.Revenue:
       return (
         <DetailRevenue
+          onSuccess={handleSucces}
           onClose={handleCloseDialog}
           open={isOpenDialog}
           id={idTransaction}

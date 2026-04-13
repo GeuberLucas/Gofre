@@ -29,6 +29,7 @@ import { getRevenue, sendRevenue } from "../services/revenue-service";
 import { IncomeType } from "../enums/income-type";
 import { enumToFormattedOptions } from "@/lib/enum-to-option";
 import { GofreSelect } from "@/components/gofre-select";
+import { NumericFormat } from "react-number-format";
 interface DetailProps {
   open: boolean;
   onClose: () => void;
@@ -40,7 +41,7 @@ const formSchema = z.object({
   description: z.string().optional(),
   origin: z.string().optional(),
   type: z.enum(IncomeType).optional(),
-  receiveDate: z.date().optional(),
+  receiveDate: z.date(),
   amount: z.number().optional(),
   recieved: z.boolean().optional(),
 });
@@ -81,8 +82,7 @@ export default function DetailRevenue(props: Readonly<DetailProps>) {
   }, [props.id, form, props.open]);
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(Object.keys(form.formState.dirtyFields).length);
-    if (Object.keys(form.formState.dirtyFields).length === 0) {
+    if (!form.formState.isDirty && props.id > 0) {
       props.onClose();
       return;
     }
@@ -174,10 +174,19 @@ export default function DetailRevenue(props: Readonly<DetailProps>) {
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid} className="p-2">
                       <FieldLabel htmlFor={field.name}>Valor Total</FieldLabel>
-                      <Input
+                      <NumericFormat
+                        value={field.value}
+                        thousandSeparator="."
+                        decimalSeparator=","
+                        decimalScale={2}
+                        fixedDecimalScale
+                        prefix="R$ "
+                        className="w-full"
+                        customInput={Input}
                         placeholder="Valor Total"
-                        {...field}
-                        id={field.name}
+                        onValueChange={(values) => {
+                          field.onChange(values.floatValue);
+                        }}
                       />
                     </Field>
                   )}

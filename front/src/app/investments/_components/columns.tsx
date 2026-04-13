@@ -5,8 +5,11 @@ import { ColumnDef } from "@tanstack/react-table";
 import { TransactionType } from "@/enums/TypeTransactions";
 import DropDownActions from "@/components/actions-dropdown";
 import { Portfolio } from "../model/portfolio";
+import { AssetClass } from "../model/asset-class";
 
-export const columns: ColumnDef<Portfolio>[] = [
+export const getColumns = (
+  assetsClasses: AssetClass[],
+): ColumnDef<Portfolio>[] => [
   {
     accessorKey: "description",
     header: "Descrição",
@@ -18,6 +21,12 @@ export const columns: ColumnDef<Portfolio>[] = [
   {
     accessorKey: "asset_id",
     header: "Ativo",
+    cell: ({ row }) => {
+      const asset = assetsClasses.find(
+        (ass) => ass.id == row.getValue("asset_id"),
+      );
+      return asset?.name;
+    },
   },
   {
     accessorKey: "deposit_date",
