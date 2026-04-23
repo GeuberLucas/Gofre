@@ -27,9 +27,22 @@ export async function sendExpense(expense: Expense) {
   const url = buildUrl(id);
   const method = id && id > 0 ? "PUT" : "POST";
   const json = JSON.stringify(expense);
-  const res = await ApiClient.request<{ token: string }>(url, {
+  const res = await ApiClient.request(url, {
     method: method,
     body: json,
+  });
+  if (!res.success) {
+    const errorBody = res.data;
+    console.error({ status: res.statusCode, msg: errorBody });
+    return;
+  }
+  return res.success;
+}
+
+export async function deleteExpense(id: number) {
+  console.log("Executado delete");
+  const res = await ApiClient.request(buildUrl(id), {
+    method: "DELETE",
   });
   if (!res.success) {
     const errorBody = res.data;

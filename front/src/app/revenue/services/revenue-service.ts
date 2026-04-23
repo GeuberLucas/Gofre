@@ -38,3 +38,15 @@ export async function sendRevenue(expense: Revenue) {
   }
   return res.success;
 }
+
+export async function deleteRevenue(id: number) {
+  const res = await ApiClient.request(buildUrl(id), {
+    method: "DELETE",
+  });
+  if (!res.success) {
+    const errorBody = res.data;
+    console.error({ status: res.statusCode, msg: errorBody });
+    return;
+  }
+  return res.success;
+}

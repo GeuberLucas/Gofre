@@ -31,7 +31,7 @@ function getCookieToken(): string | null {
 }
 
 export class ApiClient {
-  static async request<T = unknown>(
+  static async request<T = unknown | undefined>(
     endpoint: string,
     options: RequestOptions = {},
   ): Promise<ApiResponse<T>> {
