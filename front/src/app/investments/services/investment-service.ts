@@ -73,3 +73,15 @@ export async function getAssetClasses() {
     { id: 12, name: "Outros" },
   ];
 }
+
+export async function deleteInvestment(id: number) {
+  const res = await ApiClient.request(buildUrl(id), {
+    method: "DELETE",
+  });
+  if (!res.success) {
+    const errorBody = res.data;
+    console.error({ status: res.statusCode, msg: errorBody });
+    return;
+  }
+  return res.success;
+}

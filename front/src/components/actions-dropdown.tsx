@@ -18,10 +18,25 @@ import { TransactionType } from "@/enums/TypeTransactions";
 import DetailRevenue from "@/app/revenue/_components/detail-dialog";
 import DetailExpense from "@/app/expense/_components/detail-dialog";
 import DetailInvestment from "@/app/investments/_components/detail-dialog";
+import { deleteRevenue } from "@/app/revenue/services/revenue-service";
+import { deleteExpense } from "@/app/expense/services/expense-service";
+import { deleteInvestment } from "@/app/investments/services/investment-service";
 
 //TODO:IMPLEMENT LOGIC ALTER STATUS
 //TODO:ALTER DELETE LOGIC
-
+const deleteTransaction = (type: TransactionType, idTransaction: number) => {
+  switch (type) {
+    case TransactionType.Revenue:
+      deleteRevenue(idTransaction);
+      break;
+    case TransactionType.Expense:
+      deleteExpense(idTransaction);
+      break;
+    case TransactionType.Investment:
+      deleteInvestment(idTransaction);
+      break;
+  }
+};
 const getIconByBool = (executedTransaction) => {
   if (executedTransaction) {
     return <CircleCheckBig className="text-emerald-600" />;
@@ -97,7 +112,9 @@ const DropDownActions = ({
             <PenLine />
             <span className="font-display">Editar</span>
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => deleteTransaction(transactionType, idTransaction)}
+          >
             <Trash />
             <span className="font-display">Remover</span>
           </DropdownMenuItem>
