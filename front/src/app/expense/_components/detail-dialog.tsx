@@ -20,7 +20,12 @@ import {
   Select,
 } from "@/components/ui/select";
 import { Controller, useForm } from "react-hook-form";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Calendar } from "@/components/ui/calendar";
 import { Switch } from "@/components/ui/switch";
 import { Expense } from "../model/expense";
@@ -41,11 +46,16 @@ interface DetailProps {
 const formSchema = z.object({
   description: z.string().optional(),
   target: z.string().optional(),
-  category: z.enum(CategoryExpenseEnum).optional(),
-  type: z.enum(TypeExpenseEnum).optional(),
-  paymentMethod: z.enum(PaymentMethodEnum).optional(),
-  paymentDate: z.any().optional(),
-  amount: z.number().optional(),
+  category: z.enum(CategoryExpenseEnum, "Selecione uma categoria válida"),
+  type: z.enum(TypeExpenseEnum, "Selecione um tipo de despesa válido"),
+  paymentMethod: z.enum(
+    PaymentMethodEnum,
+    "Selecione um método de pagamento válido",
+  ),
+  paymentDate: z.date("A data de pagamento é obrigatória"),
+  amount: z
+    .number("O valor é obrigatório")
+    .min(0.01, "O valor deve ser maior que zero"),
   isPaid: z.boolean().optional(),
 });
 
@@ -126,6 +136,7 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>Decrição</FieldLabel>
                     <Input placeholder="decrição" {...field} id={field.name} />
+                    <FieldError>{fieldState.error?.message}</FieldError>
                   </Field>
                 )}
               />
@@ -136,6 +147,7 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>Destino</FieldLabel>
                     <Input placeholder="destino" {...field} id={field.name} />
+                    <FieldError>{fieldState.error?.message}</FieldError>
                   </Field>
                 )}
               />
@@ -171,6 +183,7 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
                         })}
                       </SelectContent>
                     </Select>
+                    <FieldError>{fieldState.error?.message}</FieldError>
                   </Field>
                 )}
               />
@@ -204,6 +217,7 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
                         })}
                       </SelectContent>
                     </Select>
+                    <FieldError>{fieldState.error?.message}</FieldError>
                   </Field>
                 )}
               />
@@ -237,6 +251,7 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
                         })}
                       </SelectContent>
                     </Select>
+                    <FieldError>{fieldState.error?.message}</FieldError>
                   </Field>
                 )}
               />
@@ -257,6 +272,7 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
                       className="rounded-lg border"
                       captionLayout="dropdown"
                     />
+                    <FieldError>{fieldState.error?.message}</FieldError>
                   </Field>
                 )}
               />
@@ -281,6 +297,7 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
                           field.onChange(values.floatValue);
                         }}
                       />
+                      <FieldError>{fieldState.error?.message}</FieldError>
                     </Field>
                   )}
                 />
@@ -300,6 +317,7 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
                         onCheckedChange={field.onChange}
                         aria-invalid={fieldState.invalid}
                       />
+                      <FieldError>{fieldState.error?.message}</FieldError>
                     </Field>
                   )}
                 />
