@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/GeuberLucas/Gofre/backend/pkg/messaging"
+	"github.com/GeuberLucas/Gofre/backend/pkg/types"
 	dtos "github.com/GeuberLucas/Gofre/backend/services/investments/internal/DTOs"
 	"github.com/GeuberLucas/Gofre/backend/services/investments/internal/helpers"
 	"github.com/GeuberLucas/Gofre/backend/services/investments/internal/models"
@@ -17,6 +18,7 @@ type IPortfolioService interface {
 	GetById(id uint) (dtos.Portfolio, helpers.ErrorType, error)
 	Update(dto dtos.Portfolio) (helpers.ErrorType, error)
 	Delete(id int64, userId int64) (helpers.ErrorType, error)
+	UpdateIsDone(id uint, isDone bool) (helpers.ErrorType, error)
 }
 
 type PortfolioService struct {
@@ -26,7 +28,7 @@ type PortfolioService struct {
 
 // Add implements IPortfolioService.
 func (p *PortfolioService) Add(dto dtos.Portfolio) (helpers.ErrorType, error) {
-	portfolioModel := helpers.MapperDtoToModel(dto)
+	portfolioModel := p.MapperDtoToModel(dto)
 	err := portfolioModel.IsValid()
 	if err != nil {
 		return helpers.VALIDATION, err
@@ -71,7 +73,7 @@ func (p *PortfolioService) GetAll(userId int) ([]dtos.Portfolio, helpers.ErrorTy
 
 	var protfolioDtos []dtos.Portfolio
 	for _, portfolioModel := range investments {
-		portfolioDto := helpers.MapperModelToDto(portfolioModel)
+		portfolioDto := p.MapperModelToDto(portfolioModel)
 		protfolioDtos = append(protfolioDtos, portfolioDto)
 	}
 	return protfolioDtos, helpers.NONE, nil
@@ -84,7 +86,7 @@ func (p *PortfolioService) GetById(id uint) (dtos.Portfolio, helpers.ErrorType, 
 		return dtos.Portfolio{}, helpers.INTERNAL, err
 	}
 
-	portfolioDto := helpers.MapperModelToDto(portfolioModel)
+	portfolioDto := p.MapperModelToDto(portfolioModel)
 
 	return portfolioDto, helpers.NONE, nil
 
@@ -96,10 +98,29 @@ func (p *PortfolioService) Update(dto dtos.Portfolio) (helpers.ErrorType, error)
 	if err != nil {
 		return helpers.INTERNAL, err
 	}
-	portfolioModel := helpers.MapperDtoToModel(dto)
+	portfolioModel := p.MapperDtoToModel(dto)
 	err = portfolioModel.IsValid()
 	if err != nil {
 		return helpers.VALIDATION, err
+	}
+
+	err = p.portifolioRepository.Update(portfolioModel)
+	if err != nil {
+		return helpers.INTERNAL, err
+	}
+	err = p.sendMessagingToBroker(&portfolioModel, &oldPortfolioModel, messaging.ActionUpdate)
+	if err != nil {
+		return helpers.INTERNAL, err
+	}
+	return helpers.NONE, nil
+}
+func (p *PortfolioService) UpdateIsDone(id uint, isDone bool) (helpers.ErrorType, error) {
+	oldPortfolioModel, err := p.portifolioRepository.GetById(id)
+	portfolioModel := oldPortfolioModel
+	portfolioModel.IsDone = isDone
+	fmt.Println(oldPortfolioModel.IsDone, portfolioModel.IsDone, isDone)
+	if err != nil {
+		return helpers.INTERNAL, err
 	}
 
 	err = p.portifolioRepository.Update(portfolioModel)
@@ -158,4 +179,30 @@ func (p *PortfolioService) sendMessagingToBroker(model *models.Portfolio, modelO
 
 	return nil
 
+}
+
+func (p *PortfolioService) MapperModelToDto(model models.Portfolio) dtos.Portfolio {
+	return dtos.Portfolio{
+		Id:          model.Id,
+		UserID:      model.User_id,
+		Description: model.Description,
+		Broker:      model.Broker,
+		IsDone:      model.IsDone,
+		DepositDate: model.Deposit_date,
+		AssetID:     model.Asset_id,
+		Amount:      model.Amount.ToFloat(),
+	}
+}
+
+func (p *PortfolioService) MapperDtoToModel(dto dtos.Portfolio) models.Portfolio {
+	return models.Portfolio{
+		Id:           dto.Id,
+		User_id:      dto.UserID,
+		Description:  dto.Description,
+		Broker:       dto.Broker,
+		IsDone:       dto.IsDone,
+		Deposit_date: dto.DepositDate,
+		Asset_id:     dto.AssetID,
+		Amount:       types.FloatToMoney(dto.Amount),
+	}
 }

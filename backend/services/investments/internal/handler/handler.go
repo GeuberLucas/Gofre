@@ -18,6 +18,7 @@ type IHandlerService interface {
 	GetByIdInvestmentHandler() http.HandlerFunc
 	UpdateInvestmentHandler() http.HandlerFunc
 	DeleteInvestmentHandler() http.HandlerFunc
+	UpdateIsDoneInvestmentHandler() http.HandlerFunc
 }
 
 type HandlerService struct {
@@ -140,6 +141,33 @@ func (hd *HandlerService) DeleteInvestmentHandler() http.HandlerFunc {
 			checkErroType(w, typeError, err)
 			return
 		}
+	}
+}
+
+func (hd *HandlerService) UpdateIsDoneInvestmentHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		id, err := strconv.ParseInt(params["idInvestment"], 10, 64)
+		if err != nil {
+			checkErroType(w, helpers.VALIDATION, err)
+			return
+		}
+
+		var dto struct {
+			IsDone bool `json:"isDone"`
+		}
+		dec := json.NewDecoder(r.Body)
+		if err := dec.Decode(&dto); err != nil {
+			checkErroType(w, helpers.INTERNAL, err)
+			return
+		}
+
+		typeError, err := hd.portfolioService.UpdateIsDone(uint(id), dto.IsDone)
+		if err != nil {
+			checkErroType(w, typeError, err)
+			return
+		}
+
 	}
 }
 

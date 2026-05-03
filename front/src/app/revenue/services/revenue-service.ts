@@ -18,8 +18,8 @@ export async function getRevenue(id?: number): Promise<Revenue[] | Revenue> {
     console.error({ status: res.statusCode, msg: errorBody });
     return;
   }
-  const expenses: Revenue[] | Revenue = res.data;
-  return expenses;
+  console.log(res.data);
+  return res.data;
 }
 
 export async function sendRevenue(expense: Revenue) {
@@ -42,6 +42,21 @@ export async function sendRevenue(expense: Revenue) {
 export async function deleteRevenue(id: number) {
   const res = await ApiClient.request(buildUrl(id), {
     method: "DELETE",
+  });
+  if (!res.success) {
+    const errorBody = res.data;
+    console.error({ status: res.statusCode, msg: errorBody });
+    return;
+  }
+  return res.success;
+}
+
+export async function updateIsReceived(id: number, isReceived: boolean) {
+  const url = `${buildUrl(id)}/update-status`;
+  const json = JSON.stringify({ isReceived: isReceived });
+  const res = await ApiClient.request(url, {
+    method: "PATCH",
+    body: json,
   });
   if (!res.success) {
     const errorBody = res.data;

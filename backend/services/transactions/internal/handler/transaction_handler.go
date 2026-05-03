@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -277,4 +278,65 @@ func checkErroType(w http.ResponseWriter, err error, typeError string) {
 		return
 	}
 
+}
+func UpdateIsPaidHandler(s *service.TransactionService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		id, err := strconv.ParseInt(params["idTransaction"], 10, 64)
+		if err != nil {
+			response.ErrorResponse(w, http.StatusBadRequest, err)
+			return
+		}
+		bodyRequest, err := io.ReadAll(r.Body)
+		if err != nil {
+			response.ErrorResponse(w, http.StatusUnprocessableEntity, err)
+			return
+		}
+		var expenseDto struct {
+			IsPaid bool `json:"isPaid"`
+		}
+		if err = json.Unmarshal(bodyRequest, &expenseDto); err != nil {
+			checkErroType(w, err, "validation")
+			return
+		}
+		fmt.Println(expenseDto)
+		err, typeError := s.UpdateIsPaidExpense(id, expenseDto.IsPaid)
+		if err != nil {
+			checkErroType(w, err, typeError)
+			return
+
+		}
+
+		response.JSONResponse(w, http.StatusOK, nil)
+	}
+}
+func UpdateIsRecievedHandler(s *service.TransactionService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		id, err := strconv.ParseInt(params["idTransaction"], 10, 64)
+		if err != nil {
+			checkErroType(w, err, "Validation")
+			return
+		}
+		bodyRequest, err := io.ReadAll(r.Body)
+		if err != nil {
+			response.ErrorResponse(w, http.StatusUnprocessableEntity, err)
+			return
+		}
+		var revenueDto struct {
+			IsRecieved bool `json:"isRecieved"`
+		}
+		if err = json.Unmarshal(bodyRequest, &revenueDto); err != nil {
+			checkErroType(w, err, "Validation")
+			return
+		}
+		err, typeError := s.UpdateIsReceivedRevenue(id, revenueDto.IsRecieved)
+		if err != nil {
+			checkErroType(w, err, typeError)
+			return
+
+		}
+
+		response.JSONResponse(w, http.StatusOK, nil)
+	}
 }

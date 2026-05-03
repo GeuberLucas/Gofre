@@ -176,6 +176,54 @@ func (ts *TransactionService) DeleteRevenue(id int64, userId int64) (error, stri
 	return nil, ""
 }
 
+func (ts *TransactionService) UpdateIsPaidExpense(id int64, isPaid bool) (error, string) {
+	oldModel, err := ts.expenseRepository.GetById(id)
+	fmt.Println(oldModel)
+	if err != nil {
+		return err, "Internal"
+	}
+	model := oldModel
+	model.ID = id
+	model.IsPaid = isPaid
+	fmt.Println(isPaid)
+	fmt.Println(model)
+	err = model.Isvalid()
+	if err != nil {
+		return err, "Validation"
+	}
+	err = ts.expenseRepository.Update(model)
+	if err != nil {
+		return err, "Internal"
+	}
+	err = ts.sendExpenseToBroker(&model, &oldModel, messaging.ActionUpdate)
+	if err != nil {
+		return err, helpers.INTERNAL.String()
+	}
+	return nil, ""
+}
+func (ts *TransactionService) UpdateIsReceivedRevenue(id int64, isReceived bool) (error, string) {
+	oldModel, err := ts.revenueRepository.GetById(id)
+	if err != nil {
+		return err, "Internal"
+	}
+	model := oldModel
+	model.IsRecieved = isReceived
+
+	err = model.Isvalid()
+	if err != nil {
+		return err, "Validation"
+	}
+	err = ts.revenueRepository.Update(model)
+	if err != nil {
+		return err, "Internal"
+	}
+	err = ts.sendRevenueToBroker(&model, &oldModel, messaging.ActionUpdate)
+	if err != nil {
+		return err, helpers.INTERNAL.String()
+	}
+	return nil, ""
+}
+
 func expenseDtoFromModel(ex models.Expense) dtos.ExpenseDto {
 	return dtos.ExpenseDto{
 		ID:            ex.ID,
