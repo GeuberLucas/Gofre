@@ -36,6 +36,7 @@ export class ApiClient {
     options: RequestOptions = {},
   ): Promise<ApiResponse<T>> {
     const url = buildUrl(endpoint);
+    console.log(`Request for ${url}`);
     const headers: Record<string, string> = {
       ...options.headers,
     };
@@ -62,6 +63,7 @@ export class ApiClient {
 
     try {
       const response = await fetch(url, config);
+      console.log(response.status);
       if (response.status === 401) {
         UnauthorizedResponse();
         return;

@@ -15,7 +15,7 @@ type RevenueDto struct {
 	Origin      string             `json:"origin"`
 	Type        helpers.IncomeType `json:"type"`
 	ReceiveDate time.Time          `json:"receiveDate"`
-	IsRecieved  bool               `json:"IsRecieved"`
+	IsRecieved  bool               `json:"isRecieved"`
 	Amount      float64            `json:"amount"`
 }
 

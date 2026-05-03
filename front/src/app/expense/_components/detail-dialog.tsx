@@ -89,10 +89,6 @@ export default function DetailExpense(props: Readonly<DetailProps>) {
   }, [props.id, form]);
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
-    if (Object.keys(form.formState.dirtyFields).length === 0) {
-      props.onClose();
-      return;
-    }
     const expense: Expense = {
       id: props.id,
       userId: 0,

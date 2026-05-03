@@ -18,12 +18,24 @@ import { TransactionType } from "@/enums/TypeTransactions";
 import DetailRevenue from "@/app/revenue/_components/detail-dialog";
 import DetailExpense from "@/app/expense/_components/detail-dialog";
 import DetailInvestment from "@/app/investments/_components/detail-dialog";
-import { deleteRevenue } from "@/app/revenue/services/revenue-service";
-import { deleteExpense } from "@/app/expense/services/expense-service";
-import { deleteInvestment } from "@/app/investments/services/investment-service";
+import { deleteRevenue,updateIsReceived } from "@/app/revenue/services/revenue-service";
+import { deleteExpense,updateIsPaid } from "@/app/expense/services/expense-service";
+import { deleteInvestment,updateIsDone } from "@/app/investments/services/investment-service";
 
 //TODO:IMPLEMENT LOGIC ALTER STATUS
-//TODO:ALTER DELETE LOGIC
+const alterStatusTransaction= (type: TransactionType, idTransaction: number,executedTransaction:bool) =>{
+  switch (type) {
+    case TransactionType.Revenue:
+      updateIsReceived(idTransaction,!executedTransaction );
+      break;
+    case TransactionType.Expense:
+      updateIsPaid(idTransaction,!executedTransaction);
+      break;
+    case TransactionType.Investment:
+      updateIsDone(idTransaction,!executedTransaction);
+      break;
+  }
+}
 const deleteTransaction = (type: TransactionType, idTransaction: number) => {
   switch (type) {
     case TransactionType.Revenue:
@@ -118,7 +130,7 @@ const DropDownActions = ({
             <Trash />
             <span className="font-display">Remover</span>
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={()=> alterStatusTransaction(transactionType, idTransaction,executedTransaction)}>
             {getIconByBool(executedTransaction)}
             <span className="font-display">
               Alterar {textStatus(transactionType)}

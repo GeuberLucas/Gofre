@@ -51,3 +51,18 @@ export async function deleteExpense(id: number) {
   }
   return res.success;
 }
+
+export async function updateIsPaid(id: number, isPaid: boolean) {
+  const url = `${buildUrl(id)}/update-status`;
+  const json = JSON.stringify({ isPaid: isPaid });
+  const res = await ApiClient.request(url, {
+    method: "PATCH",
+    body: json,
+  });
+  if (!res.success) {
+    const errorBody = res.data;
+    console.error({ status: res.statusCode, msg: errorBody });
+    return;
+  }
+  return res.success;
+}

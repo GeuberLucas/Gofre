@@ -51,10 +51,8 @@ const formSchema = z.object({
   deposit_date: z.date(),
   amount: z.number().optional(),
   is_done: z.boolean().optional(),
-  asset_id: z.coerce.number().optional(),
+  asset_id: z.coerce.number(),
 });
-
-//TODO:IMPLEMENTS SERVER ACTION GET ASSETS TYPE
 
 export default function DetailInvestment(props: Readonly<DetailProps>) {
   const [assetClasses, setAssetClasses] = useState<AssetClass[]>([]);
@@ -92,11 +90,10 @@ export default function DetailInvestment(props: Readonly<DetailProps>) {
   }, [props.id, props.open, form]);
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(data.deposit_date);
-    if (!form.formState.isDirty) {
-      props.onClose();
-      return;
-    }
+    //  if (Object.keys(form.formState.dirtyFields).length === 0) {
+    //   props.onClose();
+    //   return;
+    // }
     const investment: Portfolio = {
       id: props.id,
       user_id: 0,
@@ -109,6 +106,7 @@ export default function DetailInvestment(props: Readonly<DetailProps>) {
     };
 
     sendPortfolio(investment).then();
+    props.onClose();
   }
   return (
     <Dialog open={props.open} onOpenChange={props.onClose}>
@@ -126,6 +124,7 @@ export default function DetailInvestment(props: Readonly<DetailProps>) {
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>Decrição</FieldLabel>
                     <Input placeholder="decrição" {...field} id={field.name} />
+                    <FieldError>{fieldState.error?.message}</FieldError>
                   </Field>
                 )}
               />
@@ -142,6 +141,7 @@ export default function DetailInvestment(props: Readonly<DetailProps>) {
                       {...field}
                       id={field.name}
                     />
+                    <FieldError>{fieldState.error?.message}</FieldError>
                   </Field>
                 )}
               />
@@ -162,6 +162,7 @@ export default function DetailInvestment(props: Readonly<DetailProps>) {
                       className="rounded-lg border"
                       captionLayout="dropdown"
                     />
+                    <FieldError>{fieldState.error?.message}</FieldError>
                   </Field>
                 )}
               />
@@ -206,6 +207,7 @@ export default function DetailInvestment(props: Readonly<DetailProps>) {
                           field.onChange(values.floatValue);
                         }}
                       />
+                      <FieldError>{fieldState.error?.message}</FieldError>
                     </Field>
                   )}
                 />
@@ -225,6 +227,7 @@ export default function DetailInvestment(props: Readonly<DetailProps>) {
                         onCheckedChange={field.onChange}
                         aria-invalid={fieldState.invalid}
                       />
+                      <FieldError>{fieldState.error?.message}</FieldError>
                     </Field>
                   )}
                 />

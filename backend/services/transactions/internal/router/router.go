@@ -15,6 +15,7 @@ func getTransactionRoutes(s *service.TransactionService) []routes.Route {
 		{Path: "/expense", Method: "GET", HandlerFunc: handler.GetByIdUserExpenseHandler(s)},
 		{Path: "/expense/{idTransaction}", Method: "PUT", HandlerFunc: handler.UpdateExpenseHandler(s)},
 		{Path: "/expense/{idTransaction}", Method: "DELETE", HandlerFunc: handler.DeleteExpenseHandler(s)},
+		{Path: "/expense/{idTransaction}/update-status", Method: "PATCH", HandlerFunc: handler.UpdateIsPaidHandler(s)},
 
 		//revenue paths
 		{Path: "/revenue", Method: "POST", HandlerFunc: handler.AddRevenueHandler(s)},
@@ -22,6 +23,7 @@ func getTransactionRoutes(s *service.TransactionService) []routes.Route {
 		{Path: "/revenue", Method: "GET", HandlerFunc: handler.GetByIdUserRevenueHandler(s)},
 		{Path: "/revenue/{idTransaction}", Method: "PUT", HandlerFunc: handler.UpdateRevenueHandler(s)},
 		{Path: "/revenue/{idTransaction}", Method: "DELETE", HandlerFunc: handler.DeleteRevenueHandler(s)},
+		{Path: "/revenue/{idTransaction}/update-status", Method: "PATCH", HandlerFunc: handler.UpdateIsRecievedHandler(s)},
 	}
 }
 

@@ -13,6 +13,7 @@ func getTransactionRoutes(hd handler.IHandlerService) []routes.Route {
 		{Path: "/{idInvestment}", Method: "GET", HandlerFunc: hd.GetByIdInvestmentHandler()},
 		{Path: "/{idInvestment}", Method: "PUT", HandlerFunc: hd.UpdateInvestmentHandler()},
 		{Path: "/{idInvestment}", Method: "DELETE", HandlerFunc: hd.DeleteInvestmentHandler()},
+		{Path: "/{idInvestment}/update-status", Method: "PATCH", HandlerFunc: hd.UpdateIsDoneInvestmentHandler()},
 	}
 }
 

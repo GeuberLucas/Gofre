@@ -40,11 +40,10 @@ export const columns: ColumnDef<Revenue>[] = [
     },
   },
   {
-    accessorKey: "recieved",
+    accessorKey: "isRecieved",
     header: "Recebido ?",
     cell: ({ row }) => {
-      const recieved = Boolean(row.getValue("recieved"));
-
+      const recieved = Boolean(row.getValue("isRecieved"));
       return recieved ? "Sim" : "Não";
     },
   },
@@ -58,7 +57,7 @@ export const columns: ColumnDef<Revenue>[] = [
         <DropDownActions
           idTransaction={revenue.id}
           transactionType={TransactionType.Revenue}
-          executedTransaction={revenue.recieved}
+          executedTransaction={revenue.isRecieved}
         />
       );
     },

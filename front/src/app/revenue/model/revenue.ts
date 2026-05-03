@@ -7,5 +7,5 @@ export interface Revenue {
   type: IncomeType;
   receiveDate: Date;
   amount: number;
-  recieved: boolean;
+  isRecieved: boolean;
 }
