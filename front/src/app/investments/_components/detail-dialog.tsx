@@ -48,10 +48,14 @@ interface DetailProps {
 const formSchema = z.object({
   description: z.string().optional(),
   broker: z.string().optional(),
-  deposit_date: z.date(),
-  amount: z.number().optional(),
+  deposit_date: z.date("A data do apoorte é obrigatória"),
+  amount: z
+    .number("o valor do aporte é obrigatório")
+    .min(0.01, "O valor deve ser maior que zero"),
   is_done: z.boolean().optional(),
-  asset_id: z.coerce.number(),
+  asset_id: z.coerce
+    .number("Selecione um ativo")
+    .min(1, "Selecione um ativo válido"),
 });
 
 export default function DetailInvestment(props: Readonly<DetailProps>) {

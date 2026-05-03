@@ -13,21 +13,18 @@ import {
 } from "@/components/ui/dialog";
 import { Revenue } from "../model/revenue";
 import { Input } from "@/components/ui/input";
-import {
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-  Select,
-} from "@/components/ui/select";
 import { Controller, useForm } from "react-hook-form";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Calendar } from "@/components/ui/calendar";
 import { Switch } from "@/components/ui/switch";
 import { useEffect, useState } from "react";
 import { getRevenue, sendRevenue } from "../services/revenue-service";
 import { IncomeType } from "../enums/income-type";
-import { enumToFormattedOptions } from "@/lib/enum-to-option";
 import { GofreSelect } from "@/components/gofre-select";
 import { NumericFormat } from "react-number-format";
 interface DetailProps {
@@ -39,10 +36,12 @@ interface DetailProps {
 
 const formSchema = z.object({
   description: z.string().optional(),
-  origin: z.string().optional(),
-  type: z.enum(IncomeType).optional(),
-  receiveDate: z.date(),
-  amount: z.number().optional(),
+  origin: z.string("Informe de onde você recebeu"),
+  type: z.enum(IncomeType, "Selecione um tipo de entrada válida"),
+  receiveDate: z.date("A data de recebimento é obrigatória"),
+  amount: z
+    .number("O valor é obrigatório")
+    .min(0.01, "O valor deve ser maior que zero"),
   recieved: z.boolean().optional(),
 });
 
@@ -70,7 +69,7 @@ export default function DetailRevenue(props: Readonly<DetailProps>) {
         form.reset({
           description: data.description,
           amount: data.amount,
-          recieved: data.recieved,
+          recieved: data.isRecieved,
           origin: data.origin,
           type: data.type,
           receiveDate: parsedDate,
@@ -90,7 +89,7 @@ export default function DetailRevenue(props: Readonly<DetailProps>) {
       id: props.id,
       description: data.description,
       amount: data.amount,
-      recieved: data.recieved,
+      isRecieved: data.recieved,
       origin: data.origin,
       type: data.type,
       receiveDate: data.receiveDate,
@@ -119,6 +118,7 @@ export default function DetailRevenue(props: Readonly<DetailProps>) {
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>Decrição</FieldLabel>
                     <Input placeholder="decrição" {...field} id={field.name} />
+                    <FieldError>{fieldState.error?.message}</FieldError>
                   </Field>
                 )}
               />
@@ -129,6 +129,7 @@ export default function DetailRevenue(props: Readonly<DetailProps>) {
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>origem</FieldLabel>
                     <Input placeholder="origem" {...field} id={field.name} />
+                    <FieldError>{fieldState.error?.message}</FieldError>
                   </Field>
                 )}
               />
@@ -149,6 +150,7 @@ export default function DetailRevenue(props: Readonly<DetailProps>) {
                       className="rounded-lg border"
                       captionLayout="dropdown"
                     />
+                    <FieldError>{fieldState.error?.message}</FieldError>
                   </Field>
                 )}
               />
@@ -164,6 +166,7 @@ export default function DetailRevenue(props: Readonly<DetailProps>) {
                         field={field}
                         fieldState={fieldState}
                       />
+                      <FieldError>{fieldState.error?.message}</FieldError>
                     </Field>
                   )}
                 />
@@ -188,6 +191,7 @@ export default function DetailRevenue(props: Readonly<DetailProps>) {
                           field.onChange(values.floatValue);
                         }}
                       />
+                      <FieldError>{fieldState.error?.message}</FieldError>
                     </Field>
                   )}
                 />
@@ -207,6 +211,7 @@ export default function DetailRevenue(props: Readonly<DetailProps>) {
                         onCheckedChange={field.onChange}
                         aria-invalid={fieldState.invalid}
                       />
+                      <FieldError>{fieldState.error?.message}</FieldError>
                     </Field>
                   )}
                 />
