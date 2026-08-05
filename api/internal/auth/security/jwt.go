@@ -3,12 +3,12 @@ package security
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/gofiber/fiber"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -24,8 +24,8 @@ func GenerateToken(userId int) (string, error) {
 
 }
 
-func ExtractUserId(r *http.Request) (uint64, error) {
-	tokenString := extractToken(r)
+func ExtractUserId(c *fiber.Ctx) (uint64, error) {
+	tokenString := extractToken(c)
 	token, err := jwt.Parse(tokenString, returnVerificationKey)
 	if err != nil {
 		return 0, err
@@ -43,8 +43,8 @@ func ExtractUserId(r *http.Request) (uint64, error) {
 	return 0, errors.New("invalid Token")
 }
 
-func ValidateToken(r *http.Request) error {
-	tokenString := extractToken(r)
+func ValidateToken(c *fiber.Ctx) error {
+	tokenString := extractToken(c)
 	token, err := jwt.Parse(tokenString, returnVerificationKey)
 	if err != nil {
 		return err
@@ -57,8 +57,8 @@ func ValidateToken(r *http.Request) error {
 	return errors.New("invalid Token")
 }
 
-func extractToken(r *http.Request) string {
-	headerAuthorization := r.Header.Get("Authorization")
+func extractToken(c *fiber.Ctx) string {
+	headerAuthorization := c.Get("Authorization")
 	tokenValue := strings.Split(headerAuthorization, " ")
 	if len(tokenValue) == 2 {
 		return tokenValue[1]

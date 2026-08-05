@@ -1,0 +1,25 @@
+services:
+  database:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: Gofre
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/DEV/postgres/init/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./docker/DEV/postgres/data:/var/lib/postgresql
+    networks:
+      - gofre-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: geuberlu@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: 123456
+    ports:
+      - "81:80"
+    networks:
+      - gofre-network

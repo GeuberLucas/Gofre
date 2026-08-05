@@ -1,4 +1,4 @@
-package service
+package auth
 
 import (
 	"database/sql"
@@ -8,12 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GeuberLucas/Gofre/backend/pkg/db"
-	"github.com/GeuberLucas/Gofre/backend/pkg/messaging"
-	dtos "github.com/GeuberLucas/Gofre/backend/services/auth/internal/DTOs"
-	"github.com/GeuberLucas/Gofre/backend/services/auth/internal/models"
-	"github.com/GeuberLucas/Gofre/backend/services/auth/internal/repository"
-	"github.com/GeuberLucas/Gofre/backend/services/auth/internal/security"
+	"github.com/GeuberLucas/Gofre/api/internal/auth/security"
+	dtos "github.com/GeuberLucas/Gofre/api/pkg/DTOs"
+	"github.com/GeuberLucas/Gofre/api/pkg/db"
 )
 
 type EmailMessage struct {
@@ -21,11 +18,10 @@ type EmailMessage struct {
 	EmailTo    string `json:"emailTo"`
 }
 type authService struct {
-	messasingBroker messaging.IMessaging
 }
 
-func NewAuthService(broker messaging.IMessaging) *authService {
-	return &authService{messasingBroker: broker}
+func NewAuthService() *authService {
+	return &authService{}
 }
 
 func (s *authService) Login(obj dtos.LoginDTO) (*dtos.LoginResultDto, error, string) {
@@ -57,7 +53,7 @@ func (s *authService) Login(obj dtos.LoginDTO) (*dtos.LoginResultDto, error, str
 
 func (s *authService) Register(obj dtos.RegisterDTO) (*dtos.LoginResultDto, error, string) {
 	var nameSplit []string = strings.SplitAfterN(obj.CompleteName, " ", 2)
-	var usuario models.User
+	var usuario User
 	passwordHash, err := security.HashPassword(obj.Password)
 	if err != nil {
 		return nil, err, "Internal"
@@ -129,7 +125,7 @@ func (s *authService) ForgotPassword(email string) error {
 		return err
 	}
 
-	var resetTokenModel models.ResetToken
+	var resetTokenModel ResetToken
 	resetTokenModel.UserID = user.ID
 	resetTokenModel.TokenHash = hashToken.TokenHash
 	resetTokenModel.ExpiresAt = hashToken.ExpiresAt
@@ -174,24 +170,24 @@ func (s *authService) sendEmail(token string, email string) {
 	var emailObj EmailMessage
 	emailObj.TokenReset = token
 	emailObj.EmailTo = email
-	emailData, err := json.Marshal(emailObj)
+	_, err := json.Marshal(emailObj)
 	if err != nil {
 		return
 	}
-	s.messasingBroker.PublishMessage("auth.comunication.forgotPassword", emailData)
+	//s.messasingBroker.PublishMessage("auth.comunication.forgotPassword", emailData)
 }
 
-func getUserRepository() (*sql.DB, *repository.UserRepository, error) {
+func getUserRepository() (*sql.DB, *UserRepository, error) {
 	dbConn, err := db.ConnectToDatabase()
 	if err != nil {
 		return dbConn, nil, err
 	}
-	return dbConn, repository.NewUserRepository(dbConn), nil
+	return dbConn, NewUserRepository(dbConn), nil
 }
-func getResetTokenRepository() (*sql.DB, *repository.ResetTokensRepository, error) {
+func getResetTokenRepository() (*sql.DB, *ResetTokensRepository, error) {
 	dbConn, err := db.ConnectToDatabase()
 	if err != nil {
 		return dbConn, nil, err
 	}
-	return dbConn, repository.NewResetTokensRepository(dbConn), nil
+	return dbConn, NewResetTokensRepository(dbConn), nil
 }
