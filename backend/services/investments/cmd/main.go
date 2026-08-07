@@ -2,12 +2,9 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
-	"github.com/GeuberLucas/Gofre/backend/pkg/config"
-	"github.com/GeuberLucas/Gofre/backend/pkg/db"
 	gracefulshutdown "github.com/GeuberLucas/Gofre/backend/pkg/graceful_shutdown"
 	"github.com/GeuberLucas/Gofre/backend/pkg/messaging"
 	"github.com/GeuberLucas/Gofre/backend/services/investments/internal/handler"
@@ -17,11 +14,6 @@ import (
 )
 
 func main() {
-	config.LoadEnv()
-	dbConn, err := db.ConnectToDatabase()
-	if err != nil {
-		log.Fatalf("Connecting database: %v", err)
-	}
 
 	messagingService, _ := messaging.NewNATSMessaging()
 

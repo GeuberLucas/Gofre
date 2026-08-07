@@ -3,9 +3,7 @@ package dtos
 import (
 	"time"
 
-	"github.com/GeuberLucas/Gofre/backend/pkg/helpers"
-	"github.com/GeuberLucas/Gofre/backend/pkg/types"
-	"github.com/GeuberLucas/Gofre/backend/services/transaction/internal/models"
+	"github.com/GeuberLucas/Gofre/api/pkg/helpers"
 )
 
 type ExpenseDto struct {
@@ -19,20 +17,4 @@ type ExpenseDto struct {
 	PaymentDate   time.Time               `json:"paymentDate"`
 	IsPaid        bool                    `json:"isPaid"`
 	Amount        float64                 `json:"amount"`
-}
-
-func (ex ExpenseDto) ToModel() models.Expense {
-	amount := types.FloatToMoney(ex.Amount)
-	return models.Expense{
-		ID:            ex.ID,
-		UserId:        ex.UserId,
-		Description:   ex.Description,
-		Target:        ex.Target,
-		Category:      ex.Category,
-		Type:          ex.Type,
-		PaymentMethod: ex.PaymentMethod,
-		PaymentDate:   ex.PaymentDate,
-		IsPaid:        ex.IsPaid,
-		Amount:        amount,
-	}
 }

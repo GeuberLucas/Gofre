@@ -1,7 +1,7 @@
 package response
 
 import (
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 )
 
 // JSONResponse sends a JSON response with the given status code and data
