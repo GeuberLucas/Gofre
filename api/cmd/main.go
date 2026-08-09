@@ -6,7 +6,9 @@ import (
 	"os"
 
 	"github.com/GeuberLucas/Gofre/api/internal/auth"
+	"github.com/GeuberLucas/Gofre/api/internal/expense"
 	"github.com/GeuberLucas/Gofre/api/internal/investments"
+	"github.com/GeuberLucas/Gofre/api/internal/revenue"
 	"github.com/GeuberLucas/Gofre/api/pkg/config"
 	"github.com/GeuberLucas/Gofre/api/pkg/db"
 	gracefulshutdown "github.com/GeuberLucas/Gofre/api/pkg/graceful_shutdown"
@@ -29,6 +31,18 @@ func main() {
 	portSvc := investments.NewPortfolioService(portRepo)
 	portHandler := investments.NewHandlerService(portSvc)
 	investments.SetupRoutes(api, portHandler)
+
+	//Expense module
+	expRepo := expense.NewExpenseRepository(dbConn)
+	expSvc := expense.NewExpenseService(expRepo)
+	expHandler := expense.NewHandlerService(expSvc)
+	expense.SetupRoutes(api, expHandler)
+
+	//Investments module
+	revRepo := revenue.NewRevenueRepository(dbConn)
+	revSvc := revenue.NewRevenueService(revRepo)
+	revHandler := revenue.NewHandlerService(revSvc)
+	revenue.SetupRoutes(api, revHandler)
 
 	var portApi string = ":50728"
 	if os.Getenv("Enviroment") != "Development" {

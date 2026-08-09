@@ -1,51 +1,58 @@
 package revenue
 
 import (
-	"github.com/!geuber!lucas/!gofre/backend/pkg/messaging"
 	dtos "github.com/GeuberLucas/Gofre/api/pkg/DTOs"
 	"github.com/GeuberLucas/Gofre/api/pkg/helpers"
 )
 
 type IRevenueService interface {
-	Add(dto dtos.Revenue) (helpers.ErrorType, error)
-	GetAll(userId int) ([]dtos.Revenue, helpers.ErrorType, error)
-	GetById(id uint) (dtos.Revenue, helpers.ErrorType, error)
-	Update(dto dtos.Revenue) (helpers.ErrorType, error)
-	Delete(id int64, userId int64) (helpers.ErrorType, error)
-	UpdateIsDone(id uint, isDone bool) (helpers.ErrorType, error)
+	Add(dto dtos.RevenueDto) (helpers.ErrorType, error)
+	GetAll(userId uint) ([]dtos.RevenueDto, helpers.ErrorType, error)
+	GetById(id uint) (dtos.RevenueDto, helpers.ErrorType, error)
+	Update(id uint, dto dtos.RevenueDto) (helpers.ErrorType, error)
+	Delete(id uint, userId uint) (helpers.ErrorType, error)
+	UpdateIsReceived(id uint, isDone bool) (helpers.ErrorType, error)
+}
+type RevenueService struct {
+	revenueRepository IRevenueRepository
 }
 
-func (ts *TransactionService) AddRevenue(dto dtos.RevenueDto) (string, error) {
-	model := dto.ToModel()
+func NewRevenueService(repository IRevenueRepository) IRevenueService {
+	return &RevenueService{
+		revenueRepository: repository,
+	}
+}
+func (ts *RevenueService) Add(dto dtos.RevenueDto) (helpers.ErrorType, error) {
+	model := ToModel(dto)
 	err := model.Isvalid()
 	if err != nil {
-		return "Validation", err
+		return helpers.VALIDATION, err
 	}
 
 	err = ts.revenueRepository.Create(model)
 	if err != nil {
-		return "Internal", err
+		return helpers.INTERNAL, err
 	}
-	err = ts.sendRevenueToBroker(&model, nil, messaging.ActionInsert)
+
 	if err != nil {
-		return helpers.INTERNAL.String(), err
+		return helpers.INTERNAL, err
 	}
-	return "", err
+	return helpers.NONE, nil
 }
-func (ts *TransactionService) GetByIdRevenue(id int64) (dtos.RevenueDto, error, string) {
+func (ts *RevenueService) GetById(id uint) (dtos.RevenueDto, helpers.ErrorType, error) {
 	revenueModel, err := ts.revenueRepository.GetById(id)
 	if err != nil {
-		return dtos.RevenueDto{}, err, "Internal"
+		return dtos.RevenueDto{}, helpers.INTERNAL, err
 	}
 	revenueDto := revenueDtoFromModel(revenueModel)
-	return revenueDto, nil, ""
+	return revenueDto, helpers.NONE, nil
 }
 
-func (ts *TransactionService) GetByIdUserRevenue(idUser int64) ([]dtos.RevenueDto, error, string) {
+func (ts *RevenueService) GetAll(idUser uint) ([]dtos.RevenueDto, helpers.ErrorType, error) {
 
-	revenueModels, err := ts.revenueRepository.GetByUserId(idUser)
+	revenueModels, err := ts.revenueRepository.GetAll(idUser)
 	if err != nil {
-		return nil, err, "Internal"
+		return nil, helpers.INTERNAL, err
 	}
 	var revenues []dtos.RevenueDto
 	for _, revenueModel := range revenueModels {
@@ -53,55 +60,62 @@ func (ts *TransactionService) GetByIdUserRevenue(idUser int64) ([]dtos.RevenueDt
 		revenueDto := revenueDtoFromModel(revenueModel)
 		revenues = append(revenues, revenueDto)
 	}
-	return revenues, nil, ""
+	return revenues, helpers.NONE, nil
 }
-func (ts *TransactionService) UpdateIsReceivedRevenue(id int64, isReceived bool) (error, string) {
+func (ts *RevenueService) UpdateIsReceived(id uint, isReceived bool) (helpers.ErrorType, error) {
 	oldModel, err := ts.revenueRepository.GetById(id)
 	if err != nil {
-		return err, "Internal"
+		return helpers.INTERNAL, err
 	}
 	model := oldModel
 	model.IsRecieved = isReceived
 
 	err = model.Isvalid()
 	if err != nil {
-		return err, "Validation"
+		return helpers.VALIDATION, err
 	}
 	err = ts.revenueRepository.Update(model)
 	if err != nil {
-		return err, "Internal"
+		return helpers.INTERNAL, err
 	}
-	err = ts.sendRevenueToBroker(&model, &oldModel, messaging.ActionUpdate)
+
 	if err != nil {
-		return err, helpers.INTERNAL.String()
+		return helpers.INTERNAL, err
 	}
-	return nil, ""
+	return helpers.NONE, nil
 }
-func (ts *TransactionService) UpdateRevenue(id int64, dto dtos.RevenueDto) (error, string) {
-	oldModel, err := ts.revenueRepository.GetById(id)
-	if err != nil {
-		return err, "Internal"
-	}
-	model := dto.ToModel()
+func (ts *RevenueService) Update(id uint, dto dtos.RevenueDto) (helpers.ErrorType, error) {
+
+	model := ToModel(dto)
 	model.ID = id
-	err = model.Isvalid()
+	err := model.Isvalid()
 	if err != nil {
-		return err, "Validation"
+		return helpers.VALIDATION, err
 	}
 	err = ts.revenueRepository.Update(model)
 	if err != nil {
-		return err, "Internal"
+		return helpers.INTERNAL, err
 	}
-	err = ts.sendRevenueToBroker(&model, &oldModel, messaging.ActionUpdate)
-	if err != nil {
-		return err, helpers.INTERNAL.String()
-	}
-	return nil, ""
+
+	return helpers.NONE, nil
 }
-func revenueDtoFromModel(re models.Revenue) dtos.RevenueDto {
+
+func (ts *RevenueService) Delete(id uint, userId uint) (helpers.ErrorType, error) {
+	_, err := ts.revenueRepository.GetById(id)
+	if err != nil {
+		return helpers.INTERNAL, err
+	}
+	err = ts.revenueRepository.Delete(id, userId)
+	if err != nil {
+		return helpers.INTERNAL, err
+	}
+
+	return helpers.NONE, nil
+}
+func revenueDtoFromModel(re Revenue) dtos.RevenueDto {
 	return dtos.RevenueDto{
-		ID:          re.ID,
-		UserId:      re.UserId,
+		ID:          int64(re.ID),
+		UserId:      int64(re.UserId),
 		Description: re.Description,
 		Origin:      re.Origin,
 		Type:        re.Type,
@@ -109,21 +123,4 @@ func revenueDtoFromModel(re models.Revenue) dtos.RevenueDto {
 		IsRecieved:  re.IsRecieved,
 		Amount:      re.Amount.ToFloat(),
 	}
-}
-func (ts *TransactionService) DeleteRevenue(id int64, userId int64) (error, string) {
-	model, err := ts.revenueRepository.GetById(id)
-	if err != nil {
-		return err, "Internal"
-	}
-	err = ts.revenueRepository.Delete(id, userId)
-	if err != nil {
-		return err, "Internal"
-	}
-
-	err = ts.sendRevenueToBroker(&model, nil, messaging.ActionDelete)
-	if err != nil {
-		return err, helpers.INTERNAL.String()
-	}
-
-	return nil, ""
 }

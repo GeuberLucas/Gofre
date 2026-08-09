@@ -38,7 +38,7 @@ func (h *HandlerRevenueService) AddRevenueHandler(c *fiber.Ctx) error {
 		return checkErroType(c, err, helpers.VALIDATION)
 	}
 	revenueDto.UserId = userIdInt
-	typeError, err := h.service.AddRevenue(revenueDto)
+	typeError, err := h.service.Add(revenueDto)
 	if err != nil {
 		return checkErroType(c, err, typeError)
 	}
@@ -46,11 +46,11 @@ func (h *HandlerRevenueService) AddRevenueHandler(c *fiber.Ctx) error {
 }
 func (h *HandlerRevenueService) GetByIdRevenueHandler(c *fiber.Ctx) error {
 
-	id, err := strconv.ParseInt(c.Get("idTransaction"), 10, 64)
+	id, err := strconv.ParseInt(c.Get("idRevenue"), 10, 64)
 	if err != nil {
 		return checkErroType(c, err, helpers.VALIDATION)
 	}
-	serviceresult, err, typeError := h.service.GetByIdRevenue(id)
+	serviceresult, typeError, err := h.service.GetById(uint(id))
 	if err != nil {
 		return checkErroType(c, err, typeError)
 
@@ -61,11 +61,11 @@ func (h *HandlerRevenueService) GetByIdRevenueHandler(c *fiber.Ctx) error {
 
 func (h *HandlerRevenueService) GetRevenueHandler(c *fiber.Ctx) error {
 
-	id, err := strconv.ParseInt(c.Get("idTransaction"), 10, 64)
+	id, err := strconv.ParseInt(c.Get("idRevenue"), 10, 64)
 	if err != nil {
 		return checkErroType(c, err, helpers.VALIDATION)
 	}
-	serviceresult, err, typeError := h.service.GetAllRevenue(id)
+	serviceresult, typeError, err := h.service.GetAll(uint(id))
 	if err != nil {
 		return checkErroType(c, err, typeError)
 
@@ -76,12 +76,12 @@ func (h *HandlerRevenueService) GetRevenueHandler(c *fiber.Ctx) error {
 
 func (h *HandlerRevenueService) GetByIdUserRevenueHandler(c *fiber.Ctx) error {
 	userIdToken := c.Get("user_id")
-	userIdInt, err := strconv.ParseInt(userIdToken, 10, 64)
+	userId, err := strconv.ParseInt(userIdToken, 10, 64)
 	if err != nil {
 		return response.ErrorResponse(c, http.StatusBadRequest, err)
 
 	}
-	serviceresult, err, typeError := h.service.GetByIdUserRevenue(userIdInt)
+	serviceresult, typeError, err := h.service.GetAll(uint(userId))
 	if err != nil {
 		return checkErroType(c, err, typeError)
 	}
@@ -91,7 +91,7 @@ func (h *HandlerRevenueService) GetByIdUserRevenueHandler(c *fiber.Ctx) error {
 
 func (h *HandlerRevenueService) UpdateRevenueHandler(c *fiber.Ctx) error {
 
-	id, err := strconv.ParseInt(c.Get("idTransaction"), 10, 64)
+	id, err := strconv.ParseInt(c.Get("idRevenue"), 10, 64)
 	if err != nil {
 		return checkErroType(c, err, helpers.VALIDATION)
 	}
@@ -103,7 +103,7 @@ func (h *HandlerRevenueService) UpdateRevenueHandler(c *fiber.Ctx) error {
 	if err = c.BodyParser(&revenueDto); err != nil {
 		return checkErroType(c, err, helpers.VALIDATION)
 	}
-	err, typeError := h.service.UpdateRevenue(id, revenueDto)
+	typeError, err := h.service.Update(uint(id), revenueDto)
 	if err != nil {
 		return checkErroType(c, err, typeError)
 
@@ -114,18 +114,18 @@ func (h *HandlerRevenueService) UpdateRevenueHandler(c *fiber.Ctx) error {
 
 func (h *HandlerRevenueService) DeleteRevenueHandler(c *fiber.Ctx) error {
 
-	id, err := strconv.ParseInt(c.Get("idTransaction"), 10, 64)
+	id, err := strconv.ParseInt(c.Get("idRevenue"), 10, 64)
 	if err != nil {
 		return response.ErrorResponse(c, http.StatusBadRequest, err)
 
 	}
 	userIdToken := c.Get("user_id")
-	userIdInt, err := strconv.ParseInt(userIdToken, 10, 64)
+	userId, err := strconv.ParseInt(userIdToken, 10, 64)
 	if err != nil {
 		return response.ErrorResponse(c, http.StatusBadRequest, err)
 
 	}
-	err, typeError := h.service.DeleteRevenue(id, userIdInt)
+	typeError, err := h.service.Delete(uint(id), uint(userId))
 	if err != nil {
 
 		return checkErroType(c, err, typeError)
@@ -136,7 +136,7 @@ func (h *HandlerRevenueService) DeleteRevenueHandler(c *fiber.Ctx) error {
 
 func (h *HandlerRevenueService) UpdateIsRecievedHandler(c *fiber.Ctx) error {
 
-	id, err := strconv.ParseInt(c.Get("idTransaction"), 10, 64)
+	id, err := strconv.ParseInt(c.Get("idRevenue"), 10, 64)
 	if err != nil {
 		return checkErroType(c, err, helpers.VALIDATION)
 	}
@@ -147,7 +147,7 @@ func (h *HandlerRevenueService) UpdateIsRecievedHandler(c *fiber.Ctx) error {
 	if err = c.BodyParser(&revenueDto); err != nil {
 		return checkErroType(c, err, helpers.VALIDATION)
 	}
-	err, typeError := h.service.UpdateIsReceivedRevenue(id, revenueDto.IsRecieved)
+	typeError, err := h.service.UpdateIsReceived(uint(id), revenueDto.IsRecieved)
 	if err != nil {
 		return checkErroType(c, err, typeError)
 
