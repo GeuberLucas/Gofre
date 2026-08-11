@@ -6,15 +6,27 @@ import (
 	"time"
 )
 
-type ResetTokensRepository struct {
+type IAuhtRepository interface {
+	CreateResetToken(token *ResetToken) error
+	GetResetTokenByTokenHash(tokenHash string) (ResetToken, error)
+	CreateUser(user User) uint
+	GetUsers() ([]User, error)
+	GetUserByUsername(username string) (User, error)
+	GetUserByEmail(email string) (User, error)
+	GetUserByID(id uint) (User, error)
+	UpdateUser(user User)
+	UpdateUserPassword(userId uint, password []byte)
+	DeleteUser(id uint)
+}
+type AuthRepository struct {
 	db *sql.DB
 }
 
-func NewResetTokensRepository(db *sql.DB) *ResetTokensRepository {
-	return &ResetTokensRepository{db: db}
+func NewAuthRepository(db *sql.DB) IAuhtRepository {
+	return &AuthRepository{db: db}
 }
 
-func (r *ResetTokensRepository) CreateResetToken(token *ResetToken) error {
+func (r *AuthRepository) CreateResetToken(token *ResetToken) error {
 	var sqlCommand string = "insert into auth.reset_tokens (user_id, hash_token, expires_at) values ($1,$2,$3)"
 	statement, err := r.db.Prepare(sqlCommand)
 	if err != nil {
@@ -30,7 +42,7 @@ func (r *ResetTokensRepository) CreateResetToken(token *ResetToken) error {
 	return nil
 }
 
-func (r *ResetTokensRepository) GetResetTokenByTokenHash(tokenHash string) (ResetToken, error) {
+func (r *AuthRepository) GetResetTokenByTokenHash(tokenHash string) (ResetToken, error) {
 	var resetToken ResetToken
 	var sqlCommand string = "select id, user_id, hash_token, expires_at from auth.reset_tokens where hash_token = $1"
 	row := r.db.QueryRow(sqlCommand, tokenHash)
@@ -41,15 +53,7 @@ func (r *ResetTokensRepository) GetResetTokenByTokenHash(tokenHash string) (Rese
 	return resetToken, nil
 }
 
-type UserRepository struct {
-	db *sql.DB
-}
-
-func NewUserRepository(db *sql.DB) *UserRepository {
-	return &UserRepository{db: db}
-}
-
-func (r *UserRepository) CreateUser(user User) int64 {
+func (r *AuthRepository) CreateUser(user User) uint {
 	sqlCommand := `INSERT INTO auth.users (name, last_name, cell_phone, username, email, password, created_at, updated_at)
 					VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id
 					`
@@ -60,7 +64,7 @@ func (r *UserRepository) CreateUser(user User) int64 {
 		return 0
 	}
 
-	var idLastInsert int64
+	var idLastInsert uint
 	err = statement.QueryRow(user.Name, user.LastName, user.Cellphone, user.Username, user.Email, user.Password, time.Now(), time.Now()).Scan(&idLastInsert)
 	if err != nil {
 		log.Fatal(err)
@@ -69,7 +73,7 @@ func (r *UserRepository) CreateUser(user User) int64 {
 	defer statement.Close()
 	return idLastInsert
 }
-func (r *UserRepository) GetUsers() ([]User, error) {
+func (r *AuthRepository) GetUsers() ([]User, error) {
 	var sqlCommand string = "select id, username, name, last_name, cell_phone, email, password, created_at, updated_at from auth.users"
 
 	rows, err := r.db.Query(sqlCommand)
@@ -90,7 +94,7 @@ func (r *UserRepository) GetUsers() ([]User, error) {
 	return users, nil
 }
 
-func (r *UserRepository) GetUserByUsername(username string) (User, error) {
+func (r *AuthRepository) GetUserByUsername(username string) (User, error) {
 	var user User
 	var sqlCommand string = "select id, username, name, last_name, cell_phone, email, password, created_at, updated_at from auth.users where username = $1"
 
@@ -101,7 +105,7 @@ func (r *UserRepository) GetUserByUsername(username string) (User, error) {
 	}
 	return user, nil
 }
-func (r *UserRepository) GetUserByEmail(email string) (User, error) {
+func (r *AuthRepository) GetUserByEmail(email string) (User, error) {
 	var user User
 	var sqlCommand string = "select id, username, name, last_name, cell_phone, email, password, created_at, updated_at from auth.users where email = $1"
 
@@ -113,7 +117,7 @@ func (r *UserRepository) GetUserByEmail(email string) (User, error) {
 	return user, nil
 }
 
-func (r *UserRepository) GetUserByID(id int64) (User, error) {
+func (r *AuthRepository) GetUserByID(id uint) (User, error) {
 	var user User
 	var sqlCommand string = "select id, username, name, last_name, cell_phone, email, password, created_at, updated_at from auth.users where id = $1"
 
@@ -125,7 +129,7 @@ func (r *UserRepository) GetUserByID(id int64) (User, error) {
 	return user, nil
 }
 
-func (r *UserRepository) UpdateUser(user User) {
+func (r *AuthRepository) UpdateUser(user User) {
 	var sqlCommand string = "update auth.users set name=$1, last_name=$2, cell_phone=$3, username=$4, email=$5, password=$6, updated_at=$7 where id=$8"
 
 	statement, err := r.db.Prepare(sqlCommand)
@@ -143,7 +147,7 @@ func (r *UserRepository) UpdateUser(user User) {
 
 }
 
-func (r *UserRepository) UpdateUserPassword(userId int64, password []byte) {
+func (r *AuthRepository) UpdateUserPassword(userId uint, password []byte) {
 	var sqlCommand string = "update auth.users set  password=$1 ,updated_at=$2 where id=$3"
 
 	statement, err := r.db.Prepare(sqlCommand)
@@ -160,7 +164,7 @@ func (r *UserRepository) UpdateUserPassword(userId int64, password []byte) {
 	log.Println("User updated successfully")
 }
 
-func (r *UserRepository) DeleteUser(id int64) {
+func (r *AuthRepository) DeleteUser(id uint) {
 	var sqlCommand string = "delete from auth.users where id=$1"
 
 	statement, err := r.db.Prepare(sqlCommand)

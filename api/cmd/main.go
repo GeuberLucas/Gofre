@@ -13,10 +13,12 @@ import (
 	"github.com/GeuberLucas/Gofre/api/pkg/db"
 	gracefulshutdown "github.com/GeuberLucas/Gofre/api/pkg/graceful_shutdown"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 func main() {
 	app := fiber.New()
+	app.Use(logger.New())
 	api := app.Group("/api")
 	config.LoadEnv()
 	dbConn, err := db.ConnectToDatabase()
@@ -24,7 +26,10 @@ func main() {
 		log.Fatalf("Connecting database: %v", err)
 	}
 	//Auth Module
-	auth.SetupRoutes(api)
+	repoAuth := auth.NewAuthRepository(dbConn)
+	serviceAuth := auth.NewAuthService(repoAuth)
+	handlerAuth := auth.NewHandlerService(serviceAuth)
+	auth.SetupRoutes(api, handlerAuth)
 
 	//Investments module
 	portRepo := investments.NewPortfolioRepository(dbConn)

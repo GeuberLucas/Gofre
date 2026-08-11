@@ -6,27 +6,44 @@ import (
 
 	"github.com/GeuberLucas/Gofre/api/internal/auth/security"
 	dtos "github.com/GeuberLucas/Gofre/api/pkg/DTOs"
+	"github.com/GeuberLucas/Gofre/api/pkg/helpers"
 	"github.com/GeuberLucas/Gofre/api/pkg/response"
 	"github.com/gofiber/fiber/v2"
 )
 
-func LoginHandler(c *fiber.Ctx) error {
+type IHandlerAuth interface {
+	LoginHandler(c *fiber.Ctx) error
+	RegisterHandler(c *fiber.Ctx) error
+	ForgotPasswordHandler(c *fiber.Ctx) error
+	ResetPasswordHandler(c *fiber.Ctx) error
+	IsAuthenticatedHandler(c *fiber.Ctx) error
+	ProfileHandler(c *fiber.Ctx) error
+}
+
+type HandlerAuth struct {
+	service IAuthService
+}
+
+func NewHandlerService(svc IAuthService) IHandlerAuth {
+	return &HandlerAuth{
+		service: svc,
+	}
+}
+func (h *HandlerAuth) LoginHandler(c *fiber.Ctx) error {
 
 	var loginDTO dtos.LoginDTO
 	if erro := c.BodyParser(&loginDTO); erro != nil {
 		return response.ErrorResponse(c, http.StatusBadRequest, erro)
 	}
-	service := NewAuthService()
-	serviceresult, erro, typeError := service.Login(loginDTO)
+	service := h.service
+	serviceresult, errorType, erro := service.Login(loginDTO)
 	if erro != nil {
-		if typeError == "validation" {
-
+		switch errorType {
+		case helpers.VALIDATION:
 			return response.ErrorResponse(c, http.StatusBadRequest, erro)
-		}
-		if typeError == "Internal" {
-			return response.ErrorResponse(c, http.StatusBadRequest, erro)
-		}
-		if typeError == "Pass" {
+		case helpers.INTERNAL:
+			return response.ErrorResponse(c, http.StatusInternalServerError, erro)
+		default:
 			return response.ErrorResponse(c, http.StatusBadRequest, erro)
 		}
 	}
@@ -34,30 +51,30 @@ func LoginHandler(c *fiber.Ctx) error {
 
 }
 
-func RegisterHandler(c *fiber.Ctx) error {
+func (h *HandlerAuth) RegisterHandler(c *fiber.Ctx) error {
 
 	var registerDTO dtos.RegisterDTO
 	if erro := c.BodyParser(&registerDTO); erro != nil {
 
 		return response.ErrorResponse(c, http.StatusBadRequest, erro)
 	}
-	service := NewAuthService()
-	serviceresult, erro, typeError := service.Register(registerDTO)
+	service := h.service
+	serviceresult, errorType, erro := service.Register(registerDTO)
 	if erro != nil {
-		switch typeError {
-		case "validation":
+		switch errorType {
+		case helpers.VALIDATION:
 			return response.ErrorResponse(c, http.StatusBadRequest, erro)
-		case "Internal":
-
+		case helpers.INTERNAL:
 			return response.ErrorResponse(c, http.StatusInternalServerError, erro)
+		default:
+			return response.ErrorResponse(c, http.StatusBadRequest, erro)
 		}
-
 	}
 
 	return response.JSONResponse(c, http.StatusOK, serviceresult)
 }
 
-func IsAuthenticatedHandler(c *fiber.Ctx) error {
+func (h *HandlerAuth) IsAuthenticatedHandler(c *fiber.Ctx) error {
 	if err := security.ValidateToken(c); err != nil {
 		return response.ErrorResponse(c, http.StatusUnauthorized, err)
 
@@ -73,64 +90,60 @@ func IsAuthenticatedHandler(c *fiber.Ctx) error {
 
 	return response.JSONResponse(c, http.StatusOK, userAuthenticated)
 }
-func ProfileHandler(c *fiber.Ctx) error {
+func (h *HandlerAuth) ProfileHandler(c *fiber.Ctx) error {
 
 	userId, erro := strconv.ParseInt(c.Get("userId"), 10, 64)
 	if erro != nil {
 		return response.ErrorResponse(c, http.StatusBadRequest, erro)
 
 	}
-	service := NewAuthService()
-	serviceresult, erro, typeError := service.Profile(userId)
+	service := h.service
+	serviceresult, errorType, erro := service.Profile(uint(userId))
 	if erro != nil {
-		if typeError == "Validation" {
+		switch errorType {
+		case helpers.VALIDATION:
 			return response.ErrorResponse(c, http.StatusBadRequest, erro)
-
-		}
-		if typeError == "Internal" {
+		case helpers.INTERNAL:
 			return response.ErrorResponse(c, http.StatusInternalServerError, erro)
-
+		default:
+			return response.ErrorResponse(c, http.StatusBadRequest, erro)
 		}
-
 	}
 
 	return response.JSONResponse(c, http.StatusOK, serviceresult)
 }
 
-func ForgotPasswordHandler(c *fiber.Ctx) error {
+func (h *HandlerAuth) ForgotPasswordHandler(c *fiber.Ctx) error {
 
 	var forgotPasswordDTO dtos.ForgotPasswordDTO
 	if erro := c.BodyParser(&forgotPasswordDTO); erro != nil {
 		return response.ErrorResponse(c, http.StatusBadRequest, erro)
 
 	}
-	service := NewAuthService()
-	erro := service.ForgotPassword(forgotPasswordDTO.Email)
+	service := h.service
+	_, erro := service.ForgotPassword(forgotPasswordDTO.Email)
 	if erro != nil {
 		return response.ErrorResponse(c, http.StatusInternalServerError, erro)
-
 	}
 	return response.JSONResponse(c, http.StatusOK, map[string]string{"message": "If the email exists, a reset link has been sent."})
 }
 
-func ResetPasswordHandler(c *fiber.Ctx) error {
+func (h *HandlerAuth) ResetPasswordHandler(c *fiber.Ctx) error {
 
 	HashEncoded := c.Get("HashEncoded")
 	if HashEncoded == "" {
 		return response.ErrorResponse(c, http.StatusBadRequest, nil)
 
 	}
-	service := NewAuthService()
+	service := h.service
 
 	var resetPasswordDTO dtos.ResetPasswordDTO
 	if erro := c.BodyParser(&resetPasswordDTO); erro != nil {
 		return response.ErrorResponse(c, http.StatusBadRequest, erro)
-
 	}
-	erro := service.ResetPassword(HashEncoded, resetPasswordDTO.NewPassword)
+	_, erro := service.ResetPassword(HashEncoded, resetPasswordDTO.NewPassword)
 	if erro != nil {
 		return response.ErrorResponse(c, http.StatusInternalServerError, erro)
-
 	}
 	return response.JSONResponse(c, http.StatusOK, map[string]string{"message": "Password has been reset successfully."})
 

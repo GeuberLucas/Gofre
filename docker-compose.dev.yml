@@ -1,4 +1,19 @@
 services:
+  api_gateway:
+    container_name: api
+    image: "api"
+    build:
+      context: "./api"
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend.env
+    networks:
+      - gofre-network
+    ports:
+      - "8080:80"
+    restart: on-failure
+    depends_on:
+      - database
   database:
     image: postgres:18
     environment:
