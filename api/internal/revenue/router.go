@@ -1,13 +1,16 @@
 package revenue
 
-import "github.com/gofiber/fiber/v2"
+import "github.com/gofiber/fiber/v3"
 
 func SetupRoutes(app fiber.Router, hd IRevenueHandler) {
-	route := app.Group("/expense")
-	route.Get("/", hd.GetRevenueHandler)
-	app.Post("/", hd.AddRevenueHandler)
-	app.Get("/:idRevenue", hd.GetByIdRevenueHandler)
-	app.Put("/:idRevenue", hd.UpdateRevenueHandler)
-	app.Delete("/:idRevenue", hd.DeleteRevenueHandler)
-	app.Patch("/:idRevenue/update-status", hd.UpdateIsRecievedHandler)
+	app.RouteChain("/revenue/").
+		Get(hd.GetRevenueHandler).
+		Post(hd.AddRevenueHandler)
+
+	app.RouteChain("/revenue/:idRevenue").
+		Get(hd.GetByIdRevenueHandler).
+		Put(hd.UpdateRevenueHandler).
+		Delete(hd.DeleteRevenueHandler)
+
+	app.Patch("/revenue/:idRevenue/update-status", hd.UpdateIsRecievedHandler)
 }

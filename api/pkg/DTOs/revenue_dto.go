@@ -7,8 +7,8 @@ import (
 )
 
 type RevenueDto struct {
-	ID          int64              `json:"id"`
-	UserId      int64              `json:"userId"`
+	ID          uint               `json:"id"`
+	UserId      uint               `json:"userId"`
 	Description string             `json:"description"`
 	Origin      string             `json:"origin"`
 	Type        helpers.IncomeType `json:"type"`

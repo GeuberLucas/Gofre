@@ -5,7 +5,7 @@ import (
 )
 
 type User struct {
-	ID        int64
+	ID        uint
 	Username  string
 	Name      string
 	LastName  string
@@ -30,8 +30,8 @@ func (u User) Validate() bool {
 }
 
 type ResetToken struct {
-	ID        int64
-	UserID    int64
+	ID        uint
+	UserID    uint
 	TokenHash string
 	ExpiresAt time.Time
 }

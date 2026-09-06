@@ -72,7 +72,7 @@ func (s *AuthService) Register(obj dtos.RegisterDTO) (*dtos.LoginResultDto, help
 		return nil, helpers.VALIDATION, errors.New("Required fields are empty")
 	}
 
-	id := s.repository.CreateUser(usuario)
+	id, err := s.repository.CreateUser(usuario)
 	if err != nil {
 		return nil, helpers.INTERNAL, fmt.Errorf("User Not created: %s", err)
 	}

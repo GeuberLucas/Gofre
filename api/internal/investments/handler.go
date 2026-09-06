@@ -7,16 +7,16 @@ import (
 	dtos "github.com/GeuberLucas/Gofre/api/pkg/DTOs"
 	"github.com/GeuberLucas/Gofre/api/pkg/helpers"
 	"github.com/GeuberLucas/Gofre/api/pkg/response"
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 type IHandlerService interface {
-	AddInvestmentHandler(c *fiber.Ctx) error
-	GetInvestmentHandler(c *fiber.Ctx) error
-	GetByIdInvestmentHandler(c *fiber.Ctx) error
-	UpdateInvestmentHandler(c *fiber.Ctx) error
-	DeleteInvestmentHandler(c *fiber.Ctx) error
-	UpdateIsDoneInvestmentHandler(c *fiber.Ctx) error
+	AddInvestmentHandler(c fiber.Ctx) error
+	GetInvestmentHandler(c fiber.Ctx) error
+	GetByIdInvestmentHandler(c fiber.Ctx) error
+	UpdateInvestmentHandler(c fiber.Ctx) error
+	DeleteInvestmentHandler(c fiber.Ctx) error
+	UpdateIsDoneInvestmentHandler(c fiber.Ctx) error
 }
 
 type HandlerService struct {
@@ -29,21 +29,16 @@ func NewHandlerService(service IPortfolioService) IHandlerService {
 	}
 }
 
-func (hd *HandlerService) AddInvestmentHandler(c *fiber.Ctx) error {
+func (hd *HandlerService) AddInvestmentHandler(c fiber.Ctx) error {
 
 	var dto dtos.Portfolio
 
-	if err := c.BodyParser(&dto); err != nil {
+	if err := c.Bind().Body(&dto); err != nil {
 		return checkErroType(c, helpers.INTERNAL, err)
 
 	}
-	userIdHeader := c.Get("user_id")
-	userId, err := strconv.ParseInt(userIdHeader, 10, 64)
-	if err != nil {
-		return checkErroType(c, helpers.INTERNAL, err)
-
-	}
-	dto.UserID = int(userId)
+	userId := c.Locals("user_id").(uint)
+	dto.UserID = userId
 	typeError, err := hd.portfolioService.Add(dto)
 	if err != nil {
 		return checkErroType(c, typeError, err)
@@ -53,15 +48,10 @@ func (hd *HandlerService) AddInvestmentHandler(c *fiber.Ctx) error {
 	return response.JSONResponse(c, http.StatusOK, dataReturn)
 
 }
-func (hd *HandlerService) GetInvestmentHandler(c *fiber.Ctx) error {
+func (hd *HandlerService) GetInvestmentHandler(c fiber.Ctx) error {
 
-	userIdHeader := c.Get("user_id")
-	userId, err := strconv.ParseInt(userIdHeader, 10, 64)
-	if err != nil {
-		checkErroType(c, helpers.INTERNAL, err)
-
-	}
-	serviceresult, typeError, err := hd.portfolioService.GetAll(int(userId))
+	userId := c.Locals("user_id").(uint)
+	serviceresult, typeError, err := hd.portfolioService.GetAll(userId)
 	if err != nil {
 		if err != nil {
 			return checkErroType(c, typeError, err)
@@ -73,7 +63,7 @@ func (hd *HandlerService) GetInvestmentHandler(c *fiber.Ctx) error {
 	return response.JSONResponse(c, http.StatusOK, serviceresult)
 }
 
-func (hd *HandlerService) GetByIdInvestmentHandler(c *fiber.Ctx) error {
+func (hd *HandlerService) GetByIdInvestmentHandler(c fiber.Ctx) error {
 
 	id, err := strconv.ParseInt(c.Get("idInvestment"), 10, 64)
 	if err != nil {
@@ -88,7 +78,7 @@ func (hd *HandlerService) GetByIdInvestmentHandler(c *fiber.Ctx) error {
 	return response.JSONResponse(c, http.StatusOK, serviceresult)
 }
 
-func (hd *HandlerService) UpdateInvestmentHandler(c *fiber.Ctx) error {
+func (hd *HandlerService) UpdateInvestmentHandler(c fiber.Ctx) error {
 
 	id, err := strconv.ParseInt(c.Get("idInvestment"), 10, 64)
 	if err != nil {
@@ -97,18 +87,13 @@ func (hd *HandlerService) UpdateInvestmentHandler(c *fiber.Ctx) error {
 	}
 	var dto dtos.Portfolio
 
-	if err := c.BodyParser(&dto); err != nil {
+	if err := c.Bind().Body(&dto); err != nil {
 		checkErroType(c, helpers.INTERNAL, err)
 
 	}
-	userIdHeader := c.Get("user_id")
-	userId, err := strconv.ParseInt(userIdHeader, 10, 64)
-	if err != nil {
-		return response.ErrorResponse(c, http.StatusBadRequest, err)
-
-	}
+	userId := c.Locals("user_id").(uint)
 	dto.Id = uint(id)
-	dto.UserID = int(userId)
+	dto.UserID = userId
 	typeError, err := hd.portfolioService.Update(dto)
 	if err != nil {
 		checkErroType(c, typeError, err)
@@ -118,19 +103,14 @@ func (hd *HandlerService) UpdateInvestmentHandler(c *fiber.Ctx) error {
 	return response.JSONResponse(c, http.StatusOK, dataReturn)
 }
 
-func (hd *HandlerService) DeleteInvestmentHandler(c *fiber.Ctx) error {
+func (hd *HandlerService) DeleteInvestmentHandler(c fiber.Ctx) error {
 	id, err := strconv.ParseInt(c.Get("idInvestment"), 10, 64)
 	if err != nil {
 		checkErroType(c, helpers.VALIDATION, err)
 
 	}
-	userIdHeader := c.Get("user_id")
-	userId, err := strconv.ParseInt(userIdHeader, 10, 64)
-	if err != nil {
-		checkErroType(c, helpers.INTERNAL, err)
-
-	}
-	typeError, err := hd.portfolioService.Delete(id, userId)
+	userId := c.Locals("user_id").(uint)
+	typeError, err := hd.portfolioService.Delete(uint(id), userId)
 	if err != nil {
 		checkErroType(c, typeError, err)
 
@@ -139,7 +119,7 @@ func (hd *HandlerService) DeleteInvestmentHandler(c *fiber.Ctx) error {
 	return response.JSONResponse(c, http.StatusOK, dataReturn)
 }
 
-func (hd *HandlerService) UpdateIsDoneInvestmentHandler(c *fiber.Ctx) error {
+func (hd *HandlerService) UpdateIsDoneInvestmentHandler(c fiber.Ctx) error {
 
 	id, err := strconv.ParseInt(c.Get("idInvestment"), 10, 64)
 	if err != nil {
@@ -151,7 +131,7 @@ func (hd *HandlerService) UpdateIsDoneInvestmentHandler(c *fiber.Ctx) error {
 		IsDone bool `json:"isDone"`
 	}
 
-	if err := c.BodyParser(&dto); err != nil {
+	if err := c.Bind().Body(&dto); err != nil {
 		checkErroType(c, helpers.INTERNAL, err)
 
 	}
@@ -165,7 +145,7 @@ func (hd *HandlerService) UpdateIsDoneInvestmentHandler(c *fiber.Ctx) error {
 	return response.JSONResponse(c, http.StatusOK, dataReturn)
 }
 
-func checkErroType(c *fiber.Ctx, typeError helpers.ErrorType, err error) error {
+func checkErroType(c fiber.Ctx, typeError helpers.ErrorType, err error) error {
 
 	switch typeError {
 	case helpers.VALIDATION:

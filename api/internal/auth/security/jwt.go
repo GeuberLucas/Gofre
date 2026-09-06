@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -24,7 +23,7 @@ func GenerateToken(userId uint) (string, error) {
 
 }
 
-func ExtractUserId(c *fiber.Ctx) (uint64, error) {
+func ExtractUserId(c fiber.Ctx) (uint, error) {
 	tokenString := extractToken(c)
 	token, err := jwt.Parse(tokenString, returnVerificationKey)
 	if err != nil {
@@ -37,13 +36,13 @@ func ExtractUserId(c *fiber.Ctx) (uint64, error) {
 		if err != nil {
 			return 0, err
 		}
-		return userId, nil
+		return uint(userId), nil
 	}
 
 	return 0, errors.New("invalid Token")
 }
 
-func ValidateToken(c *fiber.Ctx) error {
+func ValidateToken(c fiber.Ctx) error {
 	tokenString := extractToken(c)
 	token, err := jwt.Parse(tokenString, returnVerificationKey)
 	if err != nil {
@@ -57,13 +56,8 @@ func ValidateToken(c *fiber.Ctx) error {
 	return errors.New("invalid Token")
 }
 
-func extractToken(c *fiber.Ctx) string {
-	headerAuthorization := c.Get("Authorization")
-	tokenValue := strings.Split(headerAuthorization, " ")
-	if len(tokenValue) == 2 {
-		return tokenValue[1]
-	}
-	return ""
+func extractToken(c fiber.Ctx) string {
+	return c.Cookies("jwt-token")
 }
 
 func returnVerificationKey(token *jwt.Token) (interface{}, error) {

@@ -4,10 +4,10 @@ import "database/sql"
 
 type IPortfolioRepository interface {
 	Create(model Portfolio) error
-	GetAll(userId int) ([]Portfolio, error)
+	GetAll(userId uint) ([]Portfolio, error)
 	GetById(id uint) (Portfolio, error)
 	Update(model Portfolio) error
-	Delete(id int64, userId int64) error
+	Delete(id uint, userId uint) error
 }
 
 type PortfolioRepository struct {
@@ -34,7 +34,7 @@ func (p *PortfolioRepository) Create(model Portfolio) error {
 }
 
 // Delete implements IPortfolioRepository.
-func (p *PortfolioRepository) Delete(id int64, userId int64) error {
+func (p *PortfolioRepository) Delete(id uint, userId uint) error {
 	sqlCommand := `DELETE from investments.portfolio where id=$1 and user_id=$2;`
 
 	statement, err := p.db.Prepare(sqlCommand)
@@ -52,7 +52,7 @@ func (p *PortfolioRepository) Delete(id int64, userId int64) error {
 }
 
 // GetAll implements IPortfolioRepository.
-func (p *PortfolioRepository) GetAll(userId int) ([]Portfolio, error) {
+func (p *PortfolioRepository) GetAll(userId uint) ([]Portfolio, error) {
 	var sqlCommand string = `SELECT 
 	id,
 	user_id,

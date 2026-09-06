@@ -1,14 +1,17 @@
 package investments
 
-import "github.com/gofiber/fiber/v2"
+import "github.com/gofiber/fiber/v3"
 
 // SetupRoutes initializes the router and defines the routes
 func SetupRoutes(app fiber.Router, hd IHandlerService) {
-	route := app.Group("/investments")
-	route.Get("/", hd.GetInvestmentHandler)
-	app.Post("/", hd.AddInvestmentHandler)
-	app.Get("/:idInvestment", hd.GetByIdInvestmentHandler)
-	app.Put("/:idInvestment", hd.UpdateInvestmentHandler)
-	app.Delete("/:idInvestment", hd.DeleteInvestmentHandler)
-	app.Patch("/:idInvestment/update-status", hd.UpdateIsDoneInvestmentHandler)
+	app.RouteChain("/investments/").
+		Get(hd.GetInvestmentHandler).
+		Post(hd.AddInvestmentHandler)
+
+	app.RouteChain("/investments/:idInvestment").
+		Get(hd.GetByIdInvestmentHandler).
+		Put(hd.UpdateInvestmentHandler).
+		Delete(hd.DeleteInvestmentHandler)
+
+	app.Patch("/investments/:idInvestment/update-status", hd.UpdateIsDoneInvestmentHandler)
 }

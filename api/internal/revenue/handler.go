@@ -7,16 +7,16 @@ import (
 	dtos "github.com/GeuberLucas/Gofre/api/pkg/DTOs"
 	"github.com/GeuberLucas/Gofre/api/pkg/helpers"
 	"github.com/GeuberLucas/Gofre/api/pkg/response"
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 type IRevenueHandler interface {
-	AddRevenueHandler(c *fiber.Ctx) error
-	GetRevenueHandler(c *fiber.Ctx) error
-	GetByIdRevenueHandler(c *fiber.Ctx) error
-	UpdateRevenueHandler(c *fiber.Ctx) error
-	DeleteRevenueHandler(c *fiber.Ctx) error
-	UpdateIsRecievedHandler(c *fiber.Ctx) error
+	AddRevenueHandler(c fiber.Ctx) error
+	GetRevenueHandler(c fiber.Ctx) error
+	GetByIdRevenueHandler(c fiber.Ctx) error
+	UpdateRevenueHandler(c fiber.Ctx) error
+	DeleteRevenueHandler(c fiber.Ctx) error
+	UpdateIsRecievedHandler(c fiber.Ctx) error
 }
 
 type HandlerRevenueService struct {
@@ -29,22 +29,21 @@ func NewHandlerService(service IRevenueService) IRevenueHandler {
 	}
 }
 
-func (h *HandlerRevenueService) AddRevenueHandler(c *fiber.Ctx) error {
-	userIdToken := c.Get("user_id")
-	userIdInt, err := strconv.ParseInt(userIdToken, 10, 64)
+func (h *HandlerRevenueService) AddRevenueHandler(c fiber.Ctx) error {
+	userId := c.Locals("user_id").(uint)
 
 	var revenueDto dtos.RevenueDto
-	if err = c.BodyParser(&revenueDto); err != nil {
+	if err := c.Bind().Body(&revenueDto); err != nil {
 		return checkErroType(c, err, helpers.VALIDATION)
 	}
-	revenueDto.UserId = userIdInt
+	revenueDto.UserId = userId
 	typeError, err := h.service.Add(revenueDto)
 	if err != nil {
 		return checkErroType(c, err, typeError)
 	}
 	return response.JSONResponse(c, http.StatusOK, nil)
 }
-func (h *HandlerRevenueService) GetByIdRevenueHandler(c *fiber.Ctx) error {
+func (h *HandlerRevenueService) GetByIdRevenueHandler(c fiber.Ctx) error {
 
 	id, err := strconv.ParseInt(c.Get("idRevenue"), 10, 64)
 	if err != nil {
@@ -59,7 +58,7 @@ func (h *HandlerRevenueService) GetByIdRevenueHandler(c *fiber.Ctx) error {
 	return response.JSONResponse(c, http.StatusOK, serviceresult)
 }
 
-func (h *HandlerRevenueService) GetRevenueHandler(c *fiber.Ctx) error {
+func (h *HandlerRevenueService) GetRevenueHandler(c fiber.Ctx) error {
 
 	id, err := strconv.ParseInt(c.Get("idRevenue"), 10, 64)
 	if err != nil {
@@ -74,14 +73,9 @@ func (h *HandlerRevenueService) GetRevenueHandler(c *fiber.Ctx) error {
 	return response.JSONResponse(c, http.StatusOK, serviceresult)
 }
 
-func (h *HandlerRevenueService) GetByIdUserRevenueHandler(c *fiber.Ctx) error {
-	userIdToken := c.Get("user_id")
-	userId, err := strconv.ParseInt(userIdToken, 10, 64)
-	if err != nil {
-		return response.ErrorResponse(c, http.StatusBadRequest, err)
-
-	}
-	serviceresult, typeError, err := h.service.GetAll(uint(userId))
+func (h *HandlerRevenueService) GetByIdUserRevenueHandler(c fiber.Ctx) error {
+	userId := c.Locals("user_id").(uint)
+	serviceresult, typeError, err := h.service.GetAll(userId)
 	if err != nil {
 		return checkErroType(c, err, typeError)
 	}
@@ -89,18 +83,17 @@ func (h *HandlerRevenueService) GetByIdUserRevenueHandler(c *fiber.Ctx) error {
 	return response.JSONResponse(c, http.StatusOK, serviceresult)
 }
 
-func (h *HandlerRevenueService) UpdateRevenueHandler(c *fiber.Ctx) error {
+func (h *HandlerRevenueService) UpdateRevenueHandler(c fiber.Ctx) error {
 
 	id, err := strconv.ParseInt(c.Get("idRevenue"), 10, 64)
 	if err != nil {
 		return checkErroType(c, err, helpers.VALIDATION)
 	}
-	userIdToken := c.Get("user_id")
-	userIdInt, err := strconv.ParseInt(userIdToken, 10, 64)
+	userId := c.Locals("user_id").(uint)
 
 	var revenueDto dtos.RevenueDto
-	revenueDto.UserId = userIdInt
-	if err = c.BodyParser(&revenueDto); err != nil {
+	revenueDto.UserId = userId
+	if err = c.Bind().Body(&revenueDto); err != nil {
 		return checkErroType(c, err, helpers.VALIDATION)
 	}
 	typeError, err := h.service.Update(uint(id), revenueDto)
@@ -112,20 +105,15 @@ func (h *HandlerRevenueService) UpdateRevenueHandler(c *fiber.Ctx) error {
 	return response.JSONResponse(c, http.StatusOK, nil)
 }
 
-func (h *HandlerRevenueService) DeleteRevenueHandler(c *fiber.Ctx) error {
+func (h *HandlerRevenueService) DeleteRevenueHandler(c fiber.Ctx) error {
 
 	id, err := strconv.ParseInt(c.Get("idRevenue"), 10, 64)
 	if err != nil {
 		return response.ErrorResponse(c, http.StatusBadRequest, err)
 
 	}
-	userIdToken := c.Get("user_id")
-	userId, err := strconv.ParseInt(userIdToken, 10, 64)
-	if err != nil {
-		return response.ErrorResponse(c, http.StatusBadRequest, err)
-
-	}
-	typeError, err := h.service.Delete(uint(id), uint(userId))
+	userId := c.Locals("user_id").(uint)
+	typeError, err := h.service.Delete(uint(id), userId)
 	if err != nil {
 
 		return checkErroType(c, err, typeError)
@@ -134,7 +122,7 @@ func (h *HandlerRevenueService) DeleteRevenueHandler(c *fiber.Ctx) error {
 	return response.JSONResponse(c, http.StatusOK, nil)
 }
 
-func (h *HandlerRevenueService) UpdateIsRecievedHandler(c *fiber.Ctx) error {
+func (h *HandlerRevenueService) UpdateIsRecievedHandler(c fiber.Ctx) error {
 
 	id, err := strconv.ParseInt(c.Get("idRevenue"), 10, 64)
 	if err != nil {
@@ -144,7 +132,7 @@ func (h *HandlerRevenueService) UpdateIsRecievedHandler(c *fiber.Ctx) error {
 	var revenueDto struct {
 		IsRecieved bool `json:"isRecieved"`
 	}
-	if err = c.BodyParser(&revenueDto); err != nil {
+	if err = c.Bind().Body(&revenueDto); err != nil {
 		return checkErroType(c, err, helpers.VALIDATION)
 	}
 	typeError, err := h.service.UpdateIsReceived(uint(id), revenueDto.IsRecieved)
@@ -156,7 +144,7 @@ func (h *HandlerRevenueService) UpdateIsRecievedHandler(c *fiber.Ctx) error {
 	return response.JSONResponse(c, http.StatusOK, nil)
 }
 
-func checkErroType(c *fiber.Ctx, err error, typeError helpers.ErrorType) error {
+func checkErroType(c fiber.Ctx, err error, typeError helpers.ErrorType) error {
 	switch typeError {
 	case helpers.VALIDATION:
 		return response.ErrorResponse(c, http.StatusBadRequest, err)

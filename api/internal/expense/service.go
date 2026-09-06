@@ -111,8 +111,8 @@ func (ts *ExpenseService) UpdateIsPaidExpense(id uint, isPaid bool) (helpers.Err
 
 func expenseDtoFromModel(ex Expense) dtos.ExpenseDto {
 	return dtos.ExpenseDto{
-		ID:            int64(ex.ID),
-		UserId:        int64(ex.UserId),
+		ID:            ex.ID,
+		UserId:        ex.UserId,
 		Description:   ex.Description,
 		Target:        ex.Target,
 		Category:      ex.Category,

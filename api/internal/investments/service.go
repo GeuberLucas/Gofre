@@ -8,10 +8,10 @@ import (
 
 type IPortfolioService interface {
 	Add(dto dtos.Portfolio) (helpers.ErrorType, error)
-	GetAll(userId int) ([]dtos.Portfolio, helpers.ErrorType, error)
+	GetAll(userId uint) ([]dtos.Portfolio, helpers.ErrorType, error)
 	GetById(id uint) (dtos.Portfolio, helpers.ErrorType, error)
 	Update(dto dtos.Portfolio) (helpers.ErrorType, error)
-	Delete(id int64, userId int64) (helpers.ErrorType, error)
+	Delete(id uint, userId uint) (helpers.ErrorType, error)
 	UpdateIsDone(id uint, isDone bool) (helpers.ErrorType, error)
 }
 
@@ -37,8 +37,8 @@ func (p *PortfolioService) Add(dto dtos.Portfolio) (helpers.ErrorType, error) {
 }
 
 // Delete implements IPortfolioService.
-func (p *PortfolioService) Delete(id int64, userId int64) (helpers.ErrorType, error) {
-	_, err := p.portifolioRepository.GetById(uint(id))
+func (p *PortfolioService) Delete(id uint, userId uint) (helpers.ErrorType, error) {
+	_, err := p.portifolioRepository.GetById(id)
 	if err != nil {
 		return helpers.INTERNAL, err
 	}
@@ -51,7 +51,7 @@ func (p *PortfolioService) Delete(id int64, userId int64) (helpers.ErrorType, er
 }
 
 // GetAll implements IPortfolioService.
-func (p *PortfolioService) GetAll(userId int) ([]dtos.Portfolio, helpers.ErrorType, error) {
+func (p *PortfolioService) GetAll(userId uint) ([]dtos.Portfolio, helpers.ErrorType, error) {
 	investments, err := p.portifolioRepository.GetAll(userId)
 	if err != nil {
 		return nil, helpers.INTERNAL, err

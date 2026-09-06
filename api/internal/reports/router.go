@@ -1,11 +1,9 @@
 package reports
 
-import "github.com/gofiber/fiber/v2"
+import "github.com/gofiber/fiber/v3"
 
 func SetupRoutes(app fiber.Router) {
-	route := app.Group("/expense")
-	route.Get("/", func(c *fiber.Ctx) error {
+	app.Get("/reports/", func(c fiber.Ctx) error {
 		return c.SendString("Hello, World!")
 	})
-
 }

@@ -5,13 +5,22 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Connect to server",
+      "name": "Debug Gofre API",
       "type": "go",
-      "request": "attach",
-      "mode": "remote",
-      "remotePath": "${workspaceFolder}",
-      "port": 2345,
-      "host": "127.0.0.1:8080"
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/api/cmd/main.go",
+      "cwd": "${workspaceFolder}/api",
+      "env": {
+        "Enviroment": "Development",
+        "DB_USER": "postgres",
+        "DB_PASSWORD": "123456",
+        "DB_HOST": "localhost",
+        "DB_PORT": "5432",
+        "DB_DBNAME": "Gofre",
+        "SECRET_KEY": "devTest"
+      },
+      "args": []
     }
   ]
 }

@@ -12,13 +12,17 @@ import (
 	"github.com/GeuberLucas/Gofre/api/pkg/config"
 	"github.com/GeuberLucas/Gofre/api/pkg/db"
 	gracefulshutdown "github.com/GeuberLucas/Gofre/api/pkg/graceful_shutdown"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/logger"
 )
 
 func main() {
-	app := fiber.New()
+	configApp := fiber.Config{
+		StrictRouting: true,
+	}
+	app := fiber.New(configApp)
 	app.Use(logger.New())
+
 	api := app.Group("/api")
 	config.LoadEnv()
 	dbConn, err := db.ConnectToDatabase()
@@ -30,24 +34,25 @@ func main() {
 	serviceAuth := auth.NewAuthService(repoAuth)
 	handlerAuth := auth.NewHandlerService(serviceAuth)
 	auth.SetupRoutes(api, handlerAuth)
+	protectedApi := api.Group("", handlerAuth.IsAuthenticatedMiddleware)
 
 	//Investments module
 	portRepo := investments.NewPortfolioRepository(dbConn)
 	portSvc := investments.NewPortfolioService(portRepo)
 	portHandler := investments.NewHandlerService(portSvc)
-	investments.SetupRoutes(api, portHandler)
+	investments.SetupRoutes(protectedApi, portHandler)
 
 	//Expense module
 	expRepo := expense.NewExpenseRepository(dbConn)
 	expSvc := expense.NewExpenseService(expRepo)
 	expHandler := expense.NewHandlerService(expSvc)
-	expense.SetupRoutes(api, expHandler)
+	expense.SetupRoutes(protectedApi, expHandler)
 
 	//Investments module
 	revRepo := revenue.NewRevenueRepository(dbConn)
 	revSvc := revenue.NewRevenueService(revRepo)
 	revHandler := revenue.NewHandlerService(revSvc)
-	revenue.SetupRoutes(api, revHandler)
+	revenue.SetupRoutes(protectedApi, revHandler)
 
 	var portApi string = ":50728"
 	if os.Getenv("Enviroment") != "Development" {

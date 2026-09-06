@@ -8,16 +8,16 @@ import (
 	dtos "github.com/GeuberLucas/Gofre/api/pkg/DTOs"
 	"github.com/GeuberLucas/Gofre/api/pkg/helpers"
 	"github.com/GeuberLucas/Gofre/api/pkg/response"
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 type IHandlerExpense interface {
-	AddExpenseHandler(c *fiber.Ctx) error
-	GetExpenseHandler(c *fiber.Ctx) error
-	GetByIdExpenseHandler(c *fiber.Ctx) error
-	UpdateExpenseHandler(c *fiber.Ctx) error
-	DeleteExpenseHandler(c *fiber.Ctx) error
-	UpdateIsPaidHandler(c *fiber.Ctx) error
+	AddExpenseHandler(c fiber.Ctx) error
+	GetExpenseHandler(c fiber.Ctx) error
+	GetByIdExpenseHandler(c fiber.Ctx) error
+	UpdateExpenseHandler(c fiber.Ctx) error
+	DeleteExpenseHandler(c fiber.Ctx) error
+	UpdateIsPaidHandler(c fiber.Ctx) error
 }
 type HandlerExpenseService struct {
 	service IExpenseService
@@ -28,21 +28,17 @@ func NewHandlerService(service IExpenseService) IHandlerExpense {
 		service: service,
 	}
 }
-func (h *HandlerExpenseService) AddExpenseHandler(c *fiber.Ctx) error {
+func (h *HandlerExpenseService) AddExpenseHandler(c fiber.Ctx) error {
 
-	userIdToken := c.Get("user_id")
-	userIdInt, err := strconv.ParseInt(userIdToken, 10, 64)
-	if err != nil {
-		return response.ErrorResponse(c, http.StatusBadRequest, err)
+	userId := c.Locals("user_id").(uint)
 
-	}
 	var expenseDto dtos.ExpenseDto
-	if err = c.BodyParser(&expenseDto); err != nil {
+	if err := c.Bind().Body(&expenseDto); err != nil {
 		return checkErroType(c, err, helpers.VALIDATION)
 
 	}
 
-	expenseDto.UserId = userIdInt
+	expenseDto.UserId = userId
 	stringTypeError, err := h.service.AddExpense(expenseDto)
 	if err != nil {
 		return checkErroType(c, err, stringTypeError)
@@ -52,13 +48,9 @@ func (h *HandlerExpenseService) AddExpenseHandler(c *fiber.Ctx) error {
 	return response.JSONResponse(c, http.StatusOK, dataReturn)
 }
 
-// GetExpenseHandler implements IHandlerExpense.
-func (h *HandlerExpenseService) GetExpenseHandler(c *fiber.Ctx) error {
-	panic("unimplemented")
-}
-func (h *HandlerExpenseService) GetByIdExpenseHandler(c *fiber.Ctx) error {
-
-	id, err := strconv.ParseInt(c.Get("idTransaction"), 10, 64)
+func (h *HandlerExpenseService) GetByIdExpenseHandler(c fiber.Ctx) error {
+	idExpense := c.Params("idExpense")
+	id, err := strconv.ParseInt(idExpense, 10, 64)
 	if err != nil {
 		return response.ErrorResponse(c, http.StatusBadRequest, err)
 
@@ -72,16 +64,11 @@ func (h *HandlerExpenseService) GetByIdExpenseHandler(c *fiber.Ctx) error {
 	return response.JSONResponse(c, http.StatusOK, serviceresult)
 }
 
-func (h *HandlerExpenseService) GetByIdUserExpenseHandler(c *fiber.Ctx) error {
+func (h *HandlerExpenseService) GetExpenseHandler(c fiber.Ctx) error {
 
-	userIdToken := c.Get("user_id")
-	userIdInt, err := strconv.ParseUint(userIdToken, 10, 32)
-	if err != nil {
-		return response.ErrorResponse(c, http.StatusBadRequest, err)
+	userId := c.Locals("user_id").(uint)
 
-	}
-
-	serviceresult, typeError, err := h.service.GetAllExpense(uint(userIdInt))
+	serviceresult, typeError, err := h.service.GetAllExpense(userId)
 	if err != nil {
 		return checkErroType(c, err, typeError)
 	}
@@ -89,30 +76,25 @@ func (h *HandlerExpenseService) GetByIdUserExpenseHandler(c *fiber.Ctx) error {
 	return response.JSONResponse(c, http.StatusOK, serviceresult)
 }
 
-func (h *HandlerExpenseService) UpdateExpenseHandler(c *fiber.Ctx) error {
+func (h *HandlerExpenseService) UpdateExpenseHandler(c fiber.Ctx) error {
 
-	id, err := strconv.ParseInt(c.Get("idTransaction"), 10, 64)
+	id, err := strconv.ParseInt(c.Params("idExpense"), 10, 64)
 	if err != nil {
 		return response.ErrorResponse(c, http.StatusBadRequest, err)
 
 	}
-	userIdToken := c.Get("user_id")
-	userIdInt, err := strconv.ParseInt(userIdToken, 10, 64)
-	if err != nil {
-		return response.ErrorResponse(c, http.StatusBadRequest, err)
-
-	}
+	userId := c.Locals("user_id").(uint)
 
 	if err != nil {
 		return response.ErrorResponse(c, http.StatusUnprocessableEntity, err)
 
 	}
 	var expenseDto dtos.ExpenseDto
-	if err = c.BodyParser(&expenseDto); err != nil {
+	if err = c.Bind().Body(&expenseDto); err != nil {
 		return checkErroType(c, err, helpers.VALIDATION)
 
 	}
-	expenseDto.UserId = userIdInt
+	expenseDto.UserId = userId
 	typeError, err := h.service.UpdateExpense(uint(id), expenseDto)
 	if err != nil {
 		return checkErroType(c, err, typeError)
@@ -122,20 +104,15 @@ func (h *HandlerExpenseService) UpdateExpenseHandler(c *fiber.Ctx) error {
 	return response.JSONResponse(c, http.StatusOK, nil)
 }
 
-func (h *HandlerExpenseService) DeleteExpenseHandler(c *fiber.Ctx) error {
+func (h *HandlerExpenseService) DeleteExpenseHandler(c fiber.Ctx) error {
 
-	id, err := strconv.ParseInt(c.Get("idTransaction"), 10, 64)
+	id, err := strconv.ParseInt(c.Params("idExpense"), 10, 64)
 	if err != nil {
 		return checkErroType(c, err, helpers.VALIDATION)
 
 	}
-	userIdToken := c.Get("user_id")
-	userIdInt, err := strconv.ParseUint(userIdToken, 10, 32)
-	if err != nil {
-		return response.ErrorResponse(c, http.StatusBadRequest, err)
-
-	}
-	typeError, err := h.service.DeleteExpense(uint(id), uint(userIdInt))
+	userId := c.Locals("user_id").(uint)
+	typeError, err := h.service.DeleteExpense(uint(id), userId)
 	if err != nil {
 		return checkErroType(c, err, typeError)
 
@@ -144,9 +121,9 @@ func (h *HandlerExpenseService) DeleteExpenseHandler(c *fiber.Ctx) error {
 	return response.JSONResponse(c, http.StatusOK, nil)
 }
 
-func (h *HandlerExpenseService) UpdateIsPaidHandler(c *fiber.Ctx) error {
+func (h *HandlerExpenseService) UpdateIsPaidHandler(c fiber.Ctx) error {
 
-	id, err := strconv.ParseInt(c.Get("idTransaction"), 10, 64)
+	id, err := strconv.ParseInt(c.Params("idExpense"), 10, 64)
 	if err != nil {
 		return response.ErrorResponse(c, http.StatusBadRequest, err)
 
@@ -159,7 +136,7 @@ func (h *HandlerExpenseService) UpdateIsPaidHandler(c *fiber.Ctx) error {
 	var expenseDto struct {
 		IsPaid bool `json:"isPaid"`
 	}
-	if err = c.BodyParser(&expenseDto); err != nil {
+	if err = c.Bind().Body(&expenseDto); err != nil {
 		return checkErroType(c, err, helpers.VALIDATION)
 
 	}
@@ -173,7 +150,7 @@ func (h *HandlerExpenseService) UpdateIsPaidHandler(c *fiber.Ctx) error {
 	return response.JSONResponse(c, http.StatusOK, nil)
 }
 
-func checkErroType(c *fiber.Ctx, err error, typeError helpers.ErrorType) error {
+func checkErroType(c fiber.Ctx, err error, typeError helpers.ErrorType) error {
 	switch typeError {
 	case helpers.VALIDATION:
 		return response.ErrorResponse(c, http.StatusBadRequest, err)

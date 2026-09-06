@@ -36,7 +36,7 @@ func GetAssetName(Id uint) string {
 
 type Portfolio struct {
 	Id           uint
-	User_id      int
+	User_id      uint
 	Asset_id     uint
 	Deposit_date time.Time
 	Broker       string

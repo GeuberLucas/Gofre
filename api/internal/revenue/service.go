@@ -114,8 +114,8 @@ func (ts *RevenueService) Delete(id uint, userId uint) (helpers.ErrorType, error
 }
 func revenueDtoFromModel(re Revenue) dtos.RevenueDto {
 	return dtos.RevenueDto{
-		ID:          int64(re.ID),
-		UserId:      int64(re.UserId),
+		ID:          re.ID,
+		UserId:      re.UserId,
 		Description: re.Description,
 		Origin:      re.Origin,
 		Type:        re.Type,

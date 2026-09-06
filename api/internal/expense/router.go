@@ -1,13 +1,18 @@
 package expense
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gofiber/fiber/v3"
+)
 
 func SetupRoutes(app fiber.Router, hd IHandlerExpense) {
-	route := app.Group("/expense")
-	route.Get("/", hd.GetExpenseHandler)
-	app.Post("/", hd.AddExpenseHandler)
-	app.Get("/:idExpense", hd.GetByIdExpenseHandler)
-	app.Put("/:idExpense", hd.UpdateExpenseHandler)
-	app.Delete("/:idExpense", hd.DeleteExpenseHandler)
-	app.Patch("/:idExpense/update-status", hd.UpdateIsPaidHandler)
+	app.RouteChain("/expense/").
+		Get(hd.GetExpenseHandler).
+		Post(hd.AddExpenseHandler)
+
+	expenseID := app.Group("/expense/:idExpense")
+
+	expenseID.Get("", hd.GetByIdExpenseHandler)
+	expenseID.Put("", hd.UpdateExpenseHandler)
+	expenseID.Delete("", hd.DeleteExpenseHandler)
+	expenseID.Patch("/update-status", hd.UpdateIsPaidHandler)
 }
