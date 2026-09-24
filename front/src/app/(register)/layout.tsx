@@ -1,7 +1,6 @@
 "use client";
 import { Poppins, Roboto_Mono } from "next/font/google";
 import "../globals.css";
-import Image from "next/image";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 
