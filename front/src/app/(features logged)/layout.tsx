@@ -1,9 +1,10 @@
 "use client";
 import { Poppins, Roboto_Mono } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AppSidebar } from "@/components/Sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { Toaster } from "sonner";
 
 const poppinsFont = Poppins({
   subsets: ["latin"],
@@ -33,6 +34,7 @@ export default function RootLayout({
               {children}
             </main>
           </SidebarProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

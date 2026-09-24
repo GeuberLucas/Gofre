@@ -1,14 +1,15 @@
 import { redirect } from "next/navigation";
-
+import { toast } from "sonner";
 interface RequestOptions extends RequestInit {
   headers?: Record<string, string>;
 }
 
-interface ApiResponse<T = unknown> {
+export interface ApiResponse<T = unknown> {
   data: T;
   statusCode: number;
   timestamp: string;
   success: boolean;
+  headers: Headers;
 }
 const baseUrl = process.env.API_URL;
 
@@ -16,7 +17,7 @@ function buildUrl(endpoint: string) {
   return new URL(endpoint, baseUrl).toString();
 }
 function UnauthorizedResponse() {
-  redirect("/session/login");
+  redirect("/session");
 }
 function getCookieToken(): string | null {
   if (typeof document === "undefined") return null;
@@ -54,7 +55,7 @@ export class ApiClient {
       token = getCookieToken();
     }
     if (token) {
-      headers.Authorization = `Bearer ${token}`;
+      headers.Cookie = `jwt-token=${token}`;
     }
     const config = {
       ...options,
@@ -63,10 +64,10 @@ export class ApiClient {
 
     try {
       const response = await fetch(url, config);
-      console.log(response.status);
+
       if (response.status === 401) {
         UnauthorizedResponse();
-        return;
+        throw new Error("Não autorizado");
       }
       if (
         response.status === 204 ||
@@ -77,6 +78,7 @@ export class ApiClient {
           data: { success: true } as unknown as T,
           statusCode: response.status,
           timestamp: new Date().toISOString(),
+          headers: response.headers,
         };
       }
 
@@ -91,10 +93,53 @@ export class ApiClient {
         data: data as T,
         statusCode: response.status,
         timestamp: new Date().toISOString(),
+        headers: response.headers,
       };
     } catch (error) {
+      let isConnectionRefused = false;
+
+      if (error instanceof TypeError && error.cause instanceof AggregateError) {
+        error.cause.errors.forEach((err) => {
+          if (
+            err &&
+            typeof err === "object" &&
+            "code" in err &&
+            err.code === "ECONNREFUSED"
+          ) {
+            isConnectionRefused = true;
+          }
+        });
+      } else if (error instanceof AggregateError) {
+        error.errors.forEach((err) => {
+          if (
+            err &&
+            typeof err === "object" &&
+            "code" in err &&
+            err.code === "ECONNREFUSED"
+          )
+            isConnectionRefused = true;
+        });
+      } else if (
+        error &&
+        typeof error === "object" &&
+        "code" in error &&
+        error.code === "ECONNREFUSED"
+      ) {
+        isConnectionRefused = true;
+      }
+
+      if (isConnectionRefused) {
+        throw new Error(
+          "Serviço temporariamente indisponível. Tente novamente mais tarde.",
+        );
+      }
+
+      if (error instanceof Error) {
+        throw error;
+      }
+
       console.error("API request error:", error);
-      throw error;
+      throw new Error("Ocorreu um erro inesperado.");
     }
   }
 }
@@ -104,10 +149,11 @@ async function ProcessData<T>(
   if (!response.ok) {
     try {
       const errorData = await response.clone().json();
-
+      const errorMessage =
+        errorData.erro || errorData.message || "Erro desconhecido na API";
+      toast(errorMessage);
       return {
-        message:
-          errorData.erro || errorData.message || "Erro desconhecido na API",
+        message: errorMessage,
       };
     } catch (parseError) {
       console.error(`Falha ao ler o erro como JSON: ${parseError}`);

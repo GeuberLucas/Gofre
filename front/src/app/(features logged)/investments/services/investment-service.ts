@@ -4,15 +4,10 @@ import { ApiClient } from "@/lib/httpClient";
 import { Portfolio } from "../model/portfolio";
 import { AssetClass } from "../model/asset-class";
 
-const defaultHeaders = {
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${process.env.TOKEN}`,
-};
-
 const baseUrl = `investments`;
 
 function buildUrl(id?: number) {
-  return id && id > 0 ? `${baseUrl}/${id}` : baseUrl;
+  return id && id > 0 ? `${baseUrl}/${id}` : `${baseUrl}/`;
 }
 
 export async function getPortfolio(
@@ -86,7 +81,7 @@ export async function deleteInvestment(id: number) {
   return res.success;
 }
 export async function updateIsDone(id: number, isDone: boolean) {
-  console.log(isDone)
+  console.log(isDone);
   const url = `${buildUrl(id)}/update-status`;
   const json = JSON.stringify({ isDone: isDone });
   const res = await ApiClient.request(url, {

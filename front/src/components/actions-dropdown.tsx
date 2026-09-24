@@ -15,27 +15,41 @@ import {
 import { useState } from "react";
 
 import { TransactionType } from "@/enums/TypeTransactions";
-import DetailRevenue from "@/app/revenue/_components/detail-dialog";
-import DetailExpense from "@/app/expense/_components/detail-dialog";
-import DetailInvestment from "@/app/investments/_components/detail-dialog";
-import { deleteRevenue,updateIsReceived } from "@/app/revenue/services/revenue-service";
-import { deleteExpense,updateIsPaid } from "@/app/expense/services/expense-service";
-import { deleteInvestment,updateIsDone } from "@/app/investments/services/investment-service";
+import DetailExpense from "@/app/(features logged)/expense/_components/detail-dialog";
+import DetailInvestment from "@/app/(features logged)/investments/_components/detail-dialog";
+
+import {
+  deleteExpense,
+  updateIsPaid,
+} from "@/app/(features logged)/expense/services/expense-service";
+import {
+  deleteInvestment,
+  updateIsDone,
+} from "@/app/(features logged)/investments/services/investment-service";
+import {
+  deleteRevenue,
+  updateIsReceived,
+} from "@/app/(features logged)/revenue/services/revenue-service";
+import DetailRevenue from "@/app/(features logged)/revenue/_components/detail-dialog";
 
 //TODO:IMPLEMENT LOGIC ALTER STATUS
-const alterStatusTransaction= (type: TransactionType, idTransaction: number,executedTransaction:bool) =>{
+const alterStatusTransaction = (
+  type: TransactionType,
+  idTransaction: number,
+  executedTransaction: boolean,
+) => {
   switch (type) {
     case TransactionType.Revenue:
-      updateIsReceived(idTransaction,!executedTransaction );
+      updateIsReceived(idTransaction, !executedTransaction);
       break;
     case TransactionType.Expense:
-      updateIsPaid(idTransaction,!executedTransaction);
+      updateIsPaid(idTransaction, !executedTransaction);
       break;
     case TransactionType.Investment:
-      updateIsDone(idTransaction,!executedTransaction);
+      updateIsDone(idTransaction, !executedTransaction);
       break;
   }
-}
+};
 const deleteTransaction = (type: TransactionType, idTransaction: number) => {
   switch (type) {
     case TransactionType.Revenue:
@@ -130,7 +144,15 @@ const DropDownActions = ({
             <Trash />
             <span className="font-display">Remover</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={()=> alterStatusTransaction(transactionType, idTransaction,executedTransaction)}>
+          <DropdownMenuItem
+            onClick={() =>
+              alterStatusTransaction(
+                transactionType,
+                idTransaction,
+                executedTransaction,
+              )
+            }
+          >
             {getIconByBool(executedTransaction)}
             <span className="font-display">
               Alterar {textStatus(transactionType)}

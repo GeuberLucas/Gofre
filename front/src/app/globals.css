@@ -37,6 +37,7 @@
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
+  --color-input-border: var(--sidebar-primary);
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
   --color-sidebar-accent: var(--sidebar-accent);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -68,6 +69,16 @@
   ); /* Amber/Laranja: Melhor leitura que o amarelo original no branco */
   --color-grey-table: var(--grey-table);
   --color-grey-table-foreground: var(--grey-table-foreground);
+  --color-toast-bg: var(--toast-bg);
+  --color-toast-foreground: var(--toast-foreground);
+  --color-toast-success: var(--toast-success);
+  --color-toast-success-foreground: var(--toast-success-foreground);
+  --color-toast-error: var(--toast-error);
+  --color-toast-error-foreground: var(--toast-error-foreground);
+  --color-toast-warning: var(--toast-warning);
+  --color-toast-warning-foreground: var(--toast-warning-foreground);
+  --color-toast-info: var(--toast-info);
+  --color-toast-info-foreground: var(--toast-info-foreground);
 }
 
 :root {
@@ -114,9 +125,23 @@
   --action-realized: #7c3aed;
   --action-pending: #f59e0b;
 
-  /* background colors - INVERTIDO A LÓGICA */
   --grey-table: #f3f4f6;
   --grey-table-foreground: #ffffff;
+
+  --toast-bg: var(--popover);
+  --toast-foreground: var(--popover-foreground);
+
+  --toast-success: var(--revenue);
+  --toast-success-foreground: #ffffff;
+
+  --toast-error: var(--expense);
+  --toast-error-foreground: #ffffff;
+
+  --toast-warning: var(--action-pending);
+  --toast-warning-foreground: #ffffff;
+
+  --toast-info: var(--action-primary);
+  --toast-info-foreground: #ffffff;
 }
 
 .dark {
@@ -162,6 +187,21 @@
   --action-pending: #f5bd1f;
   --grey-table: #131313;
   --grey-table-foreground: #1f1f1f;
+
+  --toast-bg: var(--popover);
+  --toast-foreground: var(--popover-foreground);
+
+  --toast-success: var(--revenue);
+  --toast-success-foreground: #ffffff;
+
+  --toast-error: var(--expense);
+  --toast-error-foreground: #ffffff;
+
+  --toast-warning: var(--action-pending);
+  --toast-warning-foreground: #131313;
+
+  --toast-info: var(--action-primary);
+  --toast-info-foreground: #ffffff;
 }
 
 @layer base {

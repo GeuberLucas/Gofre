@@ -1,6 +1,6 @@
 "use client";
 import { DataTable } from "./_components/data-table";
-import { FinancialSummaryProps } from "../financialSummaryProps";
+import { FinancialSummaryProps } from "../../financialSummaryProps";
 import { Portfolio } from "./model/portfolio";
 import { useEffect, useState } from "react";
 import { getAssetClasses, getPortfolio } from "./services/investment-service";

@@ -8,10 +8,10 @@ func SetupRoutes(app fiber.Router, hd IHandlerService) {
 		Get(hd.GetInvestmentHandler).
 		Post(hd.AddInvestmentHandler)
 
-	app.RouteChain("/investments/:idInvestment").
-		Get(hd.GetByIdInvestmentHandler).
-		Put(hd.UpdateInvestmentHandler).
-		Delete(hd.DeleteInvestmentHandler)
+	expenseID := app.Group("/investments/:idInvestment")
+	expenseID.Get("", hd.GetByIdInvestmentHandler)
+	expenseID.Put("", hd.UpdateInvestmentHandler)
+	expenseID.Delete("", hd.DeleteInvestmentHandler)
 
-	app.Patch("/investments/:idInvestment/update-status", hd.UpdateIsDoneInvestmentHandler)
+	expenseID.Patch("/update-status", hd.UpdateIsDoneInvestmentHandler)
 }

@@ -54,7 +54,7 @@ func (h *HandlerAuth) LoginHandler(c fiber.Ctx) error {
 		Secure:   true,
 		HTTPOnly: true,
 	})
-	return response.JSONResponse(c, http.StatusOK, nil)
+	return response.JSONResponse(c, http.StatusNoContent, nil)
 
 }
 
@@ -77,8 +77,14 @@ func (h *HandlerAuth) RegisterHandler(c fiber.Ctx) error {
 			return response.ErrorResponse(c, http.StatusBadRequest, erro)
 		}
 	}
-
-	return response.JSONResponse(c, http.StatusOK, serviceresult)
+	c.Cookie(&fiber.Cookie{
+		Name:     "jwt-token",
+		Value:    serviceresult.Token,
+		Path:     "/",
+		Secure:   true,
+		HTTPOnly: true,
+	})
+	return response.JSONResponse(c, http.StatusNoContent, nil)
 }
 
 func (h *HandlerAuth) IsAuthenticatedMiddleware(c fiber.Ctx) error {

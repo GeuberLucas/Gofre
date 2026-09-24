@@ -2,8 +2,9 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Revenue } from "../model/revenue";
-import DropDownActions from "../../../components/actions-dropdown";
+
 import { TransactionType } from "@/enums/TypeTransactions";
+import DropDownActions from "@/components/actions-dropdown";
 
 export const columns: ColumnDef<Revenue>[] = [
   {

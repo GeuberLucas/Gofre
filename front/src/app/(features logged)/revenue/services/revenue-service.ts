@@ -3,10 +3,10 @@
 import { ApiClient } from "@/lib/httpClient";
 import { Revenue } from "../model/revenue";
 
-const baseUrl = `transaction/revenue`;
+const baseUrl = `revenue`;
 
 function buildUrl(id?: number) {
-  return id && id > 0 ? `${baseUrl}/${id}` : baseUrl;
+  return id && id > 0 ? `${baseUrl}/${id}` : `${baseUrl}/`;
 }
 
 export async function getRevenue(id?: number): Promise<Revenue[] | Revenue> {
