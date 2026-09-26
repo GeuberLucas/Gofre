@@ -1,103 +1,133 @@
+-- ==========================================
+-- 1. AUTH MICROSERVICE
+-- ==========================================
+BEGIN;
 
-Begin;
--- auth micro service
 CREATE SCHEMA IF NOT EXISTS auth AUTHORIZATION postgres;
 
-CREATE TABLE
-    IF NOT EXISTS auth.users (
-        id integer NOT NULL GENERATED ALWAYS AS IDENTITY (
-            INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1
-        ),
-        name character varying(255) COLLATE pg_catalog."default" NOT NULL,
-        username character varying(255) COLLATE pg_catalog."default" NOT NULL,
-        last_name character varying(255) COLLATE pg_catalog."default",
-        cell_phone character varying(255) COLLATE pg_catalog."default",
-        email character varying(255) COLLATE pg_catalog."default" NOT NULL,
-        password character varying(255) COLLATE pg_catalog."default" NOT NULL,
-        initial_balance bigint,
-        created_at timestamp with time zone NOT NULL,
-        updated_at timestamp with time zone NOT NULL,
-        CONSTRAINT users_pkey PRIMARY KEY (id)
-    );
-
-CREATE TABLE
-    IF NOT EXISTS auth.reset_tokens (
-        id integer NOT NULL GENERATED ALWAYS AS IDENTITY (
-            INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1
-        ),
-        user_id integer NOT NULL,
-        hash_token character varying(255) COLLATE pg_catalog."default" NOT NULL,
-        expires_at timestamp with time zone NOT NULL,
-        CONSTRAINT reset_tokens_pkey PRIMARY KEY (id),
-        CONSTRAINT reset_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION
-    );
-commit;
-
-Begin;
--- transaction micro service
-create schema IF NOT EXISTS transactions;
-create type expense_category as ENUM(
-'Mercado geral', 'Delivery', 'Restaurante e bares', 'Vestuário', 'Moradia', 'Utilidades', 'Decoração', 'Educação', 'Dependentes', 'Saúde', 'Entretenimento', 'Serviços', 'Impostos', 'Transporte', 'Presentes', 'Pets', 'Viagens', 'Doações', 'Apostas', 'Livre', 'Outros'
-);
-create type expense_type as enum('Mensal', 'Variável', 'Fatura');
-create type payment_method as enum('pix', 'debito', 'credito', 'boleto', 'dinheiro', 'ted', 'cheque');
-create type income_type as enum('Trabalho', 'Extra', 'Investimento', 'Aposentadoria', 'Resgate', 'Outros');
-
-create table IF NOT EXISTS transactions.expenses(
-    id serial PRIMARY KEY,
-    user_id integer not null,
-    description varchar(255) not null,
-    target varchar(255),
-    category expense_category not null,
-    type expense_type not null,
-    payment_method payment_method,
-    payment_date timestamp with time zone not null,
-    amount integer not null,
-    is_paid boolean not null default False
+-- Tabela de utilizadores enxuta (apenas dados de credenciais/autenticação)
+CREATE TABLE IF NOT EXISTS auth.users (
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY (
+        INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1
+    ),
+    username character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    email character varying(255) COLLATE pg_catalog."default" NOT NULL UNIQUE,
+    password character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone NOT NULL,
+    CONSTRAINT users_pkey PRIMARY KEY (id)
 );
 
-create table IF NOT EXISTS transactions.revenue(
-    id serial PRIMARY KEY,
-    user_id integer not null,
-    description varchar(255) not null,
-    origin varchar(255),
-    type income_type not null,
-    amount integer not null,
-    received_date timestamp with time zone not null,
-    is_recieved boolean not null default False
-);
-commit;
-
-Begin;
--- Investments micro service
-create schema IF NOT EXISTS investments;
-create table if not exists investments.asset(
-    id serial PRIMARY KEY,
-    name varchar(255)
+CREATE TABLE IF NOT EXISTS auth.reset_tokens (
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY (
+        INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1
+    ),
+    user_id integer NOT NULL,
+    hash_token character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    expires_at timestamp with time zone NOT NULL,
+    CONSTRAINT reset_tokens_pkey PRIMARY KEY (id),
+    CONSTRAINT reset_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
 );
 
-insert into investments.asset(name)
-values
+-- Índice na Foreign Key
+CREATE INDEX idx_reset_tokens_user_id ON auth.reset_tokens(user_id);
+
+COMMIT;
+
+-- ==========================================
+-- 2. PROFILES MICROSERVICE (Novo)
+-- ==========================================
+BEGIN;
+
+CREATE SCHEMA IF NOT EXISTS profiles AUTHORIZATION postgres;
+
+CREATE TABLE IF NOT EXISTS profiles.user_profiles (
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id integer NOT NULL UNIQUE,
+    full_name character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    mobile_phone character varying(20) COLLATE pg_catalog."default",
+    initial_balance bigint DEFAULT 0,
+    CONSTRAINT user_profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
+);
+
+COMMIT;
+
+-- ==========================================
+-- 3. TRANSACTIONS MICROSERVICE
+-- ==========================================
+BEGIN;
+
+CREATE SCHEMA IF NOT EXISTS transactions AUTHORIZATION postgres;
+
+-- Os ENUMs agora são criados explicitamente dentro do schema transactions
+CREATE TYPE transactions.expense_category AS ENUM(
+    'Mercado geral', 'Delivery', 'Restaurante e bares', 'Vestuário', 'Moradia', 'Utilidades', 'Decoração', 'Educação', 'Dependentes', 'Saúde', 'Entretenimento', 'Serviços', 'Impostos', 'Transporte', 'Presentes', 'Pets', 'Viagens', 'Doações', 'Apostas', 'Livre', 'Outros'
+);
+CREATE TYPE transactions.expense_type AS ENUM('Mensal', 'Variável', 'Fatura');
+CREATE TYPE transactions.payment_method AS ENUM('pix', 'debito', 'credito', 'boleto', 'dinheiro', 'ted', 'cheque');
+CREATE TYPE transactions.income_type AS ENUM('Trabalho', 'Extra', 'Investimento', 'Aposentadoria', 'Resgate', 'Outros');
+
+CREATE TABLE IF NOT EXISTS transactions.expenses(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id integer NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    description character varying(255) NOT NULL,
+    target character varying(255),
+    category transactions.expense_category NOT NULL,
+    type transactions.expense_type NOT NULL,
+    payment_method transactions.payment_method,
+    payment_date timestamp with time zone NOT NULL,
+    amount bigint NOT NULL,
+    is_paid boolean NOT NULL DEFAULT False
+);
+
+-- Índice na Foreign Key
+CREATE INDEX idx_expenses_user_id ON transactions.expenses(user_id);
+
+CREATE TABLE IF NOT EXISTS transactions.revenue(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id integer NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    description character varying(255) NOT NULL,
+    origin character varying(255),
+    type transactions.income_type NOT NULL,
+    amount bigint NOT NULL,
+    received_date timestamp with time zone NOT NULL,
+    is_received boolean NOT NULL DEFAULT False
+);
+
+-- Índice na Foreign Key
+CREATE INDEX idx_revenue_user_id ON transactions.revenue(user_id);
+
+COMMIT;
+
+-- ==========================================
+-- 4. INVESTMENTS MICROSERVICE
+-- ==========================================
+BEGIN;
+
+CREATE SCHEMA IF NOT EXISTS investments AUTHORIZATION postgres;
+
+CREATE TABLE IF NOT EXISTS investments.asset(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name character varying(255) NOT NULL
+);
+
+INSERT INTO investments.asset(name)
+VALUES
 ('Títulos privados'), ('Títulos públicos'), ('Ações'), ('ETFs'), ('FIIs'), ('Fundos'), ('Commodities'), ('Derivativos'), ('Criptomoeda'), ('Exterior'), ('Poupança'), ('Outros');
 
-create table if not EXISTS investments.portfolio(
-    id serial PRIMARY KEY,
-    user_id integer not null,
-    asset_id integer not null, -- Corrigido de 'interger' para 'integer'
-    deposit_date timestamp with time zone not null,
-    broker varchar(255) not null,
-    amount integer not null,
-    description varchar(255) not null,
-    is_done boolean not null default False,
-    FOREIGN KEY (asset_id) REFERENCES investments.asset (id)
+CREATE TABLE IF NOT EXISTS investments.portfolio(
+    id integer NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id integer NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    asset_id integer NOT NULL REFERENCES investments.asset(id) ON DELETE RESTRICT,
+    deposit_date timestamp with time zone NOT NULL,
+    broker character varying(255) NOT NULL,
+    amount bigint NOT NULL,
+    description character varying(255) NOT NULL,
+    is_done boolean NOT NULL DEFAULT False
 );
-commit;
-BEGIN;
-alter table investments.portfolio add column if not exists  amount integer not null;
-alter table investments.portfolio add column if not exists  description varchar(255) not null;
-alter table investments.portfolio add column if not exists  is_done boolean not null default False;
-commit;
 
-Begin;
-alter table auth.users add column initial_balance bigint;
-commit;
+-- Índices nas Foreign Keys
+CREATE INDEX idx_portfolio_user_id ON investments.portfolio(user_id);
+CREATE INDEX idx_portfolio_asset_id ON investments.portfolio(asset_id);
+
+COMMIT;

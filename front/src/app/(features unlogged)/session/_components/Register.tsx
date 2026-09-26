@@ -26,8 +26,6 @@ import { useRouter } from "next/navigation";
 const formSchema = z
   .object({
     username: z.string("Informe um nome de usuário"),
-    complete_name: z.string().optional(),
-    cellphone: z.string().optional(),
     email: z.email("E-mail inválido"),
     password: z
       .string("A senha é obrigatória")
@@ -50,8 +48,6 @@ export default function Register() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: undefined,
-      cellphone: undefined,
       email: undefined,
       password: undefined,
       confirmPass: undefined,
@@ -60,9 +56,9 @@ export default function Register() {
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     const obj: IRegister = {
+      complete_name: "",
+      cellphone: "",
       username: data.username,
-      complete_name: data.complete_name,
-      cellphone: data.cellphone,
       email: data.email,
       password: data.password,
     };
@@ -73,9 +69,9 @@ export default function Register() {
 
       return;
     }
-    toast.success("Login efetuado com sucesso!", {});
+    toast.success("Registro efetuado com sucesso!", {});
 
-    router.push("/register");
+    router.push("/onboarding");
   }
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-6">
