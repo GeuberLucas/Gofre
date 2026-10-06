@@ -26,9 +26,8 @@ import {
 import Image from "next/image";
 import { useState } from "react";
 import z from "zod";
-import { IProfile } from "./model/profile";
+import { IProfile } from "../../../lib/DTO/profile";
 import { toast } from "sonner";
-import router from "next/router";
 import { DoUpdateProfile } from "./services/onboarding-service";
 import { Controller, useForm } from "react-hook-form";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -36,6 +35,7 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { NumericFormat } from "react-number-format";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const steps = [
   {
@@ -61,24 +61,9 @@ const formSchema = z.object({
   cellphone: z.string().optional(),
   initialBalance: z.number().optional(),
 });
-async function onSubmit(data: z.infer<typeof formSchema>) {
-  const obj: IProfile = {
-    completeName: "",
-    cellphone: "",
-    initialBalance: 0,
-  };
 
-  const result = await DoUpdateProfile(obj);
-  if (!result?.success) {
-    toast.error(result?.error || "Erro ao tentar fazer login.");
-
-    return;
-  }
-  toast.success("Registro efetuado com sucesso!", {});
-
-  router.push("/");
-}
 export default function Onboarding() {
+  const router = useRouter();
   const appVersion = process.env.APP_VERSION;
   const [currentStep, setCurrentStep] = useState(2);
   const setStep = (step: number) => {
@@ -91,11 +76,27 @@ export default function Onboarding() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      completeName: undefined,
-      cellphone: undefined,
+      completeName: "",
+      cellphone: "",
       initialBalance: undefined,
     },
   });
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    const obj: IProfile = {
+      completeName: data.completeName ?? "",
+      cellphone: data.cellphone ?? "",
+      initialBalance: data.initialBalance ?? 0,
+    };
+    const result = await DoUpdateProfile(obj);
+    if (!result?.success) {
+      toast.error(result?.error || "Erro ao tentar fazer login.");
+
+      return;
+    }
+    toast.success("Registro efetuado com sucesso!", {});
+
+    router.push("/");
+  }
   return (
     <section className="flex min-h-screen w-full flex-col items-center bg-site-bg dark:text-white">
       {/* Header no topo com mt-2 */}
@@ -130,9 +131,9 @@ export default function Onboarding() {
 
       {/* Container principal centralizado */}
       <main className="flex w-full flex-1 items-center justify-center p-4">
-        <Card className="w-full max-w-xl p-6">
-          <CardContent className="p-0">
-            <form>
+        <form id="onboarding-form" onSubmit={form.handleSubmit(onSubmit)}>
+          <Card className="w-full max-w-xl p-6">
+            <CardContent className="p-0">
               <Stepper
                 value={currentStep}
                 onValueChange={setStep}
@@ -212,7 +213,7 @@ export default function Onboarding() {
                     <section>
                       <div className="flex gap-3 my-2">
                         <Controller
-                          name="cellphone"
+                          name="completeName"
                           control={form.control}
                           render={({ field, fieldState }) => (
                             <Field data-invalid={fieldState.invalid}>
@@ -234,7 +235,7 @@ export default function Onboarding() {
                       </div>
                       <div className="flex gap-3 my-2">
                         <Controller
-                          name="completeName"
+                          name="cellphone"
                           control={form.control}
                           render={({ field, fieldState }) => (
                             <Field data-invalid={fieldState.invalid}>
@@ -306,46 +307,46 @@ export default function Onboarding() {
                   </StepperContent>
                 </StepperPanel>
               </Stepper>
-            </form>
-          </CardContent>
-          <CardFooter className="grid grid-cols-2 grid-rows-2 gap-4">
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                className="h-12 flex-1 rounded-full"
-                onClick={() => setCurrentStep((prev) => prev - 1)}
-                disabled={currentStep === 1}
-              >
-                Voltar
-              </Button>
-            </div>
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                className="h-12 flex-1 rounded-full"
-                onClick={() => setCurrentStep((prev) => prev + 1)}
-                hidden={currentStep === steps.length}
-              >
-                Próximo
-              </Button>
-              <Button
-                hidden={currentStep != steps.length}
-                type="submit"
-                className="h-12 flex-1 rounded-full"
-              >
-                Continuar
-              </Button>
-            </div>
-            <div className="col-span-2 text-center">
-              <Link
-                className="text-action-primary underline decoration-action-primary"
-                href="/"
-              >
-                Preencher depois
-              </Link>
-            </div>
-          </CardFooter>
-        </Card>
+            </CardContent>
+            <CardFooter className="grid grid-cols-2 grid-rows-2 gap-4">
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  className="h-12 flex-1 rounded-full"
+                  onClick={() => setCurrentStep((prev) => prev - 1)}
+                  disabled={currentStep === 1}
+                >
+                  Voltar
+                </Button>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  className="h-12 flex-1 rounded-full"
+                  onClick={() => setCurrentStep((prev) => prev + 1)}
+                  hidden={currentStep === steps.length}
+                >
+                  Próximo
+                </Button>
+                <Button
+                  hidden={currentStep != steps.length}
+                  type="submit"
+                  className="h-12 flex-1 rounded-full"
+                >
+                  Continuar
+                </Button>
+              </div>
+              <div className="col-span-2 text-center">
+                <Link
+                  className="text-action-primary underline decoration-action-primary"
+                  href="/"
+                >
+                  Preencher depois
+                </Link>
+              </div>
+            </CardFooter>
+          </Card>
+        </form>
       </main>
     </section>
   );

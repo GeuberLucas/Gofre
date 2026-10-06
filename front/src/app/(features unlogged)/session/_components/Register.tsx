@@ -32,7 +32,7 @@ const formSchema = z
       .min(8, "A senha deve ter no mínimo 8 caracteres.")
       .regex(/[a-z]/, "A senha deve conter pelo menos uma letra minúscula.")
       .regex(/[A-Z]/, "A senha deve conter pelo menos uma letra maiúscula.")
-      .regex(/[/d]/, "A senha deve conter pelo menos um número."),
+      .regex(/\d/, "A senha deve conter pelo menos um número."),
     confirmPass: z.string("Por gentileza confirme a sua senha"),
   })
   .refine((data) => data.password === data.confirmPass, {

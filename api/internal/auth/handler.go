@@ -16,7 +16,6 @@ type IHandlerAuth interface {
 	ForgotPasswordHandler(c fiber.Ctx) error
 	ResetPasswordHandler(c fiber.Ctx) error
 	IsAuthenticatedMiddleware(c fiber.Ctx) error
-	ProfileHandler(c fiber.Ctx) error
 }
 
 type HandlerAuth struct {
@@ -99,24 +98,6 @@ func (h *HandlerAuth) IsAuthenticatedMiddleware(c fiber.Ctx) error {
 	}
 	c.Locals("user_id", userId)
 	return c.Next()
-}
-func (h *HandlerAuth) ProfileHandler(c fiber.Ctx) error {
-
-	userId := c.Locals("user_id").(uint)
-	service := h.service
-	serviceresult, errorType, erro := service.Profile(userId)
-	if erro != nil {
-		switch errorType {
-		case helpers.VALIDATION:
-			return response.ErrorResponse(c, http.StatusBadRequest, erro)
-		case helpers.INTERNAL:
-			return response.ErrorResponse(c, http.StatusInternalServerError, erro)
-		default:
-			return response.ErrorResponse(c, http.StatusBadRequest, erro)
-		}
-	}
-
-	return response.JSONResponse(c, http.StatusOK, serviceresult)
 }
 
 func (h *HandlerAuth) ForgotPasswordHandler(c fiber.Ctx) error {

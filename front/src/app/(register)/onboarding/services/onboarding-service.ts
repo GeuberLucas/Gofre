@@ -1,7 +1,7 @@
 "use server";
 
 import { ApiResult } from "@/lib/DTO/ApiResult";
-import { IProfile } from "../model/profile";
+import { IProfile } from "../../../../lib/DTO/profile";
 import { ApiClient } from "@/lib/httpClient";
 
 export async function DoUpdateProfile(profile: IProfile): Promise<ApiResult> {

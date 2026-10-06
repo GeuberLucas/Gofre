@@ -8,12 +8,34 @@ import { getExpense } from "./services/expense-service";
 import { Expense } from "./model/expense";
 import { PaymentMethodEnum } from "./enums/payment-method-enum";
 import { TypeExpenseEnum } from "./enums/type-expense-enum";
+import { GetProfile } from "@/lib/services/profile-service";
 
-function getSummary(expenses: Expense[]) {
+let saldoIncial: number = 0;
+
+function getSummary(expenses?: Expense[] | null) {
+  const list = expenses ?? [];
+
+  let saldoStorage = localStorage.getItem("saldo_incial");
+  if (saldoStorage == undefined || saldoStorage.length == 0) {
+    void GetProfile().finally(() => {
+      saldoStorage = localStorage.getItem("saldo_incial");
+      saldoIncial = Number.parseFloat(saldoStorage ?? "") || 0;
+    });
+  } else {
+    saldoIncial = Number.parseFloat(saldoStorage) || 0;
+  }
+
   const today = new Date();
   const actualMonth = today.getMonth();
   const actualYear = today.getFullYear();
-  const expensesThisMonth = expenses.filter((expense) => {
+
+  const actualBalance =
+    saldoIncial -
+    list
+      .filter((exp) => exp.isPaid)
+      .reduce((accumulator, expense) => accumulator + expense.amount, 0);
+
+  const expensesThisMonth = list.filter((expense) => {
     const dateObj = new Date(expense.paymentDate);
 
     if (Number.isNaN(dateObj.getTime())) return false;
@@ -22,45 +44,38 @@ function getSummary(expenses: Expense[]) {
       dateObj.getMonth() === actualMonth && dateObj.getFullYear() === actualYear
     );
   });
+
   const notCredit = expensesThisMonth.filter(
     (exp) => exp.paymentMethod != PaymentMethodEnum.credito,
   );
-  const expectedAmount = notCredit.reduce((accumulator, expense) => {
-    return accumulator + expense.amount;
-  }, 0);
+  const expectedAmount = notCredit.reduce(
+    (accumulator, expense) => accumulator + expense.amount,
+    0,
+  );
   const actualAmount = notCredit
     .filter((exp) => exp.isPaid)
-    .reduce((accumulator, expense) => {
-      return accumulator + expense.amount;
-    }, 0);
+    .reduce((accumulator, expense) => accumulator + expense.amount, 0);
   const pendingAmount = notCredit
     .filter((exp) => !exp.isPaid)
-    .reduce((accumulator, expense) => {
-      return accumulator + expense.amount;
-    }, 0);
+    .reduce((accumulator, expense) => accumulator + expense.amount, 0);
   const invoiceAmount = expensesThisMonth
     .filter((exp) => exp.type == TypeExpenseEnum.Fatura)
-    .reduce((accumulator, expense) => {
-      return accumulator + expense.amount;
-    }, 0);
+    .reduce((accumulator, expense) => accumulator + expense.amount, 0);
   const variableAmount = expensesThisMonth
     .filter((exp) => exp.type == TypeExpenseEnum.Variável)
-    .reduce((accumulator, expense) => {
-      return accumulator + expense.amount;
-    }, 0);
+    .reduce((accumulator, expense) => accumulator + expense.amount, 0);
   const monthlyAmount = expensesThisMonth
     .filter((exp) => exp.type == TypeExpenseEnum.Mensal)
-    .reduce((accumulator, expense) => {
-      return accumulator + expense.amount;
-    }, 0);
+    .reduce((accumulator, expense) => accumulator + expense.amount, 0);
+
   return {
-    expectedAmount: expectedAmount,
-    actualAmount: actualAmount,
-    pendingAmount: pendingAmount,
-    currentBalance: 0,
-    invoiceAmount: invoiceAmount,
-    variableAmount: variableAmount,
-    monthlyAmount: monthlyAmount,
+    expectedAmount,
+    actualAmount,
+    pendingAmount,
+    currentBalance: actualBalance,
+    invoiceAmount,
+    variableAmount,
+    monthlyAmount,
   };
 }
 
@@ -81,7 +96,7 @@ export default function Revenues() {
 
   //fetch data
   useEffect(() => {
-    getExpense().then((data: Expense[]) => {
+    void getExpense().then((data: Expense[]) => {
       setData(data);
       setfinancialSummary(getSummary(data));
     });

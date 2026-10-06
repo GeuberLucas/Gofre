@@ -8,6 +8,8 @@ const (
 	MISSING
 	STATE
 	NONE
+	NOT_FOUND
+	DATABASE
 )
 
 func (et ErrorType) String() string {

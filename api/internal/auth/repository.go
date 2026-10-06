@@ -53,8 +53,8 @@ func (r *AuthRepository) GetResetTokenByTokenHash(tokenHash string) (ResetToken,
 }
 
 func (r *AuthRepository) CreateUser(user User) (uint, error) {
-	sqlCommand := `INSERT INTO auth.users (name, last_name, cell_phone, username, email, password, created_at, updated_at)
-					VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id
+	sqlCommand := `INSERT INTO auth.users (username, email, password, created_at, updated_at)
+					VALUES ($1, $2, $3, $4, $5) RETURNING id
 					`
 
 	statement, err := r.db.Prepare(sqlCommand)
@@ -63,7 +63,7 @@ func (r *AuthRepository) CreateUser(user User) (uint, error) {
 	}
 
 	var idLastInsert uint
-	err = statement.QueryRow(user.Name, user.LastName, user.Cellphone, user.Username, user.Email, user.Password, time.Now(), time.Now()).Scan(&idLastInsert)
+	err = statement.QueryRow(user.Username, user.Email, user.Password, time.Now(), time.Now()).Scan(&idLastInsert)
 	if err != nil {
 		return 0, err
 	}
@@ -71,7 +71,7 @@ func (r *AuthRepository) CreateUser(user User) (uint, error) {
 	return idLastInsert, nil
 }
 func (r *AuthRepository) GetUsers() ([]User, error) {
-	var sqlCommand string = "select id, username, name, last_name, cell_phone, email, password, created_at, updated_at from auth.users"
+	var sqlCommand string = "select id, username, email, password, created_at, updated_at from auth.users"
 
 	rows, err := r.db.Query(sqlCommand)
 	if err != nil {
@@ -82,7 +82,7 @@ func (r *AuthRepository) GetUsers() ([]User, error) {
 	var users []User
 	for rows.Next() {
 		var user User
-		err := rows.Scan(&user.ID, &user.Username, &user.Name, &user.LastName, &user.Cellphone, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+		err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -93,10 +93,10 @@ func (r *AuthRepository) GetUsers() ([]User, error) {
 
 func (r *AuthRepository) GetUserByUsername(username string) (User, error) {
 	var user User
-	var sqlCommand string = "select id, username, name, last_name, cell_phone, email, password, created_at, updated_at from auth.users where username = $1"
+	var sqlCommand string = "select id, username, email, password, created_at, updated_at from auth.users where username = $1"
 
 	row := r.db.QueryRow(sqlCommand, username)
-	err := row.Scan(&user.ID, &user.Username, &user.Name, &user.LastName, &user.Cellphone, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return user, err
 	}
@@ -104,10 +104,10 @@ func (r *AuthRepository) GetUserByUsername(username string) (User, error) {
 }
 func (r *AuthRepository) GetUserByEmail(email string) (User, error) {
 	var user User
-	var sqlCommand string = "select id, username, name, last_name, cell_phone, email, password, created_at, updated_at from auth.users where email = $1"
+	var sqlCommand string = "select id, username, email, password, created_at, updated_at from auth.users where email = $1"
 
 	row := r.db.QueryRow(sqlCommand, email)
-	err := row.Scan(&user.ID, &user.Username, &user.Name, &user.LastName, &user.Cellphone, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return user, err
 	}
@@ -116,10 +116,10 @@ func (r *AuthRepository) GetUserByEmail(email string) (User, error) {
 
 func (r *AuthRepository) GetUserByID(id uint) (User, error) {
 	var user User
-	var sqlCommand string = "select id, username, name, last_name, cell_phone, email, password, created_at, updated_at from auth.users where id = $1"
+	var sqlCommand string = "select id, username, email, password, created_at, updated_at from auth.users where id = $1"
 
 	row := r.db.QueryRow(sqlCommand, id)
-	err := row.Scan(&user.ID, &user.Username, &user.Name, &user.LastName, &user.Cellphone, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return user, err
 	}
@@ -127,14 +127,14 @@ func (r *AuthRepository) GetUserByID(id uint) (User, error) {
 }
 
 func (r *AuthRepository) UpdateUser(user User) error {
-	var sqlCommand string = "update auth.users set name=$1, last_name=$2, cell_phone=$3, username=$4, email=$5, password=$6, updated_at=$7 where id=$8"
+	var sqlCommand string = "update auth.users set username=$4, email=$5, password=$6, updated_at=$7 where id=$8"
 
 	statement, err := r.db.Prepare(sqlCommand)
 	if err != nil {
 		return err
 	}
 	defer statement.Close()
-	_, err = statement.Exec(user.Name, user.LastName, user.Cellphone, user.Username, user.Email, user.Password, time.Now(), user.ID)
+	_, err = statement.Exec(user.Username, user.Email, user.Password, time.Now(), user.ID)
 	if err != nil {
 		return err
 	}

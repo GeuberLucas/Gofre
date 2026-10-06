@@ -4,18 +4,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/GeuberLucas/Gofre/api/internal/auth/security"
+	"github.com/GeuberLucas/Gofre/api/internal/profile"
 	dtos "github.com/GeuberLucas/Gofre/api/pkg/DTOs"
 	"github.com/GeuberLucas/Gofre/api/pkg/helpers"
+	"github.com/GeuberLucas/Gofre/api/pkg/types"
 )
 
 type IAuthService interface {
 	Login(obj dtos.LoginDTO) (*dtos.LoginResultDto, helpers.ErrorType, error)
 	Register(obj dtos.RegisterDTO) (*dtos.LoginResultDto, helpers.ErrorType, error)
-	Profile(userID uint) (*dtos.ProfileDto, helpers.ErrorType, error)
+
 	ForgotPassword(email string) (helpers.ErrorType, error)
 	ResetPassword(token string, newPassword string) (helpers.ErrorType, error)
 }
@@ -24,11 +25,15 @@ type EmailMessage struct {
 	EmailTo    string `json:"emailTo"`
 }
 type AuthService struct {
-	repository IAuhtRepository
+	repository     IAuhtRepository
+	profileService profile.IProfileService
 }
 
-func NewAuthService(repo IAuhtRepository) *AuthService {
-	return &AuthService{repository: repo}
+func NewAuthService(repo IAuhtRepository, profileSvc profile.IProfileService) *AuthService {
+	return &AuthService{
+		repository:     repo,
+		profileService: profileSvc,
+	}
 }
 
 func (s *AuthService) Login(obj dtos.LoginDTO) (*dtos.LoginResultDto, helpers.ErrorType, error) {
@@ -53,52 +58,50 @@ func (s *AuthService) Login(obj dtos.LoginDTO) (*dtos.LoginResultDto, helpers.Er
 	return &result, helpers.NONE, nil
 }
 
+// Register implements [IAuthService].
 func (s *AuthService) Register(obj dtos.RegisterDTO) (*dtos.LoginResultDto, helpers.ErrorType, error) {
-	var nameSplit []string = strings.SplitAfterN(obj.CompleteName, " ", 2)
 	var usuario User
+
 	passwordHash, err := security.HashPassword(obj.Password)
 	if err != nil {
 		return nil, helpers.INTERNAL, err
 	}
+
+	// Agora apenas mapeamos o essencial
 	usuario.Email = obj.Email
 	usuario.Password = passwordHash
 	usuario.Username = obj.Username
-	usuario.Cellphone = obj.Cellphone
-	usuario.Name = nameSplit[0]
-	if len(nameSplit) > 1 {
-		usuario.LastName = nameSplit[1]
-	}
+
 	if !usuario.Validate() {
 		return nil, helpers.VALIDATION, errors.New("Required fields are empty")
 	}
 
+	// 1. Cria na tabela auth.users
 	id, err := s.repository.CreateUser(usuario)
 	if err != nil {
 		return nil, helpers.INTERNAL, fmt.Errorf("User Not created: %s", err)
 	}
+
+	// 2. Cria o Perfil base com dados provisórios
+	newProfile := profile.Profile{
+		UserId:         id,
+		CompleteName:   obj.Username, // Usamos o username provisoriamente pois o full_name não aceita null no DB
+		CellPhone:      "",
+		InitialBalance: types.FloatToMoney(0.0),
+	}
+
+	// Chama o serviço do módulo de profile para guardar o perfil
+	_, err = s.profileService.AddProfileService(newProfile)
+	if err != nil {
+		return nil, helpers.INTERNAL, fmt.Errorf("User created but Profile base failed: %s", err)
+	}
+
+	// 3. Gera o Token e conclui o Login automático
 	jwtToken, _ := security.GenerateToken(id)
-
 	var result dtos.LoginResultDto
-
 	result.Token = jwtToken
 
 	return &result, helpers.NONE, nil
-
-}
-func (s *AuthService) Profile(userID uint) (*dtos.ProfileDto, helpers.ErrorType, error) {
-
-	userModel, err := s.repository.GetUserByID(userID)
-	if err != nil {
-		return nil, helpers.INTERNAL, err
-	}
-	var profileDto dtos.ProfileDto
-	profileDto.CellPhone = userModel.Cellphone
-	profileDto.Email = userModel.Email
-	profileDto.FirstName = userModel.Name
-	profileDto.LastName = userModel.LastName
-	profileDto.UserID = userModel.ID
-
-	return &profileDto, helpers.NONE, nil
 }
 
 func (s *AuthService) ForgotPassword(email string) (helpers.ErrorType, error) {
