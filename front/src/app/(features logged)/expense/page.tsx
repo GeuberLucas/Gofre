@@ -10,27 +10,26 @@ import { PaymentMethodEnum } from "./enums/payment-method-enum";
 import { TypeExpenseEnum } from "./enums/type-expense-enum";
 import { GetProfile } from "@/lib/services/profile-service";
 
-let saldoIncial: number = 0;
+function getInitialBalanceFromStorage(): number | null {
+  const saldoStorage = localStorage.getItem("saldo_incial");
+  if (saldoStorage === null || saldoStorage.trim() === "") return null;
 
-function getSummary(expenses?: Expense[] | null) {
+  const initialBalance = Number(saldoStorage);
+  return Number.isFinite(initialBalance) ? initialBalance : null;
+}
+
+function getSummary(
+  expenses: Expense[] | null | undefined,
+  initialBalance: number,
+) {
   const list = expenses ?? [];
-
-  let saldoStorage = localStorage.getItem("saldo_incial");
-  if (saldoStorage == undefined || saldoStorage.length == 0) {
-    void GetProfile().finally(() => {
-      saldoStorage = localStorage.getItem("saldo_incial");
-      saldoIncial = Number.parseFloat(saldoStorage ?? "") || 0;
-    });
-  } else {
-    saldoIncial = Number.parseFloat(saldoStorage) || 0;
-  }
 
   const today = new Date();
   const actualMonth = today.getMonth();
   const actualYear = today.getFullYear();
 
   const actualBalance =
-    saldoIncial -
+    initialBalance -
     list
       .filter((exp) => exp.isPaid)
       .reduce((accumulator, expense) => accumulator + expense.amount, 0);
@@ -96,10 +95,28 @@ export default function Revenues() {
 
   //fetch data
   useEffect(() => {
-    void getExpense().then((data: Expense[]) => {
+    let cancelled = false;
+
+    void getExpense().then(async (data: Expense[]) => {
       setData(data);
-      setfinancialSummary(getSummary(data));
+
+      let initialBalance = getInitialBalanceFromStorage();
+      if (initialBalance === null) {
+        const result = await GetProfile();
+        if (!result.success) {
+          console.error("Falha ao carregar o saldo inicial:", result.error);
+        }
+        initialBalance = getInitialBalanceFromStorage() ?? 0;
+      }
+
+      if (!cancelled) {
+        setfinancialSummary(getSummary(data, initialBalance));
+      }
     });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
